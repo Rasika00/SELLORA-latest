@@ -103,11 +103,13 @@ export function AiChatbot() {
   const [isOpen, setIsOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
-  const [geminiApiKey, setGeminiApiKey] = useState(() => 
-    localStorage.getItem("sellora_gemini_key") || 
-    (import.meta as any).env?.VITE_GEMINI_API_KEY || 
-    ""
-  );
+  const [geminiApiKey, setGeminiApiKey] = useState(() => {
+    if (typeof window !== "undefined") {
+      const local = localStorage.getItem("sellora_gemini_key");
+      if (local && local.trim()) return local.trim();
+    }
+    return ((import.meta as any).env?.VITE_GEMINI_API_KEY || "").trim();
+  });
   const [tempApiKey, setTempApiKey] = useState(geminiApiKey);
   const [testingKey, setTestingKey] = useState(false);
   const [testResult, setTestResult] = useState<{ success: boolean; message: string } | null>(null);
@@ -203,10 +205,30 @@ export function AiChatbot() {
     setTestingKey(false);
   };
 
+  // Save or clear API key
+  const saveApiKey = (keyToSave: string) => {
+    const trimmed = keyToSave.trim();
+    if (trimmed) {
+      if (typeof window !== "undefined") {
+        localStorage.setItem("sellora_gemini_key", trimmed);
+      }
+      setGeminiApiKey(trimmed);
+      setTempApiKey(trimmed);
+    } else {
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("sellora_gemini_key");
+      }
+      const envKey = (import.meta as any).env?.VITE_GEMINI_API_KEY?.trim() || "";
+      setGeminiApiKey(envKey);
+      setTempApiKey(envKey);
+    }
+    setShowSettings(false);
+  };
+
   // Google Gemini API Engine with auto-fallback across models
   const callGeminiApi = async (userPrompt: string, history: Message[]): Promise<string> => {
-    const key = geminiApiKey.trim();
-    if (!key) throw new Error("No Gemini API key configured. Click ⚙️ in the chat header to add your key.");
+    const key = geminiApiKey.trim() || (import.meta as any).env?.VITE_GEMINI_API_KEY?.trim() || "";
+    if (!key) throw new Error("No Gemini API key configured. Click ⚙️ in the chat header or set VITE_GEMINI_API_KEY in .env.");
 
     const conversationTurns: { role: "user" | "model"; parts: { text: string }[] }[] = [];
     let expectedRole: "user" | "model" = "user";
@@ -620,13 +642,6 @@ export function AiChatbot() {
     } finally {
       setIsTyping(false);
     }
-  };
-
-  const saveApiKey = (key: string) => {
-    const trimmed = key.trim();
-    setGeminiApiKey(trimmed);
-    localStorage.setItem("sellora_gemini_key", trimmed);
-    setShowSettings(false);
   };
 
   const resetChat = () => {

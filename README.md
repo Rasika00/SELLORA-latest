@@ -1,3 +1,5 @@
+<img width="1342" height="646" alt="Screenshot 2026-08-30 125412" src="https://github.com/user-attachments/assets/1b45dabc-6ba4-44ee-afce-99363905abb1" />
+
 # SELLORA
 E-commerce platform for laptops
 

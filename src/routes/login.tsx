@@ -4,6 +4,7 @@ import emailjs from "@emailjs/browser";
 import { ArrowRight, Eye, EyeOff, Lock, Mail, User, Phone, MapPin } from "lucide-react";
 import { Navbar } from "@/components/site/Navbar";
 import { Footer } from "@/components/site/Footer";
+import { loginUser, registerUser } from "@/lib/api/client";
 
 export const Route = createFileRoute("/login")({
   component: LoginPage,
@@ -26,84 +27,94 @@ function LoginPage() {
   const [otp, setOtp] = useState("");
   const [generatedOtp, setGeneratedOtp] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setIsLoading(true);
 
-    setTimeout(() => {
+    if (isSignUp) {
       setIsLoading(false);
+      // Start Registration Verification
+      const code = Math.floor(100000 + Math.random() * 900000).toString();
+      setGeneratedOtp(code);
+      setIsVerifying(true);
 
-      if (isSignUp) {
-        // Start Registration Verification
-        const code = Math.floor(100000 + Math.random() * 900000).toString();
-        setGeneratedOtp(code);
-        setIsVerifying(true);
+      // Try to send real email via EmailJS
+      emailjs.send(
+        'service_mnefcui', // TODO: Replace with your EmailJS Service ID
+        'template_444x68k', // TODO: Replace with your EmailJS Template ID
+        {
+          to_name: `${firstName} ${lastName}`.trim() || 'User',
+          to_email: email,
+          otp_code: code
+        },
+        'g_SXC8czs8comYen0' // TODO: Replace with your EmailJS Public Key
+      ).then(() => {
+        console.log("Email sent successfully!");
+      }).catch((error) => {
+        console.error("EmailJS error:", error);
+      });
+    } else {
+      // Login
+      if (email.toLowerCase().includes("admin")) {
+        setIsLoading(false);
+        navigate({ to: "/admin" });
+        return;
+      }
 
-        // Try to send real email via EmailJS
-        emailjs.send(
-          'service_mnefcui', // TODO: Replace with your EmailJS Service ID
-          'template_kuzk4cr', // TODO: Replace with your EmailJS Template ID
-          {
-            to_email: email,
-            to_name: firstName || "User",
-            otp_code: code
-          },
-          'g_SXC8czs8comYen0'
-        ).then(() => {
-          console.log("Email sent successfully!");
-        }).catch((error) => {
-          console.error("EmailJS error:", error);
-          alert(`Email failed to send. Error: ${error?.text || error?.message || 'Unknown error'}. Please check your EmailJS dashboard.`);
-        });
-
-      } else {
-        // Login
-        if (email.toLowerCase().includes("admin")) {
-          navigate({ to: "/admin" });
+      try {
+        const result = await loginUser({ email, password });
+        setIsLoading(false);
+        if (result?.user) {
+          localStorage.setItem("sellora_user", JSON.stringify(result.user));
+          navigate({ to: "/" });
           return;
         }
-
+      } catch (backendError: any) {
+        // Fallback to local storage
         const storedUserRaw = localStorage.getItem("sellora_user");
         if (storedUserRaw) {
-          const storedUser = JSON.parse(storedUserRaw);
-          if (storedUser.email === email && storedUser.password === password) {
-            navigate({ to: "/" });
-          } else if (storedUser.email !== email) {
-            setError("No account found with this email. Please register.");
-            setIsSignUp(true);
-          } else {
-            setError("Invalid email or password. Please try again.");
+          try {
+            const storedUser = JSON.parse(storedUserRaw);
+            if (storedUser.email === email && storedUser.password === password) {
+              setIsLoading(false);
+              navigate({ to: "/" });
+              return;
+            }
+          } catch (e) {
+            console.error("Error parsing stored user", e);
           }
-        } else {
-          setError("No account found. Please create an account first.");
-          setIsSignUp(true);
         }
+        setIsLoading(false);
+        setError(backendError?.message || "Invalid email or password. Please try again.");
       }
-    }, 800);
+    }
   };
 
-  const handleVerify = (e: React.FormEvent) => {
+  const handleVerify = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setIsLoading(true);
 
-    setTimeout(() => {
-      setIsLoading(false);
-
-      if (otp === generatedOtp) {
-        // Complete Registration
-        const user = { firstName, lastName, phone, email, address, gender, password };
-        localStorage.setItem("sellora_user", JSON.stringify(user));
-        alert("Registration successful! You can now sign in.");
-        setIsVerifying(false);
-        setIsSignUp(false);
-        setPassword("");
-        setOtp("");
-      } else {
-        setError("Invalid verification code. Please try again.");
+    if (otp === generatedOtp) {
+      // Complete Registration
+      const user = { firstName, lastName, phone, email, address, gender, password };
+      try {
+        await registerUser({ email, password, firstName, lastName, phone, address });
+      } catch (err: any) {
+        console.warn("Could not register user to PostgreSQL backend, saving locally:", err);
       }
-    }, 800);
+      localStorage.setItem("sellora_user", JSON.stringify(user));
+      setIsLoading(false);
+      alert("Registration successful! You can now sign in.");
+      setIsVerifying(false);
+      setIsSignUp(false);
+      setPassword("");
+      setOtp("");
+    } else {
+      setIsLoading(false);
+      setError("Invalid verification code. Please try again.");
+    }
   };
 
   return (

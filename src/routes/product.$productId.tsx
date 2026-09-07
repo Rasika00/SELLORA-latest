@@ -1,10 +1,11 @@
+import { useState, useEffect } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowLeft, Cpu, MemoryStick, Zap, Fingerprint, Shield, Battery, Expand } from "lucide-react";
-import { products } from "@/data/products";
+import { ArrowLeft, Cpu, MemoryStick, Zap, Fingerprint, Shield, Battery, Expand, ShoppingCart } from "lucide-react";
+import { products, type Product } from "@/data/products";
 import { Navbar } from "@/components/site/Navbar";
 import { Footer } from "@/components/site/Footer";
 import { useCart } from "@/context/CartContext";
-import { ShoppingCart } from "lucide-react";
+import { getProductById } from "@/lib/api/client";
 
 export const Route = createFileRoute("/product/$productId")({
   component: ProductDetails,
@@ -12,8 +13,22 @@ export const Route = createFileRoute("/product/$productId")({
 
 function ProductDetails() {
   const { productId } = Route.useParams();
-  const product = products.find((p) => p.id === productId);
+  const [product, setProduct] = useState<Product | undefined>(() =>
+    products.find((p) => p.id === productId)
+  );
   const { addToCart } = useCart();
+
+  useEffect(() => {
+    let mounted = true;
+    getProductById(productId).then((found) => {
+      if (mounted && found) {
+        setProduct(found);
+      }
+    });
+    return () => {
+      mounted = false;
+    };
+  }, [productId]);
 
 
   if (!product) {

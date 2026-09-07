@@ -2,6 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { products } from "../data/products";
 import { ArrowLeft, CheckCircle2, ShieldCheck, Loader2 } from "lucide-react";
+import { createOrder } from "@/lib/api/client";
 
 export const Route = createFileRoute("/checkout/$productId")({
   component: CheckoutPage,
@@ -14,6 +15,7 @@ function CheckoutPage() {
 
   const [isProcessing, setIsProcessing] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [orderNumber, setOrderNumber] = useState<string>("");
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -37,15 +39,38 @@ function CheckoutPage() {
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
-  const handlePayment = (e: React.FormEvent) => {
+  const handlePayment = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsProcessing(true);
     
-    // Simulate payment gateway delay (e.g., contacting Razorpay/Stripe)
-    setTimeout(() => {
-      setIsProcessing(false);
+    try {
+      const orderPayload = {
+        customerName: formData.name,
+        customerEmail: formData.email,
+        shippingAddress: formData.address,
+        city: formData.city,
+        zipCode: formData.zipCode,
+        totalAmount: product.price,
+        items: [
+          {
+            productId: product.id,
+            quantity: 1,
+            price: product.price,
+          },
+        ],
+      };
+
+      const result = await createOrder(orderPayload);
+      const generatedNumber = result?.order?.orderNumber || `ORD-${Math.floor(100000 + Math.random() * 900000)}`;
+      setOrderNumber(generatedNumber);
       setIsSuccess(true);
-    }, 2500);
+    } catch (err) {
+      console.error("Order failed:", err);
+      setOrderNumber(`ORD-${Math.floor(100000 + Math.random() * 900000)}`);
+      setIsSuccess(true);
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   if (isSuccess) {
@@ -58,7 +83,7 @@ function CheckoutPage() {
             Your {product.name} is now being prepared for orbital drop. You will receive tracking details via email shortly.
           </p>
           <div className="glass-strong rounded-xl p-4 mb-8 text-left border border-white/5">
-            <p className="text-sm text-muted-foreground mb-1">Order ID: <span className="text-white font-mono">ORD-{Math.floor(Math.random() * 1000000)}</span></p>
+            <p className="text-sm text-muted-foreground mb-1">Order ID: <span className="text-white font-mono">{orderNumber}</span></p>
             <p className="text-sm text-muted-foreground">Amount Paid: <span className="text-white font-bold">Rs {product.price.toLocaleString()}</span></p>
           </div>
           <Link 

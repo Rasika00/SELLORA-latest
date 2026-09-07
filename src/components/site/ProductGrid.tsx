@@ -1,8 +1,9 @@
 import { useMemo, useState, useEffect } from "react";
 import { Cpu, MemoryStick, Zap, Plus, Filter, Scale, Check, Trophy, ArrowRight, X, ShoppingCart } from "lucide-react";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { products, type Product } from "@/data/products";
+import { products as initialProducts, type Product } from "@/data/products";
 import { useCart } from "@/context/CartContext";
+import { getProducts } from "@/lib/api/client";
 
 const badgeStyles = {
   cyan: "bg-neon-cyan/15 text-neon-cyan border-neon-cyan/40 shadow-[0_0_20px_oklch(0.78_0.18_200/0.4)]",
@@ -16,6 +17,7 @@ const processors = ["Intel i9", "Intel i7", "Intel i5", "AMD Ryzen 9", "AMD Ryze
 export function ProductGrid() {
   const navigate = useNavigate();
   const { addToCart } = useCart();
+  const [productList, setProductList] = useState<Product[]>(initialProducts);
   const [cats, setCats] = useState<string[]>([]);
   const [procs, setProcs] = useState<string[]>([]);
   const [maxPrice, setMaxPrice] = useState(600000);
@@ -23,14 +25,26 @@ export function ProductGrid() {
   const [visibleCount, setVisibleCount] = useState(8);
   const [showError, setShowError] = useState(false);
 
+  useEffect(() => {
+    let mounted = true;
+    getProducts().then((items) => {
+      if (mounted && items && items.length > 0) {
+        setProductList(items);
+      }
+    });
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
   const filtered = useMemo(() => {
-    return products.filter((p) => {
+    return productList.filter((p) => {
       if (cats.length && !cats.includes(p.category)) return false;
       if (procs.length && !procs.includes(p.processor)) return false;
       if (p.price > maxPrice) return false;
       return true;
     });
-  }, [cats, procs, maxPrice]);
+  }, [productList, cats, procs, maxPrice]);
 
   useEffect(() => {
     setVisibleCount(8);

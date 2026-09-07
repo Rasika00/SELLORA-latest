@@ -1,5 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { products } from "@/data/products";
+import { getProducts } from "@/lib/api/client";
 import {
   Activity,
   Box,
@@ -24,11 +26,19 @@ export const Route = createFileRoute("/admin")({
   component: AdminDashboard,
 });
 
-const initialInventoryData: any[] = [];
-
 export function AdminDashboard() {
   const [activeTab, setActiveTab] = useState("dashboard");
-  const [inventory, setInventory] = useState<any[]>(initialInventoryData);
+  const [inventory, setInventory] = useState<any[]>(() =>
+    products.map((p) => ({ ...p, stock: 12 }))
+  );
+
+  useEffect(() => {
+    getProducts().then((items) => {
+      if (items && items.length > 0) {
+        setInventory(items.map((p) => ({ ...p, stock: 12 })));
+      }
+    });
+  }, []);
 
   // Define tab navigation
   const tabs = [

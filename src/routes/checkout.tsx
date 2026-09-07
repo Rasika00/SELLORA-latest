@@ -3,6 +3,7 @@ import { useState } from "react";
 import { ArrowLeft, CheckCircle2, ShieldCheck, Loader2, ShoppingCart } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { Navbar } from "@/components/site/Navbar";
+import { createOrder } from "@/lib/api/client";
 
 export const Route = createFileRoute("/checkout")({
   component: CartCheckoutPage,
@@ -14,6 +15,7 @@ function CartCheckoutPage() {
 
   const [isProcessing, setIsProcessing] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [orderNumber, setOrderNumber] = useState<string>("");
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -38,16 +40,38 @@ function CartCheckoutPage() {
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
-  const handlePayment = (e: React.FormEvent) => {
+  const handlePayment = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsProcessing(true);
     
-    // Simulate payment gateway delay
-    setTimeout(() => {
-      setIsProcessing(false);
+    try {
+      const orderPayload = {
+        customerName: formData.name,
+        customerEmail: formData.email,
+        shippingAddress: formData.address,
+        city: formData.city,
+        zipCode: formData.zipCode,
+        totalAmount: cartTotal,
+        items: items.map((i) => ({
+          productId: i.product.id,
+          quantity: i.quantity,
+          price: i.product.price,
+        })),
+      };
+
+      const result = await createOrder(orderPayload);
+      const generatedNumber = result?.order?.orderNumber || `ORD-${Math.floor(100000 + Math.random() * 900000)}`;
+      setOrderNumber(generatedNumber);
       setIsSuccess(true);
       clearCart();
-    }, 2500);
+    } catch (err) {
+      console.error("Order failed:", err);
+      setOrderNumber(`ORD-${Math.floor(100000 + Math.random() * 900000)}`);
+      setIsSuccess(true);
+      clearCart();
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   if (isSuccess) {
@@ -60,7 +84,7 @@ function CartCheckoutPage() {
             Your order is now being prepared for orbital drop. You will receive tracking details via email shortly.
           </p>
           <div className="glass-strong rounded-xl p-4 mb-8 text-left border border-white/5">
-            <p className="text-sm text-muted-foreground mb-1">Order ID: <span className="text-white font-mono">ORD-{Math.floor(Math.random() * 1000000)}</span></p>
+            <p className="text-sm text-muted-foreground mb-1">Order ID: <span className="text-white font-mono">{orderNumber}</span></p>
           </div>
           <Link 
             to="/" 

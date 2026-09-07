@@ -101,17 +101,36 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
-  const [showPreloader, setShowPreloader] = useState(true);
+  const [showPreloader, setShowPreloader] = useState(() => {
+    if (typeof window !== "undefined") {
+      return !sessionStorage.getItem("sellora_loaded");
+    }
+    return true;
+  });
+
+  const handlePreloaderComplete = () => {
+    if (typeof window !== "undefined") {
+      sessionStorage.setItem("sellora_loaded", "1");
+    }
+    setShowPreloader(false);
+  };
 
   return (
     <QueryClientProvider client={queryClient}>
       <CartProvider>
         <HeadContent />
-        {showPreloader && <Preloader onComplete={() => setShowPreloader(false)} />}
+        {showPreloader && <Preloader onComplete={handlePreloaderComplete} />}
         <CartDrawer />
-        <AiChatbot />
-        {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-        <Outlet />
+        {!showPreloader && <AiChatbot />}
+        {/* Main page content with smooth entrance transition */}
+        <div
+          className={`min-h-screen transition-opacity duration-700 ease-out ${
+            showPreloader ? "opacity-0 pointer-events-none" : "opacity-100"
+          }`}
+        >
+          {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+          <Outlet />
+        </div>
         <Scripts />
       </CartProvider>
     </QueryClientProvider>

@@ -1,6 +1,8 @@
 import { products as fallbackProducts, type Product } from "@/data/products";
+import { initialFeedbacks, type FeedbackItem } from "@/data/feedbacks";
 
 const API_BASE = "/api";
+const LOCAL_FEEDBACK_KEY = "sellora_community_feedback";
 
 export interface OrderItemInput {
   productId: string;
@@ -158,4 +160,114 @@ export async function loginUser(credentials: { email: string; password: string }
     throw new Error(data.error || "Login failed");
   }
   return data;
+}
+
+export async function getFeedbacks(): Promise<FeedbackItem[]> {
+  try {
+    const res = await fetch(`${API_BASE}/feedback`);
+    if (res.ok) {
+      const data = await res.json();
+      if (Array.isArray(data) && data.length > 0) {
+        // Also update local cache
+        localStorage.setItem(LOCAL_FEEDBACK_KEY, JSON.stringify(data));
+        return data;
+      }
+    }
+  } catch (error) {
+    console.warn("Could not fetch feedback from backend, checking local storage:", error);
+  }
+
+  // Graceful fallback to localStorage or default reviews
+  try {
+    const stored = localStorage.getItem(LOCAL_FEEDBACK_KEY);
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        return parsed;
+      }
+    }
+  } catch (e) {
+    // Ignore storage parse error
+  }
+
+  return initialFeedbacks;
+}
+
+export async function submitFeedback(payload: {
+  name: string;
+  role: string;
+  rigModel: string;
+  category: "Gaming" | "Ultrabook" | "Workstation" | "General";
+  rating: number;
+  message: string;
+}): Promise<FeedbackItem> {
+  const newFeedback: FeedbackItem = {
+    id: `fb-${Date.now()}`,
+    name: payload.name.trim(),
+    role: payload.role.trim() || "Hardware Operator",
+    rigModel: payload.rigModel.trim() || "Sellora Machine",
+    category: payload.category || "General",
+    rating: Number(payload.rating) || 5,
+    message: payload.message.trim(),
+    verifiedPurchase: true,
+    date: "Just now",
+    likes: 1,
+  };
+
+  // Optimistically store in localStorage first
+  try {
+    const existing = await getFeedbacks();
+    const updated = [newFeedback, ...existing.filter((f) => f.id !== newFeedback.id)];
+    localStorage.setItem(LOCAL_FEEDBACK_KEY, JSON.stringify(updated));
+  } catch (e) {
+    console.warn("Could not cache feedback locally:", e);
+  }
+
+  // Also submit to backend server
+  try {
+    const res = await fetch(`${API_BASE}/feedback`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    if (res.ok) {
+      const data = await res.json();
+      if (data && data.feedback) {
+        return data.feedback;
+      }
+    }
+  } catch (error) {
+    console.warn("Backend feedback submission failed, using local item:", error);
+  }
+
+  return newFeedback;
+}
+
+export async function likeFeedback(id: string): Promise<number> {
+  let newLikes = 1;
+  try {
+    const existing = await getFeedbacks();
+    const found = existing.find((f) => f.id === id);
+    if (found) {
+      found.likes += 1;
+      newLikes = found.likes;
+      localStorage.setItem(LOCAL_FEEDBACK_KEY, JSON.stringify(existing));
+    }
+  } catch (e) {
+    // ignore
+  }
+
+  try {
+    const res = await fetch(`${API_BASE}/feedback/${id}/like`, { method: "POST" });
+    if (res.ok) {
+      const data = await res.json();
+      if (data && typeof data.likes === "number") {
+        newLikes = data.likes;
+      }
+    }
+  } catch (error) {
+    // backend silent fail
+  }
+
+  return newLikes;
 }

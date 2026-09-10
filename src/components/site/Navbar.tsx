@@ -12,6 +12,7 @@ export function Navbar() {
     { label: "Workstation", href: "/#workstation" },
     { label: "Tech", href: "/#features" },
     { label: "Support", href: "/#support" },
+    { label: "Feedback", href: "/#feedback" },
   ];
 
   return (

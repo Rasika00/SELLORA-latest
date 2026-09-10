@@ -1,5 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import { products } from "../src/data/products";
+import { initialFeedbacks } from "../src/data/feedbacks";
 
 const prisma = new PrismaClient();
 
@@ -49,7 +50,36 @@ async function main() {
     console.log(`✅ Seeded product: ${product.name} (ID: ${product.id})`);
   }
 
-  console.log(`\n🎉 Seed finished: ${products.length} products upserted.`);
+  console.log(`\n💬 Seeding initial community feedbacks...`);
+  for (const fb of initialFeedbacks) {
+    await prisma.feedback.upsert({
+      where: { id: fb.id },
+      update: {
+        name: fb.name,
+        role: fb.role,
+        rigModel: fb.rigModel,
+        category: fb.category,
+        rating: fb.rating,
+        message: fb.message,
+        verifiedPurchase: fb.verifiedPurchase,
+        likes: fb.likes,
+      },
+      create: {
+        id: fb.id,
+        name: fb.name,
+        role: fb.role,
+        rigModel: fb.rigModel,
+        category: fb.category,
+        rating: fb.rating,
+        message: fb.message,
+        verifiedPurchase: fb.verifiedPurchase,
+        likes: fb.likes,
+      },
+    });
+    console.log(`💬 Seeded feedback: ${fb.name} (${fb.category})`);
+  }
+
+  console.log(`\n🎉 Seed finished: ${products.length} products and ${initialFeedbacks.length} feedbacks synced.`);
 }
 
 main()

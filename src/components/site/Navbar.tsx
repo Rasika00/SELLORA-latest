@@ -6,7 +6,7 @@ export function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { itemCount, setIsCartOpen } = useCart();
 
-  const links = [
+  const links: { label: string; href: string; isRouterLink?: boolean }[] = [
     { label: "Laptop", href: "/#products" },
     { label: "Creator", href: "/#creator" },
     { label: "Workstation", href: "/#workstation" },

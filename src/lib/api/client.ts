@@ -31,12 +31,16 @@ export async function checkDatabaseHealth(): Promise<{ status: string; database?
 export async function getProducts(options?: {
   category?: string;
   processor?: string;
+  ram?: string;
+  gpu?: string;
   search?: string;
 }): Promise<Product[]> {
   try {
     const params = new URLSearchParams();
     if (options?.category) params.append("category", options.category);
     if (options?.processor) params.append("processor", options.processor);
+    if (options?.ram) params.append("ram", options.ram);
+    if (options?.gpu) params.append("gpu", options.gpu);
     if (options?.search) params.append("search", options.search);
 
     const url = `${API_BASE}/products${params.toString() ? `?${params.toString()}` : ""}`;
@@ -61,6 +65,12 @@ export async function getProducts(options?: {
   }
   if (options?.processor) {
     filtered = filtered.filter((p) => p.processor === options.processor);
+  }
+  if (options?.ram) {
+    filtered = filtered.filter((p) => p.ram.toLowerCase().includes(options.ram!.toLowerCase()));
+  }
+  if (options?.gpu) {
+    filtered = filtered.filter((p) => p.gpu.toLowerCase().includes(options.gpu!.toLowerCase()));
   }
   if (options?.search) {
     const term = options.search.toLowerCase();

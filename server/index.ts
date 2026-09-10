@@ -34,7 +34,7 @@ app.get("/api/health", async (_req, res) => {
 // Products: Get all products
 app.get("/api/products", async (req, res) => {
   try {
-    const { category, processor, search } = req.query;
+    const { category, processor, ram, gpu, search } = req.query;
 
     const where: any = {};
     if (category && typeof category === "string") {
@@ -42,6 +42,12 @@ app.get("/api/products", async (req, res) => {
     }
     if (processor && typeof processor === "string") {
       where.processor = processor;
+    }
+    if (ram && typeof ram === "string") {
+      where.ram = { contains: ram, mode: "insensitive" };
+    }
+    if (gpu && typeof gpu === "string") {
+      where.gpu = { contains: gpu, mode: "insensitive" };
     }
     if (search && typeof search === "string") {
       where.OR = [

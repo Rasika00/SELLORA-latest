@@ -1,5 +1,20 @@
 import { useMemo, useState, useEffect } from "react";
-import { Cpu, MemoryStick, Zap, Plus, Filter, Scale, Check, Trophy, ArrowRight, X, ShoppingCart } from "lucide-react";
+import {
+  Cpu,
+  MemoryStick,
+  Zap,
+  Plus,
+  Filter,
+  Scale,
+  Check,
+  Trophy,
+  ArrowRight,
+  X,
+  ShoppingCart,
+  Layers,
+  SlidersHorizontal,
+  RotateCcw,
+} from "lucide-react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { products as initialProducts, type Product } from "@/data/products";
 import { useCart } from "@/context/CartContext";
@@ -12,7 +27,27 @@ const badgeStyles = {
 };
 
 const categories = ["Gaming", "Ultrabook", "Workstation"] as const;
-const processors = ["Intel i9", "Intel i7", "Intel i5", "AMD Ryzen 9", "AMD Ryzen 7", "AMD Ryzen 5", "Apple M Max"] as const;
+const processors = [
+  "Intel i9",
+  "Intel i7",
+  "Intel i5",
+  "AMD Ryzen 9",
+  "AMD Ryzen 7",
+  "AMD Ryzen 5",
+  "Apple M Max",
+] as const;
+const ramOptions = ["8GB", "16GB", "32GB", "48GB", "64GB", "128GB"] as const;
+const gpuOptions = [
+  "RTX 4090",
+  "RTX 4080",
+  "RTX 4070",
+  "RTX 4060",
+  "RTX 4050",
+  "RTX Ada",
+  "Apple GPU",
+  "RTX 3050 / 2050",
+  "Integrated / Arc",
+] as const;
 
 export function ProductGrid() {
   const navigate = useNavigate();
@@ -20,6 +55,8 @@ export function ProductGrid() {
   const [productList, setProductList] = useState<Product[]>(initialProducts);
   const [cats, setCats] = useState<string[]>([]);
   const [procs, setProcs] = useState<string[]>([]);
+  const [rams, setRams] = useState<string[]>([]);
+  const [gpus, setGpus] = useState<string[]>([]);
   const [maxPrice, setMaxPrice] = useState(600000);
   const [compareIds, setCompareIds] = useState<string[]>([]);
   const [visibleCount, setVisibleCount] = useState(8);
@@ -39,19 +76,76 @@ export function ProductGrid() {
 
   const filtered = useMemo(() => {
     return productList.filter((p) => {
+      // Category filter
       if (cats.length && !cats.includes(p.category)) return false;
-      if (procs.length && !procs.includes(p.processor)) return false;
+
+      // Processor filter
+      if (procs.length) {
+        const matchesProc = procs.some((proc) => {
+          if (p.processor === proc) return true;
+          // Flexible match for CPU string naming
+          if (proc === "Intel i9" && (p.cpu.includes("i9") || p.cpu.includes("Ultra 9"))) return true;
+          if (proc === "Intel i7" && (p.cpu.includes("i7") || p.cpu.includes("Ultra 7"))) return true;
+          if (proc === "Intel i5" && p.cpu.includes("i5")) return true;
+          if (proc === "AMD Ryzen 9" && p.cpu.includes("Ryzen 9")) return true;
+          if (proc === "AMD Ryzen 7" && p.cpu.includes("Ryzen 7")) return true;
+          if (proc === "AMD Ryzen 5" && p.cpu.includes("Ryzen 5")) return true;
+          if (proc === "Apple M Max" && (p.cpu.toLowerCase().includes("m3") || p.cpu.toLowerCase().includes("apple"))) return true;
+          return false;
+        });
+        if (!matchesProc) return false;
+      }
+
+      // RAM filter
+      if (rams.length) {
+        const matchesRam = rams.some((r) => {
+          const regex = new RegExp(`(^|\\D)${r}(\\D|$)`, "i");
+          return regex.test(p.ram);
+        });
+        if (!matchesRam) return false;
+      }
+
+      // Graphic Card (GPU) filter
+      if (gpus.length) {
+        const lowerGpu = p.gpu.toLowerCase();
+        const matchesGpu = gpus.some((g) => {
+          if (g === "RTX 4090") return lowerGpu.includes("4090");
+          if (g === "RTX 4080") return lowerGpu.includes("4080");
+          if (g === "RTX 4070") return lowerGpu.includes("4070");
+          if (g === "RTX 4060") return lowerGpu.includes("4060");
+          if (g === "RTX 4050") return lowerGpu.includes("4050");
+          if (g === "RTX Ada") return lowerGpu.includes("ada");
+          if (g === "Apple GPU") return lowerGpu.includes("apple");
+          if (g === "RTX 3050 / 2050") return lowerGpu.includes("3050") || lowerGpu.includes("2050");
+          if (g === "Integrated / Arc") return lowerGpu.includes("arc") || lowerGpu.includes("radeon") || lowerGpu.includes("integrated");
+          return lowerGpu.includes(g.toLowerCase());
+        });
+        if (!matchesGpu) return false;
+      }
+
+      // Max price filter
       if (p.price > maxPrice) return false;
       return true;
     });
-  }, [productList, cats, procs, maxPrice]);
+  }, [productList, cats, procs, rams, gpus, maxPrice]);
 
   useEffect(() => {
     setVisibleCount(8);
-  }, [cats, procs, maxPrice]);
+  }, [cats, procs, rams, gpus, maxPrice]);
 
   const toggle = (arr: string[], setArr: (v: string[]) => void, val: string) =>
     setArr(arr.includes(val) ? arr.filter((x) => x !== val) : [...arr, val]);
+
+  const resetFilters = () => {
+    setCats([]);
+    setProcs([]);
+    setRams([]);
+    setGpus([]);
+    setMaxPrice(600000);
+  };
+
+  const activeFilterCount =
+    cats.length + procs.length + rams.length + gpus.length + (maxPrice < 600000 ? 1 : 0);
 
   const toggleCompare = (e: React.MouseEvent, id: string) => {
     e.preventDefault();
@@ -124,60 +218,200 @@ export function ProductGrid() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-[220px_1fr]">
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-[270px_1fr]">
           {/* Sticky sidebar */}
           <aside className="lg:sticky lg:top-28 lg:self-start">
-            <div className="rounded-2xl glass p-5 neon-border min-h-[600px] flex flex-col">
-              <div className="mb-4 flex items-center gap-2">
-                <Filter className="h-4 w-4 text-neon-cyan" />
-                <h3 className="font-display text-sm tracking-[0.2em]">FILTERS</h3>
+            <div className="rounded-2xl glass p-5 sm:p-6 neon-border flex flex-col justify-between lg:min-h-[1040px] xl:min-h-[1050px]">
+              <div>
+                <div className="mb-5 flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Filter className="h-4 w-4 text-neon-cyan" />
+                    <h3 className="font-display text-sm tracking-[0.2em]">FILTERS</h3>
+                    {activeFilterCount > 0 && (
+                      <span className="rounded-full bg-neon-cyan/20 px-2 py-0.5 text-[10px] font-mono font-bold text-neon-cyan border border-neon-cyan/40">
+                        {activeFilterCount}
+                      </span>
+                    )}
+                  </div>
+                  {activeFilterCount > 0 && (
+                    <button
+                      onClick={resetFilters}
+                      className="flex items-center gap-1 text-[10px] font-mono uppercase tracking-wider text-muted-foreground hover:text-neon-cyan transition-colors"
+                      title="Clear all filters"
+                    >
+                      <RotateCcw className="h-3 w-3" />
+                      <span>Clear</span>
+                    </button>
+                  )}
+                </div>
+
+                {/* Category Filter */}
+                <FilterGroup label="CATEGORY" icon={Layers} activeCount={cats.length}>
+                  {categories.map((c) => (
+                    <Chip key={c} active={cats.includes(c)} onClick={() => toggle(cats, setCats, c)}>
+                      {c}
+                    </Chip>
+                  ))}
+                </FilterGroup>
+
+                {/* Processor Filter */}
+                <FilterGroup label="PROCESSOR" icon={Cpu} activeCount={procs.length}>
+                  {processors.map((p) => (
+                    <Chip key={p} active={procs.includes(p)} onClick={() => toggle(procs, setProcs, p)}>
+                      {p}
+                    </Chip>
+                  ))}
+                </FilterGroup>
+
+                {/* RAM Filter */}
+                <FilterGroup label="MEMORY (RAM)" icon={MemoryStick} activeCount={rams.length}>
+                  {ramOptions.map((r) => (
+                    <Chip key={r} active={rams.includes(r)} onClick={() => toggle(rams, setRams, r)}>
+                      {r}
+                    </Chip>
+                  ))}
+                </FilterGroup>
+
+                {/* Graphic Card (GPU) Filter */}
+                <FilterGroup label="GRAPHIC CARD" icon={Zap} activeCount={gpus.length}>
+                  {gpuOptions.map((g) => (
+                    <Chip key={g} active={gpus.includes(g)} onClick={() => toggle(gpus, setGpus, g)}>
+                      {g}
+                    </Chip>
+                  ))}
+                </FilterGroup>
+
+                {/* Price Filter */}
+                <FilterGroup
+                  label="MAX PRICE"
+                  icon={SlidersHorizontal}
+                  activeCount={maxPrice < 600000 ? 1 : 0}
+                >
+                  <div className="w-full px-1">
+                    <input
+                      type="range"
+                      min={40000}
+                      max={600000}
+                      step={5000}
+                      value={maxPrice}
+                      onChange={(e) => setMaxPrice(Number(e.target.value))}
+                      className="w-full accent-[oklch(0.78_0.18_200)] cursor-pointer"
+                    />
+                    <div className="mt-2 flex justify-between text-xs text-muted-foreground">
+                      <span>Rs 40K</span>
+                      <span className="font-display text-neon-cyan font-bold">Rs {maxPrice.toLocaleString()}</span>
+                    </div>
+                  </div>
+                </FilterGroup>
               </div>
 
-              <FilterGroup label="CATEGORY">
-                {categories.map((c) => (
-                  <Chip key={c} active={cats.includes(c)} onClick={() => toggle(cats, setCats, c)}>
-                    {c}
-                  </Chip>
-                ))}
-              </FilterGroup>
-
-              <FilterGroup label="PROCESSOR">
-                {processors.map((p) => (
-                  <Chip key={p} active={procs.includes(p)} onClick={() => toggle(procs, setProcs, p)}>
-                    {p}
-                  </Chip>
-                ))}
-              </FilterGroup>
-
-              <FilterGroup label="MAX PRICE">
-                <div className="px-1">
-                  <input
-                    type="range"
-                    min={40000}
-                    max={600000}
-                    step={5000}
-                    value={maxPrice}
-                    onChange={(e) => setMaxPrice(Number(e.target.value))}
-                    className="w-full accent-[oklch(0.78_0.18_200)]"
-                  />
-                  <div className="mt-2 flex justify-between text-xs text-muted-foreground">
-                    <span>Rs 40K</span>
-                    <span className="font-display text-neon-cyan">Rs {maxPrice.toLocaleString()}</span>
-                  </div>
+              {/* Bottom Deck Stats & Reset Action */}
+              <div className="mt-auto pt-6 border-t border-glass-border">
+                <div className="mb-3 rounded-xl bg-white/[0.02] border border-glass-border p-3 text-center">
+                  <p className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">Catalog Deck</p>
+                  <p className="font-display text-base font-bold text-foreground mt-0.5">
+                    <span className="text-neon-cyan">{filtered.length}</span> of {productList.length} <span className="text-xs text-muted-foreground font-normal">Active Models</span>
+                  </p>
                 </div>
-              </FilterGroup>
-
-              <button
-                onClick={() => { setCats([]); setProcs([]); setMaxPrice(600000); }}
-                className="mt-auto w-full rounded-lg border border-glass-border px-4 py-2 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
-              >
-                Reset filters
-              </button>
+                <button
+                  onClick={resetFilters}
+                  className="w-full flex items-center justify-center gap-2 rounded-xl border border-glass-border bg-white/[0.02] px-4 py-2.5 text-xs font-semibold text-muted-foreground transition-all hover:bg-neon-cyan/10 hover:border-neon-cyan/40 hover:text-neon-cyan"
+                >
+                  <RotateCcw className="h-3.5 w-3.5" />
+                  <span>Reset all filters</span>
+                </button>
+              </div>
             </div>
           </aside>
 
           {/* Main Content Area */}
           <div className="flex flex-col">
+            {/* Active Filter Badges Bar */}
+            {activeFilterCount > 0 && (
+              <div className="mb-6 flex flex-wrap items-center gap-2 rounded-2xl glass p-3 text-xs neon-border">
+                <span className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground mr-1">
+                  Active Filters:
+                </span>
+                {cats.map((c) => (
+                  <span
+                    key={c}
+                    className="inline-flex items-center gap-1 rounded-full border border-neon-cyan/40 bg-neon-cyan/15 px-2.5 py-0.5 text-[11px] font-medium text-neon-cyan"
+                  >
+                    {c}
+                    <button
+                      onClick={() => toggle(cats, setCats, c)}
+                      className="hover:text-white ml-0.5"
+                      title={`Remove ${c}`}
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </span>
+                ))}
+                {procs.map((p) => (
+                  <span
+                    key={p}
+                    className="inline-flex items-center gap-1 rounded-full border border-neon-cyan/40 bg-neon-cyan/15 px-2.5 py-0.5 text-[11px] font-medium text-neon-cyan"
+                  >
+                    {p}
+                    <button
+                      onClick={() => toggle(procs, setProcs, p)}
+                      className="hover:text-white ml-0.5"
+                      title={`Remove ${p}`}
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </span>
+                ))}
+                {rams.map((r) => (
+                  <span
+                    key={r}
+                    className="inline-flex items-center gap-1 rounded-full border border-neon-cyan/40 bg-neon-cyan/15 px-2.5 py-0.5 text-[11px] font-medium text-neon-cyan"
+                  >
+                    {r} RAM
+                    <button
+                      onClick={() => toggle(rams, setRams, r)}
+                      className="hover:text-white ml-0.5"
+                      title={`Remove ${r}`}
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </span>
+                ))}
+                {gpus.map((g) => (
+                  <span
+                    key={g}
+                    className="inline-flex items-center gap-1 rounded-full border border-neon-cyan/40 bg-neon-cyan/15 px-2.5 py-0.5 text-[11px] font-medium text-neon-cyan"
+                  >
+                    {g}
+                    <button
+                      onClick={() => toggle(gpus, setGpus, g)}
+                      className="hover:text-white ml-0.5"
+                      title={`Remove ${g}`}
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </span>
+                ))}
+                {maxPrice < 600000 && (
+                  <span className="inline-flex items-center gap-1 rounded-full border border-neon-cyan/40 bg-neon-cyan/15 px-2.5 py-0.5 text-[11px] font-medium text-neon-cyan">
+                    ≤ Rs {maxPrice.toLocaleString()}
+                    <button
+                      onClick={() => setMaxPrice(600000)}
+                      className="hover:text-white ml-0.5"
+                      title="Clear max price filter"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </span>
+                )}
+                <button
+                  onClick={resetFilters}
+                  className="ml-auto font-mono text-[10px] uppercase tracking-wider text-muted-foreground hover:text-neon-cyan transition-colors"
+                >
+                  Clear All
+                </button>
+              </div>
+            )}
             {/* Grid */}
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
             {filtered.slice(0, visibleCount).map((p) => {
@@ -269,8 +503,23 @@ export function ProductGrid() {
               );
             })}
             {filtered.length === 0 && (
-              <div className="col-span-full rounded-2xl glass p-12 text-center text-muted-foreground">
-                No machines match your filters. Try widening the search.
+              <div className="col-span-full rounded-2xl glass p-12 text-center text-muted-foreground flex flex-col items-center justify-center gap-4">
+                <div className="rounded-full bg-neon-cyan/10 border border-neon-cyan/30 p-3 text-neon-cyan">
+                  <Filter className="h-6 w-6" />
+                </div>
+                <div>
+                  <p className="font-display text-base font-bold text-foreground">No matching machines found</p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Try clearing or widening your filters to view more laptops.
+                  </p>
+                </div>
+                <button
+                  onClick={resetFilters}
+                  className="inline-flex items-center gap-2 rounded-xl bg-neon-cyan/20 border border-neon-cyan/50 px-4 py-2 text-xs font-bold text-neon-cyan hover:bg-neon-cyan hover:text-black transition-all shadow-[0_0_15px_oklch(0.78_0.18_200/0.2)]"
+                >
+                  <RotateCcw className="h-3.5 w-3.5" />
+                  <span>Reset All Filters</span>
+                </button>
               </div>
             )}
           </div>
@@ -298,7 +547,7 @@ export function ProductGrid() {
             <div className="flex items-center gap-3">
               <div className="flex -space-x-3 overflow-hidden">
                 {compareIds.map((id) => {
-                  const prod = products.find((p) => p.id === id);
+                  const prod = productList.find((p) => p.id === id);
                   if (!prod) return null;
                   return (
                     <img
@@ -316,7 +565,7 @@ export function ProductGrid() {
                   SHOWDOWN DECK ({compareIds.length}/3)
                 </p>
                 <p className="text-xs text-foreground font-medium truncate max-w-[180px] sm:max-w-[220px]">
-                  {compareIds.map((id) => products.find((p) => p.id === id)?.name).filter(Boolean).join(", ")}
+                  {compareIds.map((id) => productList.find((p) => p.id === id)?.name).filter(Boolean).join(", ")}
                 </p>
               </div>
             </div>
@@ -345,13 +594,31 @@ export function ProductGrid() {
   );
 }
 
-function FilterGroup({ label, children }: { label: string; children: React.ReactNode }) {
+function FilterGroup({
+  icon: Icon,
+  label,
+  children,
+  activeCount = 0,
+}: {
+  icon?: React.ElementType;
+  label: string;
+  children: React.ReactNode;
+  activeCount?: number;
+}) {
   return (
     <div className="mb-5 border-t border-glass-border pt-4 first:border-t-0 first:pt-0">
-      <p className="mb-3 font-display text-[10px] tracking-[0.25em] text-muted-foreground">
-        {label}
-      </p>
-      <div className="flex flex-wrap gap-2">{children}</div>
+      <div className="mb-3 flex items-center justify-between">
+        <div className="flex items-center gap-1.5 font-display text-[10px] tracking-[0.25em] text-muted-foreground">
+          {Icon && <Icon className="h-3.5 w-3.5 text-neon-cyan/80" />}
+          <span>{label}</span>
+        </div>
+        {activeCount > 0 && (
+          <span className="rounded-full bg-neon-cyan/15 text-neon-cyan border border-neon-cyan/30 px-1.5 py-0.2 text-[9px] font-mono font-bold">
+            {activeCount}
+          </span>
+        )}
+      </div>
+      <div className="flex flex-wrap gap-1.5">{children}</div>
     </div>
   );
 }

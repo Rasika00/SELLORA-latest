@@ -13,7 +13,7 @@ export function CreatorBuilder() {
         "Focus: Premium Consumer & Pro Hardware",
         "Key Lineup: MacBook Pro, Mac Studio",
       ],
-      link: "https://www.apple.com"
+
     },
     {
       name: "Dell Technologies",

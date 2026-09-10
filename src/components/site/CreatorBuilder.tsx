@@ -1,4 +1,4 @@
-import { Sparkles, Check, ArrowRight, Building2 } from "lucide-react";
+import { Check, Building2 } from "lucide-react";
 
 export function CreatorBuilder() {
   const companies = [
@@ -13,7 +13,7 @@ export function CreatorBuilder() {
         "Focus: Premium Consumer & Pro Hardware",
         "Key Lineup: MacBook Pro, Mac Studio",
       ],
-
+      link: "https://www.apple.com",
     },
     {
       name: "Dell Technologies",
@@ -66,17 +66,16 @@ export function CreatorBuilder() {
             return (
               <div
                 key={company.name}
-                className="group flex flex-col rounded-3xl border border-glass-border bg-card/60 overflow-hidden backdrop-blur-xl transition-all hover:border-white/30 hover:shadow-elevated"
+                className="group flex flex-col rounded-3xl border border-glass-border bg-card/60 overflow-hidden backdrop-blur-xl transition-all duration-300 hover:border-white/30 hover:shadow-elevated"
               >
-                {/* Image */}
-                <div className="relative aspect-[16/10] w-full overflow-hidden bg-black/50">
+                {/* Image - Clean, natural and balanced */}
+                <div className="relative aspect-[16/10] w-full overflow-hidden bg-black/10">
                   <img
                     src={company.img}
                     alt={company.name}
-                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105 opacity-80"
+                    className="h-full w-full object-cover brightness-105 transition-all duration-700 group-hover:scale-105 group-hover:brightness-110"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
-                  <span className="absolute bottom-3 left-4 font-mono text-[10px] font-bold uppercase tracking-wider text-neon-cyan bg-black/60 px-2.5 py-1 rounded-full border border-white/10">
+                  <span className="absolute bottom-3 left-4 font-mono text-[10px] font-bold uppercase tracking-wider text-neon-cyan bg-black/80 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/20 shadow-md">
                     {company.tagline}
                   </span>
                 </div>
@@ -99,19 +98,6 @@ export function CreatorBuilder() {
                       </li>
                     ))}
                   </ul>
-
-                  {/* Action */}
-                  <div className="mt-auto pt-8 flex items-center justify-end border-t border-glass-border/50">
-                    <a
-                      href={company.link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 rounded-full bg-white/5 px-5 py-2.5 text-xs font-bold text-foreground transition-all hover:bg-neon-cyan hover:text-background hover:shadow-neon-cyan group/btn"
-                    >
-                      <span>Explore Brand</span>
-                      <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover/btn:translate-x-1" />
-                    </a>
-                  </div>
                 </div>
               </div>
             );

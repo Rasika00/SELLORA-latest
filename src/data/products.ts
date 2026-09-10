@@ -622,7 +622,7 @@ export const products: Product[] = [
     display: '15.6" FHD IPS Anti-Glare',
     batteryWeight: "50Wh · 1.78 kg",
     specialHighlight: "Reliable daily driver for college students and everyday office productivity",
-    img: "https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?auto=format&fit=crop&w=1000&q=80",
+    img: "https://res.cloudinary.com/fqizrdtg/image/upload/v1789059787/Acer_Aspire_5_laptop_render_20260910220244.jpg",
     detailedSpecs: {
       displayTech: "FHD IPS SlimBezel",
       refreshRate: "60Hz",
@@ -647,7 +647,7 @@ export const products: Product[] = [
     display: '15.6" FHD 120Hz WVA',
     batteryWeight: "54Wh · 1.65 kg",
     specialHighlight: "Smooth 120Hz display with lift hinge design for ergonomic typing comfort",
-    img: "https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?auto=format&fit=crop&w=1000&q=80",
+    img: "https://res.cloudinary.com/fqizrdtg/image/upload/v1789059787/Dell_laptop_product_render_20260910220246.jpg",
     detailedSpecs: {
       displayTech: "FHD 120Hz Anti-glare Narrow Border",
       refreshRate: "120Hz",
@@ -672,7 +672,7 @@ export const products: Product[] = [
     display: '14" FHD IPS 300 nits',
     batteryWeight: "47Wh · 1.37 kg",
     specialHighlight: "Ultra-lightweight chassis with military-grade MIL-STD-810H durability",
-    img: "https://images.unsplash.com/photo-1525547719571-a2d4ac8945e2?auto=format&fit=crop&w=1000&q=80",
+    img: "https://res.cloudinary.com/fqizrdtg/image/upload/v1789059789/Lenovo_IdeaPad_Slim_3_render_20260910220249.jpg",
     detailedSpecs: {
       displayTech: "14 inch FHD Anti-glare 300 nits",
       refreshRate: "60Hz",
@@ -697,7 +697,7 @@ export const products: Product[] = [
     display: '15.6" FHD Micro-Edge',
     batteryWeight: "41Wh · 1.59 kg",
     specialHighlight: "Fast-charging battery with hardware camera privacy shutter and mic mute",
-    img: "https://images.unsplash.com/photo-1593642632823-8f785ba67e45?auto=format&fit=crop&w=1000&q=80",
+    img: "https://res.cloudinary.com/fqizrdtg/image/upload/v1789059788/HP_laptop_product_render_20260910220251.jpg",
     detailedSpecs: {
       displayTech: "FHD Micro-edge Anti-glare",
       refreshRate: "60Hz",
@@ -722,7 +722,7 @@ export const products: Product[] = [
     display: '15.6" FHD NanoEdge',
     batteryWeight: "42Wh · 1.70 kg",
     specialHighlight: "8-core processing power with 180-degree lay-flat hinge and Antimicrobial Guard",
-    img: "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?auto=format&fit=crop&w=1000&q=80",
+    img: "https://res.cloudinary.com/fqizrdtg/image/upload/v1789059787/ASUS_Vivobook_15_product_render_20260910220550.jpg",
     detailedSpecs: {
       displayTech: "15.6 inch FHD TÜV Rheinland-certified",
       refreshRate: "60Hz",
@@ -747,7 +747,7 @@ export const products: Product[] = [
     display: '14" 16:10 WUXGA IPS',
     batteryWeight: "60Wh · 1.38 kg",
     specialHighlight: "Enterprise-grade security with dual SSD slots and spill-resistant keyboard",
-    img: "https://images.unsplash.com/photo-1593642634315-48f5414c3ad9?auto=format&fit=crop&w=1000&q=80",
+    img: "https://res.cloudinary.com/fqizrdtg/image/upload/v1789059788/Lenovo_ThinkBook_laptop_product___20260910220254.jpg",
     detailedSpecs: {
       displayTech: "14 inch 16:10 WUXGA 300 nits IPS",
       refreshRate: "60Hz",
@@ -772,7 +772,7 @@ export const products: Product[] = [
     display: '14" 2.8K 90Hz OLED HDR 500',
     batteryWeight: "65Wh · 1.25 kg",
     specialHighlight: "Incredible 2.8K 90Hz OLED panel in an ultra-portable 1.25kg aluminum body",
-    img: "https://images.unsplash.com/photo-1531297484001-80022131f5a1?auto=format&fit=crop&w=1000&q=80",
+    img: "https://res.cloudinary.com/fqizrdtg/image/upload/v1789059787/Acer_Swift_Go_laptop_render_20260910220257.jpg",
     detailedSpecs: {
       displayTech: "2.8K OLED 100% DCI-P3 500 nits",
       refreshRate: "90Hz / 0.2ms",
@@ -797,7 +797,7 @@ export const products: Product[] = [
     display: '15.6" FHD 144Hz IPS',
     batteryWeight: "52.5Wh · 2.29 kg",
     specialHighlight: "Affordable dedicated GPU gaming with dual speakers custom tuned by B&O",
-    img: "https://images.unsplash.com/photo-1504707748692-419802cf939d?auto=format&fit=crop&w=1000&q=80",
+    img: "https://res.cloudinary.com/fqizrdtg/image/upload/v1789059788/HP_laptop_product_render_20260910220251.jpg",
     detailedSpecs: {
       displayTech: "15.6 inch FHD 144Hz IPS 9ms",
       refreshRate: "144Hz",
@@ -822,7 +822,7 @@ export const products: Product[] = [
     display: '15.6" FHD 120Hz',
     batteryWeight: "56Wh · 2.65 kg",
     specialHighlight: "Alienware-inspired thermal engineering with dedicated Game Shift boost button",
-    img: "https://images.unsplash.com/photo-1603302576837-37561b2e2302?auto=format&fit=crop&w=1000&q=80",
+    img: "https://res.cloudinary.com/fqizrdtg/image/upload/v1789059787/Dell_G15_gaming_laptop_render_20260910220311.jpg",
     detailedSpecs: {
       displayTech: "FHD 120Hz 250 nits Anti-Glare",
       refreshRate: "120Hz",
@@ -847,7 +847,7 @@ export const products: Product[] = [
     display: '13.6" Liquid Retina 500 nits',
     batteryWeight: "52.6Wh · 1.24 kg",
     specialHighlight: "Completely silent fanless architecture with up to 18 hours of real battery life",
-    img: "https://images.unsplash.com/photo-1611186871348-b1ce696e52c9?auto=format&fit=crop&w=1000&q=80",
+    img: "https://res.cloudinary.com/fqizrdtg/image/upload/v1789059788/Laptop_product_render_20260910220303.jpg",
     detailedSpecs: {
       displayTech: "13.6 inch Liquid Retina with True Tone",
       refreshRate: "60Hz",
@@ -872,7 +872,7 @@ export const products: Product[] = [
     display: '14" 3K 120Hz OLED Lumina',
     batteryWeight: "75Wh · 1.20 kg",
     specialHighlight: "Intel AI Boost NPU processor paired with a massive 75Wh battery in a 1.2kg frame",
-    img: "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=1000&q=80",
+    img: "https://res.cloudinary.com/fqizrdtg/image/upload/v1789059787/ASUS_Zenbook_14_OLED_render_20260910220635.jpg",
     detailedSpecs: {
       displayTech: "3K 120Hz OLED 16:10 600 nits HDR",
       refreshRate: "120Hz / 0.2ms",
@@ -897,7 +897,7 @@ export const products: Product[] = [
     display: '14" 2.8K OLED Touch 120Hz',
     batteryWeight: "71Wh · 1.49 kg",
     specialHighlight: "Versatile 360-degree convertibility with stylus pen support and Dolby Atmos sound",
-    img: "https://images.unsplash.com/photo-1541807084-5c52b6b3adef?auto=format&fit=crop&w=1000&q=80",
+    img: "https://res.cloudinary.com/fqizrdtg/image/upload/v1789059788/Lenovo_Yoga_7_laptop_render_20260910220314.jpg",
     detailedSpecs: {
       displayTech: "14 inch 2.8K OLED PureSight Touch 400 nits",
       refreshRate: "120Hz",

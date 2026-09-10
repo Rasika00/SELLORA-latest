@@ -455,6 +455,10 @@ app.post("/api/feedback/:id/like", async (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`🚀 SELLORA PostgreSQL API Server running on http://localhost:${PORT}`);
-});
+if (!process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log(`🚀 SELLORA PostgreSQL API Server running on http://localhost:${PORT}`);
+  });
+}
+
+export default app;

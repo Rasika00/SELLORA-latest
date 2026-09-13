@@ -27,10 +27,10 @@ function Index() {
       <Navbar />
       <Hero />
       <CreatorBuilder />
-      <PerformanceEstimator />
       <ProductGrid />
       <Features />
       <Support />
+      <PerformanceEstimator />
       <FeedbackSection />
       <Footer />
     </main>

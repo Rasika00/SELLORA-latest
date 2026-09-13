@@ -8,11 +8,11 @@ export function Navbar() {
 
   const links: { label: string; href: string; isRouterLink?: boolean; isHighlight?: boolean }[] = [
     { label: "Laptop", href: "/#products" },
-    { label: "Estimator", href: "/#estimator", isHighlight: true },
     { label: "Creator", href: "/#creator" },
     { label: "Workstation", href: "/#workstation" },
     { label: "Tech", href: "/#features" },
     { label: "Support", href: "/#support" },
+    { label: "Estimator", href: "/#estimator", isHighlight: true },
     { label: "Feedback", href: "/#feedback" },
   ];
 

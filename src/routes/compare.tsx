@@ -13,28 +13,61 @@ import {
   ArrowLeft,
   CheckCircle2,
 } from "lucide-react";
-import { products, type Product } from "@/data/products";
+import { products as initialProducts, type Product } from "@/data/products";
 import { Navbar } from "@/components/site/Navbar";
 import { Footer } from "@/components/site/Footer";
+import { getProducts } from "@/lib/api/client";
+
+interface CompareSearchParams {
+  s1?: string;
+  s2?: string;
+  s3?: string;
+}
 
 export const Route = createFileRoute("/compare")({
+  validateSearch: (search: Record<string, unknown>): CompareSearchParams => {
+    return {
+      s1: typeof search.s1 === "string" ? search.s1 : undefined,
+      s2: typeof search.s2 === "string" ? search.s2 : undefined,
+      s3: typeof search.s3 === "string" ? search.s3 : undefined,
+    };
+  },
   component: CompareShowdown,
 });
 
 function CompareShowdown() {
   const navigate = useNavigate();
+  const searchParams = useSearch({ from: "/compare" });
 
-  const searchParams: any = useSearch({ strict: false });
-
-  const [slot1Id, setSlot1Id] = useState<string>("1");
-  const [slot2Id, setSlot2Id] = useState<string>("2");
-  const [slot3Id, setSlot3Id] = useState<string>("3");
+  const [productList, setProductList] = useState<Product[]>(initialProducts);
 
   useEffect(() => {
-    if (searchParams.s1 && products.some((p) => p.id === searchParams.s1)) setSlot1Id(searchParams.s1);
-    if (searchParams.s2 && products.some((p) => p.id === searchParams.s2)) setSlot2Id(searchParams.s2);
-    if (searchParams.s3 && products.some((p) => p.id === searchParams.s3)) setSlot3Id(searchParams.s3);
-  }, [searchParams.s1, searchParams.s2, searchParams.s3]);
+    let mounted = true;
+    getProducts().then((items) => {
+      if (mounted && items && items.length > 0) {
+        setProductList(items);
+      }
+    });
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const [slot1Id, setSlot1Id] = useState<string>(() =>
+    searchParams.s1 && initialProducts.some((p) => p.id === searchParams.s1) ? searchParams.s1 : "1"
+  );
+  const [slot2Id, setSlot2Id] = useState<string>(() =>
+    searchParams.s2 && initialProducts.some((p) => p.id === searchParams.s2) ? searchParams.s2 : "2"
+  );
+  const [slot3Id, setSlot3Id] = useState<string>(() =>
+    searchParams.s3 && initialProducts.some((p) => p.id === searchParams.s3) ? searchParams.s3 : "3"
+  );
+
+  useEffect(() => {
+    if (searchParams.s1 && productList.some((p) => p.id === searchParams.s1)) setSlot1Id(searchParams.s1);
+    if (searchParams.s2 && productList.some((p) => p.id === searchParams.s2)) setSlot2Id(searchParams.s2);
+    if (searchParams.s3 && productList.some((p) => p.id === searchParams.s3)) setSlot3Id(searchParams.s3);
+  }, [searchParams.s1, searchParams.s2, searchParams.s3, productList]);
 
   // Track active swap dropdown open states (null | 1 | 2 | 3)
   const [activeDropdown, setActiveDropdown] = useState<number | null>(null);
@@ -42,9 +75,9 @@ function CompareShowdown() {
   // Celebration state when "PICK WINNER ->" is clicked
   const [winnerCelebrated, setWinnerCelebrated] = useState<boolean>(false);
 
-  const slot1 = products.find((p) => p.id === slot1Id) || products[0];
-  const slot2 = products.find((p) => p.id === slot2Id) || products[1];
-  const slot3 = products.find((p) => p.id === slot3Id) || products[2];
+  const slot1 = productList.find((p) => p.id === slot1Id) || productList[0] || initialProducts[0];
+  const slot2 = productList.find((p) => p.id === slot2Id) || productList[1] || initialProducts[1];
+  const slot3 = productList.find((p) => p.id === slot3Id) || productList[2] || initialProducts[2];
 
   const selectedSlots = [
     { slotNum: 1, product: slot1, id: slot1Id, setId: setSlot1Id },
@@ -63,7 +96,7 @@ function CompareShowdown() {
     const minBudget = minSelectedPrice * 0.75;
 
     // 2. Filter available products
-    const validProducts = products.filter(p => {
+    const validProducts = productList.filter((p) => {
       // Exclude MacBooks completely
       if (p.name.toLowerCase().includes("macbook")) return false;
       if (p.processor === "Apple M Max") return false;
@@ -75,9 +108,14 @@ function CompareShowdown() {
     });
 
     // Fallback to all non-MacBooks if no products fit the price range perfectly
-    const pool = validProducts.length > 0 ? validProducts : products.filter(p => !p.name.toLowerCase().includes("macbook") && p.processor !== "Apple M Max");
+    const pool =
+      validProducts.length > 0
+        ? validProducts
+        : productList.filter(
+            (p) => !p.name.toLowerCase().includes("macbook") && p.processor !== "Apple M Max"
+          );
 
-    let highest = pool[0];
+    let highest = pool[0] || productList[0] || initialProducts[0];
     pool.forEach((p) => {
       const pScore = p.detailedSpecs?.benchmarkScore || 0;
       const hScore = highest.detailedSpecs?.benchmarkScore || 0;
@@ -88,8 +126,8 @@ function CompareShowdown() {
       }
     });
     
-    return highest || products[0];
-  }, [slot1Id, slot2Id, slot3Id]);
+    return highest || productList[0] || initialProducts[0];
+  }, [slot1Id, slot2Id, slot3Id, productList]);
 
   const handlePickWinner = () => {
     setWinnerCelebrated(true);
@@ -275,7 +313,7 @@ function CompareShowdown() {
                             Select Model for Slot #{slotNum}
                           </p>
                           <div className="max-h-60 overflow-y-auto flex flex-col gap-1">
-                            {products.map((m) => (
+                            {productList.map((m) => (
                               <button
                                 key={m.id}
                                 onClick={() => {

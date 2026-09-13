@@ -437,7 +437,12 @@ export function ProductGrid() {
 
                     {/* Compare Button right on top right of the card image */}
                     <button
-                      onClick={(e) => toggleCompare(e, p.id)}
+                      type="button"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        toggleCompare(e, p.id);
+                      }}
                       className={`absolute right-4 top-4 flex items-center gap-1.5 rounded-full px-3 py-1 font-display text-[10px] font-bold tracking-wider transition-all z-20 ${
                         isCompared
                           ? "bg-neon-cyan text-background shadow-neon-cyan scale-105"
@@ -471,6 +476,7 @@ export function ProductGrid() {
                       </div>
                       <div className="grid grid-cols-2 gap-2">
                         <button
+                          type="button"
                           onClick={(e) => {
                             e.preventDefault();
                             e.stopPropagation();
@@ -483,7 +489,10 @@ export function ProductGrid() {
                           <span>Add to Cart</span>
                         </button>
                         <button
+                          type="button"
                           onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
                             toggleCompare(e, p.id);
                           }}
                           className={`group/btn inline-flex items-center justify-center h-9 px-2.5 rounded-xl text-xs font-semibold transition-all ${

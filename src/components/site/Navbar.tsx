@@ -8,6 +8,7 @@ export function Navbar() {
 
   const links: { label: string; href: string; isRouterLink?: boolean; isHighlight?: boolean }[] = [
     { label: "Laptop", href: "/#products" },
+    { label: "Compare", href: "/compare", isRouterLink: true },
     { label: "Creator", href: "/#creator" },
     { label: "Workstation", href: "/#workstation" },
     { label: "Tech", href: "/#features" },

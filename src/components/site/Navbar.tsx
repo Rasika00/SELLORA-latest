@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { Menu, X, Search, ShoppingCart, User, ShieldCheck, Scale, Gauge } from "lucide-react";
+import { Menu, X, Search, ShoppingCart, User, ShieldCheck, Gauge } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 export function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -8,7 +8,6 @@ export function Navbar() {
 
   const links: { label: string; href: string; isRouterLink?: boolean; isHighlight?: boolean }[] = [
     { label: "Laptop", href: "/#products" },
-    { label: "Compare", href: "/compare", isRouterLink: true },
     { label: "Creator", href: "/#creator" },
     { label: "Workstation", href: "/#workstation" },
     { label: "Tech", href: "/#features" },

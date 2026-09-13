@@ -1,5 +1,4 @@
 import { useState, useMemo } from "react";
-import { Link } from "@tanstack/react-router";
 import {
   Gauge,
   Check,
@@ -10,7 +9,6 @@ import {
   CheckCircle2,
   XCircle,
   HelpCircle,
-  ArrowRight,
   Sparkles,
   Info,
   Layers,
@@ -857,95 +855,6 @@ export function PerformanceEstimator({ initialProductId, isCompactEmbedded = fal
                 })}
               </div>
             )}
-          </div>
-
-          {/* STEP 4: Recommended Laptops from Store */}
-          <div className="rounded-3xl border border-neon-cyan/30 bg-card/80 p-6 sm:p-8 backdrop-blur-2xl mt-12 shadow-[0_0_50px_oklch(0.78_0.18_200/0.1)]">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-              <div>
-                <div className="flex items-center gap-2">
-                  <Sparkles className="h-4 w-4 text-neon-cyan" />
-                  <span className="font-mono text-xs uppercase tracking-widest text-neon-cyan font-bold">
-                    STORE MATCH RECOMMENDATIONS
-                  </span>
-                </div>
-                <h4 className="font-display text-xl sm:text-2xl font-black uppercase tracking-tight text-foreground mt-1">
-                  Top Machines Engineered For Your Selected Stack
-                </h4>
-              </div>
-              <a
-                href="/#products"
-                className="inline-flex items-center gap-1.5 text-xs font-mono font-bold text-neon-cyan hover:underline self-start sm:self-auto"
-              >
-                <span>Browse All {products.length} Machines</span>
-                <ArrowRight className="h-3.5 w-3.5" />
-              </a>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {evaluation.recommendedLaptops.map((laptop) => (
-                <div
-                  key={laptop.id}
-                  className="group flex flex-col justify-between rounded-2xl border border-glass-border bg-black/40 p-4 transition-all duration-300 hover:border-neon-cyan/50 hover:shadow-neon-cyan"
-                >
-                  <div>
-                    <div className="relative aspect-[16/10] w-full overflow-hidden rounded-xl bg-black mb-3">
-                      <img
-                        src={laptop.img}
-                        alt={laptop.name}
-                        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                      />
-                      <span className="absolute top-2 left-2 rounded-md bg-black/80 px-2 py-0.5 text-[9px] font-mono font-bold uppercase text-neon-cyan border border-white/20">
-                        {laptop.badge}
-                      </span>
-                    </div>
-
-                    <div className="flex items-center justify-between gap-2">
-                      <h5 className="font-display text-sm font-bold text-foreground truncate">
-                        {laptop.name}
-                      </h5>
-                      <span className="font-display text-xs font-bold text-neon-cyan whitespace-nowrap">
-                        Rs {laptop.price.toLocaleString()}
-                      </span>
-                    </div>
-
-                    <div className="mt-2.5 flex flex-wrap gap-1.5 text-[10px] font-mono text-muted-foreground">
-                      <span className="rounded bg-white/5 px-2 py-0.5 border border-white/10">
-                        {laptop.gpu}
-                      </span>
-                      <span className="rounded bg-white/5 px-2 py-0.5 border border-white/10">
-                        {laptop.ram}
-                      </span>
-                      <span className="rounded bg-white/5 px-2 py-0.5 border border-white/10">
-                        {laptop.cpu}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="mt-4 pt-3 border-t border-glass-border flex items-center justify-between gap-3">
-                    <button
-                      onClick={() => {
-                        setHardwareMode("catalog");
-                        setSelectedLaptopId(laptop.id);
-                        const el = document.getElementById("estimator");
-                        el?.scrollIntoView({ behavior: "smooth" });
-                      }}
-                      className="text-xs font-mono text-muted-foreground hover:text-neon-cyan transition-colors"
-                    >
-                      Test in Simulator ↑
-                    </button>
-                    <Link
-                      to="/product/$productId"
-                      params={{ productId: laptop.id }}
-                      className="inline-flex items-center gap-1 rounded-lg bg-neon-cyan/15 px-3 py-1.5 text-xs font-bold text-neon-cyan hover:bg-neon-cyan hover:text-background transition-all"
-                    >
-                      <span>View Laptop</span>
-                      <ArrowRight className="h-3 w-3" />
-                    </Link>
-                  </div>
-                </div>
-              ))}
-            </div>
           </div>
         </div>
       </div>

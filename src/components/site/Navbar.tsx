@@ -1,13 +1,14 @@
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { Menu, X, Search, ShoppingCart, User, ShieldCheck, Scale } from "lucide-react";
+import { Menu, X, Search, ShoppingCart, User, ShieldCheck, Scale, Gauge } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 export function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { itemCount, setIsCartOpen } = useCart();
 
-  const links: { label: string; href: string; isRouterLink?: boolean }[] = [
+  const links: { label: string; href: string; isRouterLink?: boolean; isHighlight?: boolean }[] = [
     { label: "Laptop", href: "/#products" },
+    { label: "Estimator", href: "/#estimator", isHighlight: true },
     { label: "Creator", href: "/#creator" },
     { label: "Workstation", href: "/#workstation" },
     { label: "Tech", href: "/#features" },
@@ -24,7 +25,7 @@ export function Navbar() {
         </Link>
 
         {/* Desktop Nav Links */}
-        <ul className="hidden items-center gap-6 lg:gap-8 md:flex">
+        <ul className="hidden items-center gap-5 lg:gap-7 md:flex">
           {links.map((l) => (
             <li key={l.label}>
               {l.isRouterLink ? (
@@ -35,6 +36,14 @@ export function Navbar() {
                   <Scale className="h-3.5 w-3.5 shrink-0 animate-pulse" />
                   <span>{l.label}</span>
                 </Link>
+              ) : l.isHighlight ? (
+                <a
+                  href={l.href}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-neon-cyan/40 bg-neon-cyan/10 px-3 py-1 text-xs font-mono font-bold text-neon-cyan transition-all hover:bg-neon-cyan hover:text-background shadow-[0_0_15px_oklch(0.78_0.18_200/0.2)]"
+                >
+                  <Gauge className="h-3 w-3 animate-pulse" />
+                  <span>{l.label}</span>
+                </a>
               ) : (
                 <a
                   href={l.href}
@@ -109,6 +118,15 @@ export function Navbar() {
                     <Scale className="h-4 w-4" />
                     <span>{l.label}</span>
                   </Link>
+                ) : l.isHighlight ? (
+                  <a
+                    href={l.href}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex items-center gap-2 rounded-xl bg-neon-cyan/15 border border-neon-cyan/40 px-4 py-2.5 text-sm font-bold text-neon-cyan transition-all shadow-[0_0_15px_oklch(0.78_0.18_200/0.25)]"
+                  >
+                    <Gauge className="h-4 w-4 animate-pulse" />
+                    <span>{l.label}</span>
+                  </a>
                 ) : (
                   <a
                     href={l.href}

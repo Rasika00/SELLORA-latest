@@ -3,6 +3,7 @@ import { Navbar } from "@/components/site/Navbar";
 import { Hero } from "@/components/site/Hero";
 import { Features } from "@/components/site/Features";
 import { CreatorBuilder } from "@/components/site/CreatorBuilder";
+import { PerformanceEstimator } from "@/components/site/PerformanceEstimator";
 import { ProductGrid } from "@/components/site/ProductGrid";
 import { Support } from "@/components/site/Support";
 import { FeedbackSection } from "@/components/site/FeedbackSection";
@@ -26,6 +27,7 @@ function Index() {
       <Navbar />
       <Hero />
       <CreatorBuilder />
+      <PerformanceEstimator />
       <ProductGrid />
       <Features />
       <Support />

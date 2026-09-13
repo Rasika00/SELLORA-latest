@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowLeft, Cpu, MemoryStick, Zap, Fingerprint, Shield, Battery, Expand, ShoppingCart } from "lucide-react";
+import { ArrowLeft, Cpu, MemoryStick, Zap, Fingerprint, Shield, Battery, Expand, ShoppingCart, Gauge } from "lucide-react";
 import { products, type Product } from "@/data/products";
 import { Navbar } from "@/components/site/Navbar";
 import { Footer } from "@/components/site/Footer";
+import { PerformanceEstimator } from "@/components/site/PerformanceEstimator";
 import { useCart } from "@/context/CartContext";
 import { getProductById } from "@/lib/api/client";
 
@@ -119,6 +120,16 @@ function ProductDetails() {
                 Engineered with {product.processor}. Built for unprecedented performance.
               </p>
 
+              <div className="mt-5 flex flex-wrap gap-2.5 animate-fade-up [animation-delay:0.25s]">
+                <a
+                  href="#product-estimator"
+                  className="inline-flex items-center gap-2 rounded-full border border-neon-cyan/50 bg-neon-cyan/15 px-4 py-2 text-xs font-mono font-bold uppercase tracking-wider text-neon-cyan transition-all hover:bg-neon-cyan hover:text-background shadow-[0_0_20px_oklch(0.78_0.18_200/0.3)]"
+                >
+                  <Gauge className="h-3.5 w-3.5 animate-pulse" />
+                  <span>Test My Apps on This Machine ↓</span>
+                </a>
+              </div>
+
               {/* Auto Suggestion Comparison Algorithm */}
               <div className="mt-12 w-full animate-fade-up [animation-delay:0.3s]">
                 <div className="mb-4 flex items-center gap-2 border-b border-glass-border pb-2">
@@ -198,6 +209,28 @@ function ProductDetails() {
             <HUDCard icon={Battery} label="Power" value="99.9Wh" desc="All day battery life" color="purple" />
             <HUDCard icon={Shield} label="Security" value="Zero Trust" desc="Hardware encryption" color="blue" />
           </div>
+        </div>
+      </section>
+
+      {/* Interactive Workload & Game Estimator Section */}
+      <section id="product-estimator" className="relative py-20 border-b border-glass-border scroll-mt-20">
+        <div className="mx-auto w-full max-w-full px-4 sm:px-8 md:px-12">
+          <div className="mb-8 flex items-center justify-between border-b border-glass-border pb-4">
+            <div>
+              <span className="font-display text-[10px] tracking-[0.3em] text-neon-cyan uppercase font-bold">
+                REAL-TIME HARDWARE ESTIMATOR
+              </span>
+              <h3 className="font-display text-2xl sm:text-3xl font-bold uppercase tracking-tight text-foreground mt-1">
+                Will {product.name} Run Your Daily Workload?
+              </h3>
+            </div>
+            <div className="hidden sm:flex items-center gap-2 rounded-full border border-neon-cyan/40 bg-neon-cyan/10 px-3.5 py-1 text-xs font-mono text-neon-cyan">
+              <Gauge className="h-3.5 w-3.5 animate-pulse" />
+              <span>{product.gpu} Evaluated</span>
+            </div>
+          </div>
+
+          <PerformanceEstimator initialProductId={product.id} isCompactEmbedded={true} />
         </div>
       </section>
 

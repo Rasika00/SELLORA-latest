@@ -1,4 +1,7 @@
+import { useTheme } from "@/context/ThemeContext";
+
 export function Footer() {
+  const { theme } = useTheme();
   const cols = [
     { title: "Series", links: ["Phantom", "Atelier", "Forge", "Edge", "Strike"] },
     { title: "Support", links: ["Warranty", "Drivers", "Repair", "Community"] },
@@ -10,8 +13,12 @@ export function Footer() {
       <div className="mx-auto grid w-full max-w-full gap-10 px-4 sm:px-8 md:px-12 md:grid-cols-[2fr_3fr]">
         <div>
           <div className="flex items-center gap-2">
-            <img src="/logo.png" alt="Sellora Logo" className="h-10 sm:h-12 w-auto object-contain drop-shadow-[0_0_8px_rgba(0,255,255,0.3)]" />
-            <span className="font-display text-lg font-black tracking-widest">SELLORA</span>
+            <img
+              src={theme === "light" ? "/logo black.png" : "/logo.png"}
+              alt="Sellora Logo"
+              className="h-10 sm:h-12 w-auto object-contain transition-all duration-300 drop-shadow-[0_0_8px_rgba(0,255,255,0.2)]"
+            />
+            <span className="font-display text-lg font-black tracking-widest text-foreground">SELLORA</span>
           </div>
           <p className="mt-4 max-w-sm text-sm text-muted-foreground">
             High performance computing, engineered without compromise. Shipping globally from orbit.

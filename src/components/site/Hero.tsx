@@ -88,16 +88,24 @@ export function Hero() {
             and shipped in 3D. Cinematic OLED, desktop class silicon, aerospace grade chassis.
           </p>
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
-            <button className="group relative inline-flex items-center justify-center gap-2 rounded-full bg-gradient-primary px-7 py-3.5 text-sm font-semibold text-primary-foreground shadow-neon-cyan transition-transform duration-300 hover:scale-105 w-full sm:w-auto">
+            <a
+              href="#products"
+              className="group relative inline-flex items-center justify-center gap-2 rounded-full bg-gradient-primary px-7 py-3.5 text-sm font-semibold text-primary-foreground shadow-neon-cyan transition-transform duration-300 hover:scale-105 w-full sm:w-auto"
+            >
               Explore Series
               <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-            </button>
-            <button className="group inline-flex items-center justify-center gap-2 rounded-full glass-strong px-7 py-3.5 text-sm font-semibold text-foreground neon-border-hover w-full sm:w-auto">
+            </a>
+            <a
+              href="https://res.cloudinary.com/ybzqvcg1/video/upload/v1790518577/Sellora.mp4"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group inline-flex items-center justify-center gap-2 rounded-full glass-strong px-7 py-3.5 text-sm font-semibold text-foreground neon-border-hover w-full sm:w-auto transition-transform duration-300 hover:scale-105"
+            >
               <span className="flex h-6 w-6 items-center justify-center rounded-full bg-gradient-primary">
                 <Play className="h-3 w-3 fill-primary-foreground text-primary-foreground" />
               </span>
               Watch the Film
-            </button>
+            </a>
           </div>
         </div>
 

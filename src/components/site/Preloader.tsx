@@ -1,15 +1,14 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 
 export function Preloader({ onComplete }: { onComplete: () => void }) {
   const [progress, setProgress] = useState(0);
   const [isFadingOut, setIsFadingOut] = useState(false);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  // Smooth continuous loading progression with ease-out curve
+  // Smooth continuous loading progression (~1.5s sequence)
   useEffect(() => {
     let animId: number;
     const startTime = performance.now();
-    const duration = 1600; // 1.6s smooth loading sequence
+    const duration = 1500; // 1.5s crisp, responsive loading sequence
 
     const step = (now: number) => {
       const elapsed = now - startTime;
@@ -24,8 +23,8 @@ export function Preloader({ onComplete }: { onComplete: () => void }) {
       } else {
         setTimeout(() => {
           setIsFadingOut(true);
-          setTimeout(onComplete, 650);
-        }, 150);
+          setTimeout(onComplete, 600);
+        }, 180);
       }
     };
 
@@ -33,323 +32,204 @@ export function Preloader({ onComplete }: { onComplete: () => void }) {
     return () => cancelAnimationFrame(animId);
   }, [onComplete]);
 
-  // Quantum Silicon Matrix & Neural Cyber Mesh Canvas Engine
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-
-    let width = 0;
-    let height = 0;
-    let dpr = Math.min(window.devicePixelRatio || 1, 2);
-
-    const resize = () => {
-      dpr = Math.min(window.devicePixelRatio || 1, 2);
-      width = window.innerWidth;
-      height = window.innerHeight;
-      canvas.width = width * dpr;
-      canvas.height = height * dpr;
-      canvas.style.width = `${width}px`;
-      canvas.style.height = `${height}px`;
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    };
-
-    resize();
-    window.addEventListener("resize", resize);
-
-    // Interactive mouse tracking
-    const mouse = {
-      x: width / 2,
-      y: height / 2,
-      targetX: width / 2,
-      targetY: height / 2,
-    };
-
-    const handleMouseMove = (e: MouseEvent) => {
-      mouse.targetX = e.clientX;
-      mouse.targetY = e.clientY;
-    };
-    window.addEventListener("mousemove", handleMouseMove);
-
-    // Quantum Node Particles for Silicon Constellation
-    interface NodeParticle {
-      x: number;
-      y: number;
-      vx: number;
-      vy: number;
-      size: number;
-      baseAlpha: number;
-      color: string;
-      glowColor: string;
-      pulsePhase: number;
-      pulseSpeed: number;
-    }
-
-    const nodeCount = width < 768 ? 45 : 85;
-    const nodes: NodeParticle[] = [];
-
-    for (let i = 0; i < nodeCount; i++) {
-      const isCyan = Math.random() > 0.45;
-      nodes.push({
-        x: Math.random() * width,
-        y: Math.random() * height,
-        vx: (Math.random() - 0.5) * 0.6,
-        vy: (Math.random() - 0.5) * 0.6 - 0.15,
-        size: Math.random() * 2.2 + 1,
-        baseAlpha: Math.random() * 0.5 + 0.3,
-        color: isCyan ? "rgba(0, 242, 254," : "rgba(189, 0, 255,",
-        glowColor: isCyan ? "rgba(0, 242, 254, 0.8)" : "rgba(189, 0, 255, 0.8)",
-        pulsePhase: Math.random() * Math.PI * 2,
-        pulseSpeed: Math.random() * 0.03 + 0.015,
-      });
-    }
-
-    // Concentric Quantum Wave Rings
-    const rings = [
-      { radius: 60, speed: 0.8, maxRadius: 360, alpha: 0.35 },
-      { radius: 140, speed: 0.8, maxRadius: 360, alpha: 0.25 },
-      { radius: 220, speed: 0.8, maxRadius: 360, alpha: 0.15 },
-    ];
-
-    let time = 0;
-    let animId: number;
-
-    const render = () => {
-      time += 1;
-
-      // Smooth mouse interpolation
-      mouse.x += (mouse.targetX - mouse.x) * 0.05;
-      mouse.y += (mouse.targetY - mouse.y) * 0.05;
-
-      const mouseOffsetFactorX = (mouse.x / width - 0.5) * 50;
-      const mouseOffsetFactorY = (mouse.y / height - 0.5) * 50;
-
-      // Dark Cyber Void Background
-      ctx.fillStyle = "#050811";
-      ctx.fillRect(0, 0, width, height);
-
-      // 1. Dual Ambient Core Glow
-      const centerGlow = ctx.createRadialGradient(
-        width / 2 + mouseOffsetFactorX * 0.5,
-        height / 2 + mouseOffsetFactorY * 0.5,
-        0,
-        width / 2,
-        height / 2,
-        Math.max(width, height) * 0.6
-      );
-      centerGlow.addColorStop(0, "rgba(0, 242, 254, 0.12)");
-      centerGlow.addColorStop(0.3, "rgba(147, 51, 234, 0.08)");
-      centerGlow.addColorStop(0.7, "rgba(30, 27, 75, 0.04)");
-      centerGlow.addColorStop(1, "rgba(5, 8, 17, 0)");
-
-      ctx.fillStyle = centerGlow;
-      ctx.fillRect(0, 0, width, height);
-
-      // 2. Concentric Quantum Resonance Rings
-      ctx.save();
-      ctx.globalCompositeOperation = "screen";
-      rings.forEach((ring) => {
-        ring.radius += ring.speed;
-        if (ring.radius > ring.maxRadius) {
-          ring.radius = 40;
-        }
-
-        const ringAlpha = (1 - ring.radius / ring.maxRadius) * ring.alpha;
-        ctx.beginPath();
-        ctx.ellipse(
-          width / 2 + mouseOffsetFactorX * 0.3,
-          height / 2 + mouseOffsetFactorY * 0.3,
-          ring.radius * 1.6,
-          ring.radius * 0.9,
-          0,
-          0,
-          Math.PI * 2
-        );
-        ctx.strokeStyle = `rgba(0, 242, 254, ${ringAlpha})`;
-        ctx.lineWidth = 1.2;
-        ctx.shadowColor = "rgba(0, 242, 254, 0.5)";
-        ctx.shadowBlur = 10;
-        ctx.stroke();
-      });
-      ctx.restore();
-
-      // 3. Dynamic Undulating Silicon Wave Lattice
-      ctx.save();
-      ctx.globalCompositeOperation = "screen";
-
-      const waveConfigs = [
-        {
-          baseY: 0.68,
-          amp: 45,
-          freq: 0.002,
-          speed: 0.015,
-          stroke: "rgba(0, 242, 254, 0.35)",
-          fill: "rgba(0, 242, 254, 0.04)",
-        },
-        {
-          baseY: 0.72,
-          amp: 55,
-          freq: 0.0016,
-          speed: -0.012,
-          stroke: "rgba(189, 0, 255, 0.3)",
-          fill: "rgba(189, 0, 255, 0.03)",
-        },
-        {
-          baseY: 0.64,
-          amp: 35,
-          freq: 0.0025,
-          speed: 0.02,
-          stroke: "rgba(99, 102, 241, 0.25)",
-          fill: "transparent",
-        },
-      ];
-
-      waveConfigs.forEach((w) => {
-        ctx.beginPath();
-        const startY = height * w.baseY + mouseOffsetFactorY * 0.4;
-        ctx.moveTo(0, startY);
-
-        for (let x = 0; x <= width + 20; x += 10) {
-          const y =
-            startY +
-            Math.sin(x * w.freq + time * w.speed) * w.amp +
-            Math.cos(x * w.freq * 0.7 - time * 0.01) * (w.amp * 0.5);
-          ctx.lineTo(x, y);
-        }
-
-        if (w.fill !== "transparent") {
-          ctx.lineTo(width, height);
-          ctx.lineTo(0, height);
-          ctx.closePath();
-          ctx.fillStyle = w.fill;
-          ctx.fill();
-        }
-
-        ctx.strokeStyle = w.stroke;
-        ctx.lineWidth = 1.8;
-        ctx.shadowColor = w.stroke;
-        ctx.shadowBlur = 12;
-        ctx.stroke();
-      });
-
-      ctx.restore();
-
-      // 4. Silicon Neural Constellation Nodes & Interconnecting Synapses
-      ctx.save();
-      ctx.globalCompositeOperation = "lighter";
-
-      // Connect nearby nodes with glowing filaments
-      const maxConnectDistance = width < 768 ? 95 : 125;
-      for (let i = 0; i < nodes.length; i++) {
-        for (let j = i + 1; j < nodes.length; j++) {
-          const dx = nodes[i].x - nodes[j].x;
-          const dy = nodes[i].y - nodes[j].y;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-
-          if (dist < maxConnectDistance) {
-            const filamentAlpha = (1 - dist / maxConnectDistance) * 0.25;
-            ctx.beginPath();
-            ctx.moveTo(nodes[i].x, nodes[i].y);
-            ctx.lineTo(nodes[j].x, nodes[j].y);
-            ctx.strokeStyle = `rgba(0, 242, 254, ${filamentAlpha})`;
-            ctx.lineWidth = 0.9;
-            ctx.stroke();
-          }
-        }
-      }
-
-      // Update and draw each particle node
-      nodes.forEach((n) => {
-        n.x += n.vx;
-        n.y += n.vy;
-        n.pulsePhase += n.pulseSpeed;
-
-        // Wrap around boundaries
-        if (n.x < 0) n.x = width;
-        if (n.x > width) n.x = 0;
-        if (n.y < 0) n.y = height;
-        if (n.y > height) n.y = 0;
-
-        // Subtle interactive mouse repulsion
-        const dx = n.x - mouse.x;
-        const dy = n.y - mouse.y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        if (dist < 140) {
-          const force = (1 - dist / 140) * 1.5;
-          n.x += (dx / (dist || 1)) * force;
-          n.y += (dy / (dist || 1)) * force;
-        }
-
-        const alpha = n.baseAlpha * (0.65 + 0.35 * Math.sin(n.pulsePhase));
-        ctx.beginPath();
-        ctx.arc(n.x, n.y, n.size, 0, Math.PI * 2);
-        ctx.fillStyle = `${n.color}${alpha})`;
-        ctx.shadowColor = n.glowColor;
-        ctx.shadowBlur = 8;
-        ctx.fill();
-      });
-
-      ctx.restore();
-
-      animId = requestAnimationFrame(render);
-    };
-
-    render();
-
-    return () => {
-      window.removeEventListener("resize", resize);
-      window.removeEventListener("mousemove", handleMouseMove);
-      cancelAnimationFrame(animId);
-    };
-  }, []);
+  // Dynamic status text matching high-end laptop boot architecture
+  const getStatusText = (val: number) => {
+    if (val < 22) return "INITIALIZING HARDWARE CORES...";
+    if (val < 48) return "CALIBRATING 240Hz OLED DISPLAY...";
+    if (val < 72) return "ENGAGING VAPOR CHAMBER COOLING...";
+    if (val < 94) return "SYNCHRONIZING SELLORA MATRIX...";
+    return "SYSTEM ONLINE // READY";
+  };
 
   return (
     <div
-      className={`fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[#050811] overflow-hidden transition-all duration-700 ease-out ${
+      className={`fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[#06080F] text-white select-none overflow-hidden transition-all duration-700 ease-out ${
         isFadingOut ? "opacity-0 pointer-events-none scale-105" : "opacity-100 scale-100"
       }`}
     >
-      {/* Native Quantum Silicon Matrix Canvas */}
-      <canvas
-        ref={canvasRef}
-        className="absolute inset-0 z-0 h-full w-full object-cover"
-      />
+      {/* Ambient Radial Lighting matching SELLORA Cyan & Purple Palette */}
+      <div className="absolute inset-0 pointer-events-none">
+        {/* Core Electric Cyan Halo */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[550px] sm:w-[700px] h-[350px] sm:h-[450px] rounded-full bg-[radial-gradient(circle,oklch(0.85_0.18_200/0.14)_0%,transparent_70%)] blur-3xl animate-pulse" />
+        {/* Deep Violet Secondary Halo */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-[45%] w-[400px] sm:w-[500px] h-[260px] sm:h-[320px] rounded-full bg-[radial-gradient(circle,oklch(0.65_0.26_295/0.10)_0%,transparent_75%)] blur-2xl" />
+        {/* Subtle Precision Engineering Dot Grid */}
+        <div 
+          className="absolute inset-0 opacity-[0.06]"
+          style={{
+            backgroundImage: "radial-gradient(circle, rgba(0, 242, 254, 0.8) 1px, transparent 1px)",
+            backgroundSize: "28px 28px",
+            maskImage: "radial-gradient(ellipse at center, black 40%, transparent 80%)",
+            WebkitMaskImage: "radial-gradient(ellipse at center, black 40%, transparent 80%)"
+          }}
+        />
+      </div>
 
-      {/* Atmospheric Vignette Overlay */}
-      <div className="absolute inset-0 z-[1] pointer-events-none bg-[radial-gradient(ellipse_at_center,transparent_30%,rgba(5,8,17,0.85)_100%)]" />
+      {/* Engineering Corner HUD Guides */}
+      <div className="absolute top-6 left-8 hidden sm:flex items-center gap-2 font-mono text-[10px] tracking-widest text-white/30 uppercase">
+        <span className="text-neon-cyan font-bold">+</span>
+        <span>SELLORA HARDWARE LABS</span>
+        <span className="text-white/20">|</span>
+        <span className="text-neon-cyan/60">SYS.BOOT.2026</span>
+      </div>
 
-      {/* Main Center Loading Content */}
-      <div
-        className={`relative z-10 flex flex-col items-center justify-center w-full h-full px-6 pointer-events-none select-none transition-all duration-700 ease-out ${
-          isFadingOut ? "opacity-0 scale-90 translate-y-2" : "opacity-100 scale-100 translate-y-0"
-        }`}
-      >
-        {/* Floating Minimalist Logo and Progress Line */}
-        <div className="flex flex-col items-center gap-10 max-w-[200px] sm:max-w-[240px] w-full animate-fade-up">
+      <div className="absolute top-6 right-8 hidden sm:flex items-center gap-2 font-mono text-[10px] tracking-widest text-white/30 uppercase">
+        <span className="h-1.5 w-1.5 rounded-full bg-neon-cyan animate-ping" />
+        <span>RTX AI // 240Hz OLED</span>
+      </div>
+
+      <div className="absolute bottom-6 left-8 hidden sm:flex items-center gap-2 font-mono text-[10px] tracking-widest text-white/25 uppercase">
+        <span>ARCH: X86-64 / TITANIUM FRAME</span>
+      </div>
+
+      <div className="absolute bottom-6 right-8 hidden sm:flex items-center gap-2 font-mono text-[10px] tracking-widest text-white/25 uppercase">
+        <span>THERMAL: DUAL-FAN MATRIX</span>
+      </div>
+
+      {/* Main Center Stage */}
+      <div className="relative z-10 flex flex-col items-center justify-center px-4 max-w-sm sm:max-w-md w-full">
+        
+        {/* Sleek Laptop Hardware Silhouette */}
+        <div className="relative mb-6 sm:mb-8 flex flex-col items-center group">
           
-          {/* Glowing Brand Mark */}
-          <div className="relative flex items-center justify-center">
-            <div className="absolute -inset-8 rounded-full bg-gradient-to-r from-neon-cyan via-purple-500 to-neon-purple opacity-40 blur-2xl animate-pulse" />
-            <img 
-              src="/logo.png" 
-              alt="SELLORA" 
-              className="relative h-24 sm:h-28 w-auto object-contain drop-shadow-[0_0_35px_rgba(0,242,254,0.6)]" 
-            />
-          </div>
+          {/* Ambient Display Glow Behind Screen */}
+          <div className="absolute -inset-4 rounded-2xl bg-gradient-to-t from-neon-cyan/25 via-neon-purple/20 to-transparent blur-xl opacity-60 transition-opacity duration-500" />
 
-          {/* Minimalist Glowing Dual-Tone Progress Line */}
-          <div className="w-full flex flex-col items-center">
-            <div className="relative h-[2.5px] w-full overflow-hidden rounded-full bg-white/15 shadow-[0_0_12px_rgba(0,0,0,0.6)]">
-              <div
-                className="absolute inset-y-0 left-0 bg-gradient-to-r from-neon-cyan via-purple-400 to-white shadow-[0_0_15px_rgba(0,242,254,0.9)] transition-all duration-150 ease-out"
-                style={{ width: `${progress}%` }}
+          {/* Laptop Display (Top Lid) */}
+          <div className="relative w-44 sm:w-52 h-28 sm:h-32 rounded-t-xl rounded-b-sm border border-white/20 bg-gradient-to-b from-[#121826] to-[#0A0E17] p-2 shadow-[0_0_30px_rgba(0,242,254,0.18)] flex flex-col items-center justify-center overflow-hidden">
+            
+            {/* Top Bezel Webcam Notch & Indicator */}
+            <div className="absolute top-1 inset-x-0 flex items-center justify-center gap-1">
+              <div className="h-1 w-1 rounded-full bg-white/20" />
+              <div className="h-1 w-1 rounded-full bg-neon-cyan/80 shadow-[0_0_4px_#00f2fe]" />
+            </div>
+
+            {/* Inner OLED Screen Surface */}
+            <div className="relative w-full h-full rounded bg-[#030509] border border-white/10 flex flex-col items-center justify-center overflow-hidden">
+              
+              {/* Screen Laser Scanline Effect */}
+              <div 
+                className="absolute inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-neon-cyan to-transparent shadow-[0_0_10px_#00f2fe] pointer-events-none opacity-70"
+                style={{
+                  animation: "scanline 2s ease-in-out infinite",
+                }}
               />
+
+              {/* Faint Screen Tech Grid */}
+              <div 
+                className="absolute inset-0 opacity-[0.08]"
+                style={{
+                  backgroundImage: "linear-gradient(to right, #00f2fe 1px, transparent 1px), linear-gradient(to bottom, #00f2fe 1px, transparent 1px)",
+                  backgroundSize: "12px 12px"
+                }}
+              />
+
+              {/* Centered SELLORA Brand Logo on Screen */}
+              <div className="relative z-10 flex flex-col items-center">
+                <img 
+                  src="/logo.png" 
+                  alt="SELLORA" 
+                  className="h-10 sm:h-12 w-auto object-contain drop-shadow-[0_0_16px_rgba(0,242,254,0.7)] transform transition-transform duration-500 hover:scale-105"
+                />
+              </div>
+
+              {/* Screen Bottom Micro Telemetry Bar */}
+              <div className="absolute bottom-1 inset-x-2 flex items-center justify-between text-[7px] font-mono text-white/40">
+                <span className="text-neon-cyan">240Hz</span>
+                <span className="tracking-tighter">OLED MATRIX</span>
+              </div>
             </div>
           </div>
 
+          {/* Precision Hinge Bar */}
+          <div className="w-16 sm:w-20 h-1.5 bg-gradient-to-b from-[#1b2233] to-[#0d121c] border-x border-white/20 rounded-b-xs -mt-[1px] z-10" />
+
+          {/* Laptop Lower Deck (Chassis Base) in Perspective */}
+          <div className="relative w-56 sm:w-64 h-5 sm:h-6 rounded-b-lg border-x border-b border-white/20 bg-gradient-to-b from-[#141b29] via-[#0d121c] to-[#070a10] shadow-[0_12px_24px_rgba(0,0,0,0.8)] flex flex-col items-center justify-start overflow-hidden -mt-[1px]">
+            {/* Keyboard Deck Well Indicator */}
+            <div className="w-40 sm:w-48 h-2 rounded-xs bg-[#080b12] border border-white/10 mt-0.5 flex items-center justify-center opacity-60">
+              <div className="w-10 h-1 rounded-full bg-white/10" />
+            </div>
+            
+            {/* Front Lip Signature RGB Lightbar (Glows in Cyan & Purple) */}
+            <div className="absolute bottom-0 inset-x-4 h-[1.5px] bg-gradient-to-r from-transparent via-neon-cyan to-transparent shadow-[0_0_14px_2px_#00f2fe]" />
+          </div>
+
+          {/* Underglow Surface Reflection */}
+          <div className="w-48 sm:w-56 h-1 rounded-full bg-neon-cyan/40 blur-sm -mt-0.5" />
         </div>
+
+        {/* Brand Name & Typography */}
+        <div className="text-center mb-6">
+          <h1 className="font-display font-black text-2xl sm:text-3xl tracking-[0.25em] text-transparent bg-clip-text bg-gradient-to-r from-white via-cyan-100 to-neon-cyan drop-shadow-[0_0_20px_rgba(0,242,254,0.4)]">
+            SELLORA
+          </h1>
+          <p className="font-mono text-[10px] sm:text-[11px] tracking-[0.22em] text-white/50 uppercase mt-1">
+            PREMIUM PERFORMANCE COMPUTING
+          </p>
+        </div>
+
+        {/* High-Precision Telemetry Progress Readout */}
+        <div className="w-full flex items-center justify-between text-xs font-mono mb-2 px-1">
+          <div className="flex items-center gap-2">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-neon-cyan opacity-75" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-neon-cyan" />
+            </span>
+            <span className="text-white/70 text-[11px] tracking-wider transition-all duration-300">
+              {getStatusText(progress)}
+            </span>
+          </div>
+          <span className="font-bold text-neon-cyan tabular-nums tracking-wider text-xs">
+            {progress}%
+          </span>
+        </div>
+
+        {/* Sleek Minimalist Progress Bar */}
+        <div className="w-full relative h-[4px] rounded-full bg-white/10 p-[0.5px] overflow-hidden border border-white/10 shadow-[0_0_12px_rgba(0,0,0,0.5)]">
+          <div
+            className="h-full rounded-full bg-gradient-to-r from-neon-cyan via-sky-400 to-neon-purple transition-all duration-150 ease-out relative"
+            style={{ width: `${progress}%` }}
+          >
+            {/* Leading Edge Beacon Glow */}
+            <div className="absolute right-0 top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-white shadow-[0_0_10px_2px_#00f2fe]" />
+          </div>
+        </div>
+
+        {/* Hardware Specification Badges */}
+        <div className="flex items-center justify-center gap-2 sm:gap-3 mt-6">
+          <div className="px-2.5 py-1 rounded border border-white/10 bg-white/[0.03] text-[9px] sm:text-[10px] font-mono tracking-widest text-white/40 uppercase">
+            GEFORCE RTX
+          </div>
+          <div className="px-2.5 py-1 rounded border border-neon-cyan/25 bg-neon-cyan/[0.04] text-[9px] sm:text-[10px] font-mono tracking-widest text-neon-cyan/80 uppercase">
+            OLED 240Hz
+          </div>
+          <div className="px-2.5 py-1 rounded border border-white/10 bg-white/[0.03] text-[9px] sm:text-[10px] font-mono tracking-widest text-white/40 uppercase">
+            VAPOR CHAMBER
+          </div>
+        </div>
+
       </div>
+
+      {/* Global CSS for the Screen Scanline Keyframe */}
+      <style>{`
+        @keyframes scanline {
+          0% {
+            top: 0%;
+            opacity: 0;
+          }
+          15% {
+            opacity: 0.9;
+          }
+          85% {
+            opacity: 0.9;
+          }
+          100% {
+            top: 96%;
+            opacity: 0;
+          }
+        }
+      `}</style>
     </div>
   );
 }

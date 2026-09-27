@@ -670,10 +670,10 @@ export function AiChatbot() {
             aria-label="Open Sellora AI Chatbot"
             title="Open Sellora AI Chat"
           >
-            <div className="relative flex h-full w-full items-center justify-center rounded-full bg-[#0B0F19] text-neon-cyan transition-colors group-hover:bg-black">
+            <div className="relative flex h-full w-full items-center justify-center rounded-full bg-card text-neon-cyan transition-colors group-hover:bg-background">
               <Bot className="h-6 w-6 transition-transform duration-300 group-hover:scale-110" />
               <span className="absolute top-2 right-2 h-2.5 w-2.5 rounded-full bg-neon-cyan shadow-neon-cyan animate-ping" />
-              <span className="absolute top-2 right-2 h-2.5 w-2.5 rounded-full bg-neon-cyan border-2 border-[#0B0F19]" />
+              <span className="absolute top-2 right-2 h-2.5 w-2.5 rounded-full bg-neon-cyan border-2 border-card" />
             </div>
           </button>
         </div>
@@ -682,14 +682,14 @@ export function AiChatbot() {
       {/* Main Chat Window (Compact Size) */}
       {isOpen && (
         <div 
-          className={`fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 flex flex-col rounded-2xl border border-glass-border bg-[#0B0F19]/95 backdrop-blur-2xl shadow-[0_0_40px_oklch(0_0_0/0.85)] transition-all duration-300 ${
+          className={`fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 flex flex-col rounded-2xl border border-glass-border bg-card/95 backdrop-blur-2xl shadow-elevated transition-all duration-300 ${
             isMinimized 
               ? "h-14 w-72 sm:w-80 overflow-hidden" 
               : "h-[500px] sm:h-[530px] max-h-[84vh] w-[calc(100vw-32px)] sm:w-[370px] md:w-[390px]"
           }`}
         >
           {/* Header */}
-          <div className="flex items-center justify-between border-b border-glass-border bg-black/50 px-4 py-3 backdrop-blur-md shrink-0">
+          <div className="flex items-center justify-between border-b border-glass-border bg-background/50 px-4 py-3 backdrop-blur-md shrink-0">
             <div className="flex items-center gap-2.5">
               <div className="relative flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-neon-cyan/20 to-neon-purple/20 border border-neon-cyan/50 text-neon-cyan shadow-[0_0_15px_oklch(0.78_0.18_200/0.25)]">
                 <Bot className="h-4 w-4" />

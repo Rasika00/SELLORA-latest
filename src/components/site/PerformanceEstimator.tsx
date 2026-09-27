@@ -478,10 +478,10 @@ export function PerformanceEstimator({ initialProductId, isCompactEmbedded = fal
                 <select
                   value={selectedLaptopId}
                   onChange={(e) => setSelectedLaptopId(e.target.value)}
-                  className="w-full rounded-2xl border border-glass-border bg-black/70 px-4 py-3.5 text-sm font-medium text-foreground focus:border-neon-cyan focus:outline-none focus:ring-1 focus:ring-neon-cyan"
+                  className="w-full rounded-2xl border border-glass-border bg-card px-4 py-3.5 text-sm font-medium text-foreground focus:border-neon-cyan focus:outline-none focus:ring-1 focus:ring-neon-cyan"
                 >
                   {products.map((p) => (
-                    <option key={p.id} value={p.id} className="bg-neutral-900 text-white py-1">
+                    <option key={p.id} value={p.id} className="bg-card text-foreground py-1">
                       {p.name} — {p.gpu} | {p.cpu} | {p.ram} (Rs {p.price.toLocaleString()})
                     </option>
                   ))}
@@ -552,10 +552,10 @@ export function PerformanceEstimator({ initialProductId, isCompactEmbedded = fal
                     setCustomGpuIndex(idx);
                     setCustomTgpWattage(GPU_SANDBOX_OPTIONS[idx].defaultTgp);
                   }}
-                  className="w-full rounded-xl border border-glass-border bg-black/70 px-3 py-2.5 text-xs text-foreground focus:border-neon-cyan focus:outline-none"
+                  className="w-full rounded-xl border border-glass-border bg-card px-3 py-2.5 text-xs text-foreground focus:border-neon-cyan focus:outline-none"
                 >
                   {GPU_SANDBOX_OPTIONS.map((g, idx) => (
-                    <option key={g.name} value={idx} className="bg-neutral-900 text-white">
+                    <option key={g.name} value={idx} className="bg-card text-foreground">
                       {g.name} ({g.vram}GB)
                     </option>
                   ))}
@@ -603,7 +603,7 @@ export function PerformanceEstimator({ initialProductId, isCompactEmbedded = fal
                       className={`rounded-lg py-2 text-xs font-mono font-bold border transition-all ${
                         customRamGb === r
                           ? "bg-neon-purple/20 border-neon-purple text-neon-purple shadow-neon-purple"
-                          : "border-glass-border bg-black/40 text-muted-foreground hover:border-white/30"
+                          : "border-glass-border bg-card text-muted-foreground hover:border-neon-cyan/40"
                       }`}
                     >
                       {r}GB
@@ -620,10 +620,10 @@ export function PerformanceEstimator({ initialProductId, isCompactEmbedded = fal
                 <select
                   value={customCpuTier}
                   onChange={(e) => setCustomCpuTier(parseFloat(e.target.value))}
-                  className="w-full rounded-xl border border-glass-border bg-black/70 px-3 py-2.5 text-xs text-foreground focus:border-neon-cyan focus:outline-none"
+                  className="w-full rounded-xl border border-glass-border bg-card px-3 py-2.5 text-xs text-foreground focus:border-neon-cyan focus:outline-none"
                 >
                   {CPU_OPTIONS.map((c) => (
-                    <option key={c.name} value={c.tier} className="bg-neutral-900 text-white">
+                    <option key={c.name} value={c.tier} className="bg-card text-foreground">
                       {c.label}
                     </option>
                   ))}

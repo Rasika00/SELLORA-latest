@@ -9,6 +9,7 @@ import {
 } from "@tanstack/react-router";
 import { useEffect, useState, type ReactNode } from "react";
 import { Preloader } from "@/components/site/Preloader";
+import { ThemeProvider } from "@/context/ThemeContext";
 import { CartProvider } from "@/context/CartContext";
 import { CartDrawer } from "@/components/cart/CartDrawer";
 import { AiChatbot } from "@/components/chat/AiChatbot";
@@ -101,39 +102,33 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
-  const [showPreloader, setShowPreloader] = useState(() => {
-    if (typeof window !== "undefined") {
-      return !sessionStorage.getItem("sellora_loaded");
-    }
-    return true;
-  });
+  const [showPreloader, setShowPreloader] = useState(true);
 
   const handlePreloaderComplete = () => {
-    if (typeof window !== "undefined") {
-      sessionStorage.setItem("sellora_loaded", "1");
-    }
     setShowPreloader(false);
   };
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <CartProvider>
-        <HeadContent />
-        {showPreloader && <Preloader onComplete={handlePreloaderComplete} />}
-        <CartDrawer />
-        {!showPreloader && <AiChatbot />}
-        {/* Main page content with smooth entrance transition */}
-        <div
-          className={`min-h-screen transition-opacity duration-700 ease-out ${
-            showPreloader ? "opacity-0 pointer-events-none" : "opacity-100"
-          }`}
-        >
-          {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-          <Outlet />
-        </div>
-        <Scripts />
-      </CartProvider>
-    </QueryClientProvider>
+    <ThemeProvider>
+      <QueryClientProvider client={queryClient}>
+        <CartProvider>
+          <HeadContent />
+          {showPreloader && <Preloader onComplete={handlePreloaderComplete} />}
+          <CartDrawer />
+          {!showPreloader && <AiChatbot />}
+          {/* Main page content with smooth entrance transition */}
+          <div
+            className={`min-h-screen transition-opacity duration-700 ease-out ${
+              showPreloader ? "opacity-0 pointer-events-none" : "opacity-100"
+            }`}
+          >
+            {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+            <Outlet />
+          </div>
+          <Scripts />
+        </CartProvider>
+      </QueryClientProvider>
+    </ThemeProvider>
   );
 }
 

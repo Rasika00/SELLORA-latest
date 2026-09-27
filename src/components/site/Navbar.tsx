@@ -1,10 +1,13 @@
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { Menu, X, Search, ShoppingCart, User, ShieldCheck, Gauge } from "lucide-react";
+import { Menu, X, Search, ShoppingCart, User, ShieldCheck, Gauge, Sun, Moon } from "lucide-react";
 import { useCart } from "@/context/CartContext";
+import { useTheme } from "@/context/ThemeContext";
+
 export function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { itemCount, setIsCartOpen } = useCart();
+  const { theme, toggleTheme } = useTheme();
 
   const links: { label: string; href: string; isRouterLink?: boolean; isHighlight?: boolean }[] = [
     { label: "Laptop", href: "/#products" },
@@ -72,17 +75,32 @@ export function Navbar() {
           <Link
             to="/login"
             aria-label="Account / Login"
-            className="hidden sm:inline-flex rounded-lg p-1.5 sm:p-2 text-muted-foreground transition-colors hover:bg-white/5 hover:text-neon-cyan items-center gap-1.5 shrink-0"
+            className="hidden sm:inline-flex rounded-lg p-1.5 sm:p-2 text-muted-foreground transition-colors hover:bg-foreground/5 hover:text-neon-cyan items-center gap-1.5 shrink-0"
             title="Terminal Login"
           >
             <User className="h-4 w-4" />
             <span className="text-sm font-medium hidden lg:inline">Sign In</span>
           </Link>
 
+          {/* Theme Switcher Button */}
+          <button
+            type="button"
+            onClick={toggleTheme}
+            aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
+            title={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
+            className="relative flex items-center justify-center rounded-lg p-1.5 sm:p-2 text-muted-foreground transition-all duration-300 hover:bg-foreground/5 hover:text-neon-cyan shrink-0"
+          >
+            {theme === "dark" ? (
+              <Sun className="h-4 w-4 text-amber-400 rotate-0 transition-transform duration-500 hover:rotate-90 hover:scale-110" />
+            ) : (
+              <Moon className="h-4 w-4 text-neon-cyan rotate-0 transition-transform duration-500 hover:-rotate-45 hover:scale-110" />
+            )}
+          </button>
+
           <button 
             aria-label="Cart" 
             onClick={() => setIsCartOpen(true)}
-            className="relative rounded-lg p-1.5 sm:p-2 text-muted-foreground transition-colors hover:bg-white/5 hover:text-foreground shrink-0"
+            className="relative rounded-lg p-1.5 sm:p-2 text-muted-foreground transition-colors hover:bg-foreground/5 hover:text-foreground shrink-0"
           >
             <ShoppingCart className="h-4 w-4" />
             {itemCount > 0 && (
@@ -96,7 +114,7 @@ export function Navbar() {
           <button
             aria-label="Menu"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="rounded-lg p-1.5 sm:p-2 text-muted-foreground transition-colors hover:bg-white/5 hover:text-foreground md:hidden shrink-0"
+            className="rounded-lg p-1.5 sm:p-2 text-muted-foreground transition-colors hover:bg-foreground/5 hover:text-foreground md:hidden shrink-0"
           >
             {mobileMenuOpen ? <X className="h-5 w-5 text-neon-cyan" /> : <Menu className="h-5 w-5" />}
           </button>
@@ -131,14 +149,38 @@ export function Navbar() {
                   <a
                     href={l.href}
                     onClick={() => setMobileMenuOpen(false)}
-                    className="block rounded-xl px-4 py-2.5 text-sm font-medium text-foreground hover:bg-white/10 hover:text-neon-cyan transition-all"
+                    className="block rounded-xl px-4 py-2.5 text-sm font-medium text-foreground hover:bg-foreground/5 hover:text-neon-cyan transition-all"
                   >
                     {l.label}
                   </a>
                 )}
               </li>
             ))}
-            <li className="pt-2 mt-1 border-t border-white/10 flex flex-col gap-2">
+
+            {/* Mobile Theme Switcher */}
+            <li className="pt-2 border-t border-glass-border">
+              <button
+                type="button"
+                onClick={() => {
+                  toggleTheme();
+                }}
+                className="flex w-full items-center justify-between rounded-xl px-4 py-2.5 text-sm font-medium text-foreground hover:bg-foreground/5 transition-all"
+              >
+                <span className="flex items-center gap-2">
+                  {theme === "dark" ? (
+                    <Sun className="h-4 w-4 text-amber-400" />
+                  ) : (
+                    <Moon className="h-4 w-4 text-neon-cyan" />
+                  )}
+                  <span>{theme === "dark" ? "Switch to Light Mode" : "Switch to Dark Mode"}</span>
+                </span>
+                <span className="text-[10px] font-mono uppercase tracking-wider text-neon-cyan bg-neon-cyan/10 px-2 py-0.5 rounded-full border border-neon-cyan/20">
+                  {theme.toUpperCase()}
+                </span>
+              </button>
+            </li>
+
+            <li className="pt-2 mt-1 border-t border-glass-border flex flex-col gap-2">
               <Link
                 to="/admin"
                 onClick={() => setMobileMenuOpen(false)}
@@ -150,7 +192,7 @@ export function Navbar() {
               <Link
                 to="/login"
                 onClick={() => setMobileMenuOpen(false)}
-                className="w-full rounded-xl bg-white/5 px-4 py-2.5 text-center text-sm font-medium text-muted-foreground hover:bg-white/10 hover:text-foreground transition-all flex items-center justify-center gap-2"
+                className="w-full rounded-xl bg-card border border-glass-border px-4 py-2.5 text-center text-sm font-medium text-muted-foreground hover:bg-foreground/5 hover:text-foreground transition-all flex items-center justify-center gap-2"
               >
                 <User className="h-4 w-4" />
                 Sign In

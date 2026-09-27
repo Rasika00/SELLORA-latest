@@ -446,7 +446,7 @@ export function ProductGrid() {
                       className={`absolute right-4 top-4 flex items-center gap-1.5 rounded-full px-3 py-1 font-display text-[10px] font-bold tracking-wider transition-all z-20 ${
                         isCompared
                           ? "bg-neon-cyan text-background shadow-neon-cyan scale-105"
-                          : "bg-black/60 backdrop-blur-md border border-white/20 text-muted-foreground hover:text-white hover:border-neon-cyan"
+                          : "bg-card/80 backdrop-blur-md border border-glass-border text-muted-foreground hover:text-foreground hover:border-neon-cyan"
                       }`}
                       title={isCompared ? "Remove from Showdown comparison" : "Add to Showdown comparison"}
                     >

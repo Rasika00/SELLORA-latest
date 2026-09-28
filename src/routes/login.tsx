@@ -10,6 +10,75 @@ export const Route = createFileRoute("/login")({
   component: LoginPage,
 });
 
+interface RegisteredUser {
+  id?: string;
+  email: string;
+  password?: string;
+  firstName?: string;
+  lastName?: string;
+  phone?: string;
+  address?: string;
+  gender?: string;
+  role?: string;
+  createdAt?: string;
+}
+
+const REGISTERED_USERS_KEY = "sellora_registered_users";
+
+function getRegisteredUsers(): RegisteredUser[] {
+  let list: RegisteredUser[] = [];
+  try {
+    const raw = localStorage.getItem(REGISTERED_USERS_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) list = parsed;
+    }
+  } catch (e) {
+    console.error("Error reading registered users", e);
+  }
+
+  // Include existing user from sellora_user if any
+  try {
+    const prevSingle = localStorage.getItem("sellora_user");
+    if (prevSingle) {
+      const parsed = JSON.parse(prevSingle);
+      if (parsed?.email && !list.some((u) => u.email.toLowerCase() === parsed.email.toLowerCase())) {
+        list.push(parsed);
+        localStorage.setItem(REGISTERED_USERS_KEY, JSON.stringify(list));
+      }
+    }
+  } catch (e) {
+    // ignore
+  }
+
+  // Ensure default admin account is registered
+  if (!list.some((u) => u.email.toLowerCase() === "admin@sellora.dev")) {
+    list.push({
+      id: "usr-admin",
+      email: "admin@sellora.dev",
+      password: "admin",
+      firstName: "Rasika",
+      lastName: "Admin",
+      role: "admin",
+      createdAt: new Date().toISOString(),
+    });
+    localStorage.setItem(REGISTERED_USERS_KEY, JSON.stringify(list));
+  }
+
+  return list;
+}
+
+function saveRegisteredUser(user: RegisteredUser) {
+  const users = getRegisteredUsers();
+  const idx = users.findIndex((u) => u.email.toLowerCase() === user.email.toLowerCase());
+  if (idx >= 0) {
+    users[idx] = { ...users[idx], ...user };
+  } else {
+    users.push(user);
+  }
+  localStorage.setItem(REGISTERED_USERS_KEY, JSON.stringify(users));
+}
+
 function LoginPage() {
   const navigate = useNavigate();
   const [isSignUp, setIsSignUp] = useState(false);
@@ -33,6 +102,35 @@ function LoginPage() {
     setIsLoading(true);
 
     if (isSignUp) {
+      // Validate registration fields
+      if (!firstName.trim() || !lastName.trim()) {
+        setError("Please enter your first and last name.");
+        setIsLoading(false);
+        return;
+      }
+      if (!email.trim() || !password) {
+        setError("Please enter your email and password.");
+        setIsLoading(false);
+        return;
+      }
+      if (password.length < 4) {
+        setError("Password must be at least 4 characters long.");
+        setIsLoading(false);
+        return;
+      }
+
+      // Check if user is already registered
+      const cleanEmail = email.trim().toLowerCase();
+      const users = getRegisteredUsers();
+      const existingUser = users.find(
+        (u) => u.email.toLowerCase().trim() === cleanEmail
+      );
+      if (existingUser) {
+        setError("An account with this email is already registered. Please sign in instead.");
+        setIsLoading(false);
+        return;
+      }
+
       setIsLoading(false);
       // Start Registration Verification
       const code = Math.floor(100000 + Math.random() * 900000).toString();
@@ -40,53 +138,88 @@ function LoginPage() {
       setIsVerifying(true);
 
       // Try to send real email via EmailJS
-      emailjs.send(
-        'service_mnefcui', // TODO: Replace with your EmailJS Service ID
-        'template_444x68k', // TODO: Replace with your EmailJS Template ID
-        {
-          to_name: `${firstName} ${lastName}`.trim() || 'User',
-          to_email: email,
-          otp_code: code
-        },
-        'g_SXC8czs8comYen0' // TODO: Replace with your EmailJS Public Key
-      ).then(() => {
-        console.log("Email sent successfully!");
-      }).catch((error) => {
-        console.error("EmailJS error:", error);
-      });
+      emailjs
+        .send(
+          'service_mnefcui',
+          'template_444x68k',
+          {
+            to_name: `${firstName} ${lastName}`.trim() || 'User',
+            to_email: cleanEmail,
+            otp_code: code,
+          },
+          'g_SXC8czs8comYen0'
+        )
+        .then(() => {
+          console.log("Email sent successfully!");
+        })
+        .catch((error) => {
+          console.error("EmailJS error:", error);
+        });
     } else {
-      // Login
-      if (email.toLowerCase().includes("admin")) {
+      // Sign In Flow - STRICT CHECK: ONLY REGISTERED USERS CAN LOG IN
+      if (!email.trim() || !password) {
+        setError("Please enter both email and password.");
         setIsLoading(false);
-        navigate({ to: "/admin" });
         return;
       }
 
+      const cleanEmail = email.trim().toLowerCase();
+
+      // 1. Try backend database login first
       try {
-        const result = await loginUser({ email, password });
+        const result = await loginUser({ email: cleanEmail, password });
         setIsLoading(false);
         if (result?.user) {
+          saveRegisteredUser(result.user);
           localStorage.setItem("sellora_user", JSON.stringify(result.user));
-          navigate({ to: "/" });
+          if (result.user.role === "admin" || cleanEmail.includes("admin")) {
+            navigate({ to: "/admin" });
+          } else {
+            navigate({ to: "/" });
+          }
           return;
         }
       } catch (backendError: any) {
-        // Fallback to local storage
-        const storedUserRaw = localStorage.getItem("sellora_user");
-        if (storedUserRaw) {
-          try {
-            const storedUser = JSON.parse(storedUserRaw);
-            if (storedUser.email === email && storedUser.password === password) {
-              setIsLoading(false);
-              navigate({ to: "/" });
-              return;
-            }
-          } catch (e) {
-            console.error("Error parsing stored user", e);
-          }
-        }
-        setIsLoading(false);
-        setError(backendError?.message || "Invalid email or password. Please try again.");
+        console.warn("Backend auth failed or offline, verifying against registered users registry:", backendError?.message);
+      }
+
+      // 2. Verify against registered users registry
+      const users = getRegisteredUsers();
+      const registeredUser = users.find(
+        (u) => u.email.toLowerCase().trim() === cleanEmail
+      );
+
+      setIsLoading(false);
+
+      // Enforce: User MUST be registered
+      if (!registeredUser) {
+        setError("This email is not registered. Only registered users can log in. Please click 'Sign up' below to create your account.");
+        return;
+      }
+
+      // Enforce: Password MUST match
+      if (registeredUser.password !== password) {
+        setError("Incorrect password. Please verify your credentials and try again.");
+        return;
+      }
+
+      // Valid registered user login!
+      const userSession = {
+        id: registeredUser.id || `usr-${Date.now()}`,
+        email: registeredUser.email,
+        firstName: registeredUser.firstName,
+        lastName: registeredUser.lastName,
+        phone: registeredUser.phone,
+        address: registeredUser.address,
+        role: registeredUser.role || (cleanEmail.includes("admin") ? "admin" : "customer"),
+      };
+
+      localStorage.setItem("sellora_user", JSON.stringify(userSession));
+
+      if (userSession.role === "admin" || cleanEmail === "admin@sellora.dev") {
+        navigate({ to: "/admin" });
+      } else {
+        navigate({ to: "/" });
       }
     }
   };
@@ -98,22 +231,45 @@ function LoginPage() {
 
     if (otp === generatedOtp) {
       // Complete Registration
-      const user = { firstName, lastName, phone, email, address, gender, password };
+      const cleanEmail = email.trim().toLowerCase();
+      const newUser: RegisteredUser = {
+        id: `usr-${Date.now()}`,
+        firstName: firstName.trim(),
+        lastName: lastName.trim(),
+        phone: phone.trim(),
+        email: cleanEmail,
+        address: address.trim(),
+        gender,
+        password,
+        role: cleanEmail.includes("admin") ? "admin" : "customer",
+        createdAt: new Date().toISOString(),
+      };
+
       try {
-        await registerUser({ email, password, firstName, lastName, phone, address });
+        await registerUser({
+          email: cleanEmail,
+          password,
+          firstName: newUser.firstName,
+          lastName: newUser.lastName,
+          phone: newUser.phone,
+          address: newUser.address,
+        });
       } catch (err: any) {
-        console.warn("Could not register user to PostgreSQL backend, saving locally:", err);
+        console.warn("Could not register user to PostgreSQL backend, saved in registered users registry:", err);
       }
-      localStorage.setItem("sellora_user", JSON.stringify(user));
+
+      // Save into registered users list
+      saveRegisteredUser(newUser);
+
       setIsLoading(false);
-      alert("Registration successful! You can now sign in.");
+      alert("Registration successful! You are now registered. Please sign in with your credentials.");
       setIsVerifying(false);
       setIsSignUp(false);
       setPassword("");
       setOtp("");
     } else {
       setIsLoading(false);
-      setError("Invalid verification code. Please try again.");
+      setError("Invalid verification code. Please check the code and try again.");
     }
   };
 

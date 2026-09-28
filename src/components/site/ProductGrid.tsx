@@ -14,6 +14,7 @@ import {
   Layers,
   SlidersHorizontal,
   RotateCcw,
+  Search,
 } from "lucide-react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { products as initialProducts, type Product } from "@/data/products";
@@ -53,6 +54,7 @@ export function ProductGrid() {
   const navigate = useNavigate();
   const { addToCart } = useCart();
   const [productList, setProductList] = useState<Product[]>(initialProducts);
+  const [searchTerm, setSearchTerm] = useState("");
   const [cats, setCats] = useState<string[]>([]);
   const [procs, setProcs] = useState<string[]>([]);
   const [rams, setRams] = useState<string[]>([]);
@@ -76,6 +78,22 @@ export function ProductGrid() {
 
   const filtered = useMemo(() => {
     return productList.filter((p) => {
+      // Search term filter
+      if (searchTerm.trim()) {
+        const query = searchTerm.toLowerCase().trim();
+        const matches =
+          p.name.toLowerCase().includes(query) ||
+          p.cpu.toLowerCase().includes(query) ||
+          p.gpu.toLowerCase().includes(query) ||
+          p.ram.toLowerCase().includes(query) ||
+          p.category.toLowerCase().includes(query) ||
+          p.processor.toLowerCase().includes(query) ||
+          (p.specialHighlight && p.specialHighlight.toLowerCase().includes(query)) ||
+          (p.display && p.display.toLowerCase().includes(query)) ||
+          p.badge.toLowerCase().includes(query);
+        if (!matches) return false;
+      }
+
       // Category filter
       if (cats.length && !cats.includes(p.category)) return false;
 
@@ -127,16 +145,17 @@ export function ProductGrid() {
       if (p.price > maxPrice) return false;
       return true;
     });
-  }, [productList, cats, procs, rams, gpus, maxPrice]);
+  }, [productList, searchTerm, cats, procs, rams, gpus, maxPrice]);
 
   useEffect(() => {
     setVisibleCount(8);
-  }, [cats, procs, rams, gpus, maxPrice]);
+  }, [searchTerm, cats, procs, rams, gpus, maxPrice]);
 
   const toggle = (arr: string[], setArr: (v: string[]) => void, val: string) =>
     setArr(arr.includes(val) ? arr.filter((x) => x !== val) : [...arr, val]);
 
   const resetFilters = () => {
+    setSearchTerm("");
     setCats([]);
     setProcs([]);
     setRams([]);
@@ -145,7 +164,12 @@ export function ProductGrid() {
   };
 
   const activeFilterCount =
-    cats.length + procs.length + rams.length + gpus.length + (maxPrice < 600000 ? 1 : 0);
+    (searchTerm.trim() ? 1 : 0) +
+    cats.length +
+    procs.length +
+    rams.length +
+    gpus.length +
+    (maxPrice < 600000 ? 1 : 0);
 
   const toggleCompare = (e: React.MouseEvent, id: string) => {
     e.preventDefault();
@@ -245,6 +269,29 @@ export function ProductGrid() {
                   )}
                 </div>
 
+                {/* Sidebar Quick Search */}
+                <div className="mb-4">
+                  <div className="relative flex items-center rounded-xl border border-glass-border bg-background/80 px-3 py-2 focus-within:border-neon-cyan focus-within:ring-1 focus-within:ring-neon-cyan/40 transition-all">
+                    <Search className="h-3.5 w-3.5 text-neon-cyan shrink-0 mr-2" />
+                    <input
+                      type="text"
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      placeholder="Quick filter..."
+                      className="w-full bg-transparent text-xs text-foreground placeholder:text-muted-foreground/60 focus:outline-none"
+                    />
+                    {searchTerm && (
+                      <button
+                        onClick={() => setSearchTerm("")}
+                        className="text-muted-foreground hover:text-foreground ml-1"
+                        title="Clear"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    )}
+                  </div>
+                </div>
+
                 {/* Category Filter */}
                 <FilterGroup label="CATEGORY" icon={Layers} activeCount={cats.length}>
                   {categories.map((c) => (
@@ -326,12 +373,61 @@ export function ProductGrid() {
 
           {/* Main Content Area */}
           <div className="flex flex-col">
+            {/* Smart Search Bar on top of Product Deck */}
+            <div className="mb-6 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 rounded-2xl glass p-3 sm:p-4 border border-glass-border shadow-inner">
+              <div className="relative flex-1 flex items-center rounded-xl border border-glass-border bg-background/80 px-3.5 py-2.5 focus-within:border-neon-cyan focus-within:ring-2 focus-within:ring-neon-cyan/25 transition-all">
+                <Search className="h-4 w-4 text-neon-cyan shrink-0 mr-2.5" />
+                <input
+                  type="text"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  placeholder="Search catalog by model (Razer, Legion, Zenbook), GPU, CPU, RAM..."
+                  className="w-full bg-transparent text-xs sm:text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none"
+                />
+                {searchTerm && (
+                  <button
+                    onClick={() => setSearchTerm("")}
+                    className="rounded-md p-1 text-muted-foreground hover:bg-foreground/10 hover:text-foreground ml-1"
+                    title="Clear search"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                )}
+              </div>
+
+              <div className="flex items-center justify-between sm:justify-end gap-3 shrink-0 px-1">
+                <span className="font-mono text-xs text-muted-foreground">
+                  Showing <strong className="text-neon-cyan">{filtered.length}</strong> {filtered.length === 1 ? "machine" : "machines"}
+                </span>
+                {searchTerm && (
+                  <button
+                    onClick={() => setSearchTerm("")}
+                    className="text-[11px] font-mono text-neon-cyan hover:underline"
+                  >
+                    Reset
+                  </button>
+                )}
+              </div>
+            </div>
+
             {/* Active Filter Badges Bar */}
             {activeFilterCount > 0 && (
               <div className="mb-6 flex flex-wrap items-center gap-2 rounded-2xl glass p-3 text-xs neon-border">
                 <span className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground mr-1">
                   Active Filters:
                 </span>
+                {searchTerm && (
+                  <span className="inline-flex items-center gap-1 rounded-full border border-neon-cyan/40 bg-neon-cyan/15 px-2.5 py-0.5 text-[11px] font-medium text-neon-cyan">
+                    Search: &ldquo;{searchTerm}&rdquo;
+                    <button
+                      onClick={() => setSearchTerm("")}
+                      className="hover:text-white ml-0.5"
+                      title="Clear search"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </span>
+                )}
                 {cats.map((c) => (
                   <span
                     key={c}

@@ -1,13 +1,34 @@
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { Menu, X, Search, ShoppingCart, User, ShieldCheck, Gauge, Sun, Moon } from "lucide-react";
+import { Menu, X, Search, ShoppingCart, User, ShieldCheck, Gauge, Sun, Moon, Scale } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { useTheme } from "@/context/ThemeContext";
+import { useSearch } from "@/context/SearchContext";
+import { useEffect } from "react";
 
 export function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [currentUser, setCurrentUser] = useState<any>(null);
   const { itemCount, setIsCartOpen } = useCart();
   const { theme, toggleTheme } = useTheme();
+  const { openSearch } = useSearch();
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem("sellora_user");
+      if (raw) {
+        setCurrentUser(JSON.parse(raw));
+      }
+    } catch {
+      // ignore
+    }
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem("sellora_user");
+    setCurrentUser(null);
+    window.location.reload();
+  };
 
   const links: { label: string; href: string; isRouterLink?: boolean; isHighlight?: boolean }[] = [
     { label: "Laptop", href: "/#products" },
@@ -65,6 +86,29 @@ export function Navbar() {
 
         {/* Right Actions */}
         <div className="flex items-center gap-1 sm:gap-2 shrink-0">
+          {/* Desktop Smart Search Bar Button */}
+          <button
+            type="button"
+            onClick={() => openSearch()}
+            className="hidden md:flex items-center gap-2 rounded-full border border-glass-border bg-foreground/5 hover:border-neon-cyan/50 hover:bg-neon-cyan/10 px-3.5 py-1.5 text-xs text-muted-foreground transition-all duration-300 group shadow-inner shrink-0 cursor-pointer"
+            title="Smart Search (Ctrl + K or /)"
+          >
+            <Search className="h-3.5 w-3.5 text-neon-cyan transition-transform group-hover:scale-110" />
+            <span className="font-sans group-hover:text-foreground hidden lg:inline">Search laptops...</span>
+            <span className="font-sans group-hover:text-foreground inline lg:hidden">Search</span>
+          </button>
+
+          {/* Mobile Quick Search Button */}
+          <button
+            type="button"
+            onClick={() => openSearch()}
+            aria-label="Smart Search"
+            title="Smart Search (Ctrl + K)"
+            className="flex md:hidden items-center justify-center rounded-lg p-1.5 text-muted-foreground transition-all hover:bg-foreground/5 hover:text-neon-cyan shrink-0"
+          >
+            <Search className="h-4 w-4 text-neon-cyan" />
+          </button>
+
           {/* Always Accessible Admin Command Button */}
           <Link
             to="/admin"
@@ -76,15 +120,37 @@ export function Navbar() {
             <span className="inline sm:hidden font-black">Admin</span>
           </Link>
 
-          <Link
-            to="/login"
-            aria-label="Account / Login"
-            className="hidden sm:inline-flex rounded-lg p-1.5 sm:p-2 text-muted-foreground transition-colors hover:bg-foreground/5 hover:text-neon-cyan items-center gap-1.5 shrink-0"
-            title="Terminal Login"
-          >
-            <User className="h-4 w-4" />
-            <span className="text-sm font-medium hidden lg:inline">Sign In</span>
-          </Link>
+          {currentUser ? (
+            <div className="hidden sm:inline-flex items-center gap-1.5 shrink-0">
+              <div
+                className="flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-muted-foreground bg-foreground/5 border border-glass-border shadow-inner"
+                title={`Logged in as ${currentUser.firstName || currentUser.email}`}
+              >
+                <User className="h-3.5 w-3.5 text-neon-cyan" />
+                <span className="text-xs font-mono font-semibold text-foreground max-w-[80px] lg:max-w-[110px] truncate">
+                  {currentUser.firstName || currentUser.email?.split("@")[0]}
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground hover:text-red-400 px-1.5 py-1 rounded hover:bg-foreground/5 transition-colors cursor-pointer"
+                title="Sign Out"
+              >
+                Sign Out
+              </button>
+            </div>
+          ) : (
+            <Link
+              to="/login"
+              aria-label="Account / Login"
+              className="hidden sm:inline-flex rounded-lg p-1.5 sm:p-2 text-muted-foreground transition-colors hover:bg-foreground/5 hover:text-neon-cyan items-center gap-1.5 shrink-0"
+              title="Terminal Login"
+            >
+              <User className="h-4 w-4" />
+              <span className="text-sm font-medium hidden lg:inline">Sign In</span>
+            </Link>
+          )}
 
           {/* Theme Switcher Button */}
           <button
@@ -128,6 +194,26 @@ export function Navbar() {
       {/* Mobile Menu Dropdown */}
       {mobileMenuOpen && (
         <div className="md:hidden mx-auto mt-2 max-w-full rounded-2xl glass-strong p-4 animate-fade-up border border-glass-border shadow-elevated pointer-events-auto">
+          {/* Mobile Search Bar Trigger */}
+          <div className="mb-3 pb-3 border-b border-glass-border">
+            <button
+              type="button"
+              onClick={() => {
+                setMobileMenuOpen(false);
+                openSearch();
+              }}
+              className="w-full flex items-center justify-between rounded-xl border border-neon-cyan/40 bg-card/90 px-3.5 py-2.5 text-xs text-muted-foreground hover:border-neon-cyan hover:text-foreground transition-all shadow-inner"
+            >
+              <span className="flex items-center gap-2">
+                <Search className="h-4 w-4 text-neon-cyan" />
+                <span>Search laptops, RTX, M3...</span>
+              </span>
+              <span className="font-mono text-[10px] text-neon-cyan bg-neon-cyan/15 px-2 py-0.5 rounded-full border border-neon-cyan/30">
+                FIND
+              </span>
+            </button>
+          </div>
+
           <ul className="flex flex-col gap-2.5">
             {links.map((l) => (
               <li key={l.label}>
@@ -193,14 +279,33 @@ export function Navbar() {
                 <ShieldCheck className="h-4 w-4 text-black stroke-[2.5]" />
                 Launch Admin Command Center
               </Link>
-              <Link
-                to="/login"
-                onClick={() => setMobileMenuOpen(false)}
-                className="w-full rounded-xl bg-card border border-glass-border px-4 py-2.5 text-center text-sm font-medium text-muted-foreground hover:bg-foreground/5 hover:text-foreground transition-all flex items-center justify-center gap-2"
-              >
-                <User className="h-4 w-4" />
-                Sign In
-              </Link>
+              {currentUser ? (
+                <div className="w-full rounded-xl bg-card border border-glass-border px-4 py-2.5 flex items-center justify-between text-xs">
+                  <span className="flex items-center gap-2 text-foreground font-mono truncate">
+                    <User className="h-4 w-4 text-neon-cyan shrink-0" />
+                    <span className="truncate">{currentUser.firstName || currentUser.email}</span>
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      handleLogout();
+                      setMobileMenuOpen(false);
+                    }}
+                    className="font-mono text-[10px] text-red-400 hover:underline uppercase shrink-0 ml-2"
+                  >
+                    Sign Out
+                  </button>
+                </div>
+              ) : (
+                <Link
+                  to="/login"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="w-full rounded-xl bg-card border border-glass-border px-4 py-2.5 text-center text-sm font-medium text-muted-foreground hover:bg-foreground/5 hover:text-foreground transition-all flex items-center justify-center gap-2"
+                >
+                  <User className="h-4 w-4" />
+                  Sign In
+                </Link>
+              )}
             </li>
           </ul>
         </div>

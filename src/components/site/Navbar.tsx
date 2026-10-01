@@ -167,8 +167,8 @@ export function Navbar() {
             )}
           </button>
 
-          <button 
-            aria-label="Cart" 
+          <button
+            aria-label="Cart"
             onClick={() => setIsCartOpen(true)}
             className="relative rounded-lg p-1.5 sm:p-2 text-muted-foreground transition-colors hover:bg-foreground/5 hover:text-foreground shrink-0"
           >

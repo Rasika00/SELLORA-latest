@@ -115,7 +115,7 @@ export function Navbar() {
             className="flex items-center gap-1.5 rounded-full bg-gradient-to-r from-neon-cyan via-neon-blue to-neon-purple px-3 py-1 sm:px-3.5 sm:py-1.5 text-[10px] sm:text-xs font-mono font-black uppercase tracking-wider text-black shadow-neon-cyan transition-all hover:scale-105 hover:shadow-[0_0_25px_oklch(0.78_0.18_200/0.6)] shrink-0"
             title="Admin Command Center"
           >
-            <ShieldCheck className="h-3 w-3 sm:h-3.5 sm:w-3.5 shrink-0 text-black stroke-[2.5]" />
+            <ShieldCheck className="h-3.5 w-3.5 sm:h-3.5 sm:w-3.5 shrink-0 text-black stroke-[2.5]" />
             <span className="hidden sm:inline">Admin Command</span>
             <span className="inline sm:hidden font-black">Admin</span>
           </Link>

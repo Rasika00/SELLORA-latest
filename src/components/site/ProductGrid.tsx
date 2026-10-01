@@ -192,9 +192,15 @@ export function ProductGrid() {
       setTimeout(() => setShowError(false), 3000);
       return;
     }
-    const s1 = compareIds[0] || "1";
-    const s2 = compareIds[1] || "2";
-    const s3 = compareIds[2] || "3";
+    const s1 = compareIds[0] || productList[0]?.id || "1";
+    const s2 =
+      compareIds[1] ||
+      productList.find((p) => p.id !== s1)?.id ||
+      "2";
+    const s3 =
+      compareIds[2] ||
+      productList.find((p) => p.id !== s1 && p.id !== s2)?.id ||
+      "3";
     navigate({ to: `/compare` as any, search: { s1, s2, s3 } as any });
   };
 

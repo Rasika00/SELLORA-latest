@@ -141,7 +141,7 @@ function LoginPage() {
       emailjs
         .send(
           'service_mnefcui',
-          'template_444x68k',
+          'template_kuzk4cr',
           {
             to_name: `${firstName} ${lastName}`.trim() || 'User',
             to_email: cleanEmail,

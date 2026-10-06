@@ -305,7 +305,9 @@ app.post("/api/auth/login", async (req, res) => {
 });
 
 // Feedback Storage Helpers
-const FEEDBACK_FILE = path.join(__dirname, "feedbacks.json");
+// Use /tmp on Vercel (only writable directory in serverless), fallback to __dirname locally
+const TMP_FEEDBACK_FILE = "/tmp/feedbacks.json";
+const BUNDLED_FEEDBACK_FILE = path.join(__dirname, "feedbacks.json");
 
 const defaultFeedbacks = [
   {
@@ -322,10 +324,26 @@ const defaultFeedbacks = [
   },
 ];
 
-function readFeedbacks(): any[] {
+// Seed /tmp/feedbacks.json from bundled file on cold start (Vercel)
+function ensureTmpFeedbacks() {
   try {
-    if (fs.existsSync(FEEDBACK_FILE)) {
-      const data = fs.readFileSync(FEEDBACK_FILE, "utf-8");
+    if (!fs.existsSync(TMP_FEEDBACK_FILE)) {
+      if (fs.existsSync(BUNDLED_FEEDBACK_FILE)) {
+        fs.copyFileSync(BUNDLED_FEEDBACK_FILE, TMP_FEEDBACK_FILE);
+      } else {
+        fs.writeFileSync(TMP_FEEDBACK_FILE, JSON.stringify(defaultFeedbacks, null, 2), "utf-8");
+      }
+    }
+  } catch (err) {
+    console.warn("Could not seed /tmp/feedbacks.json:", err);
+  }
+}
+
+function readFeedbacks(): any[] {
+  ensureTmpFeedbacks();
+  try {
+    if (fs.existsSync(TMP_FEEDBACK_FILE)) {
+      const data = fs.readFileSync(TMP_FEEDBACK_FILE, "utf-8");
       const parsed = JSON.parse(data);
       if (Array.isArray(parsed) && parsed.length > 0) return parsed;
     }
@@ -337,9 +355,9 @@ function readFeedbacks(): any[] {
 
 function writeFeedbacks(feedbacks: any[]) {
   try {
-    fs.writeFileSync(FEEDBACK_FILE, JSON.stringify(feedbacks, null, 2), "utf-8");
+    fs.writeFileSync(TMP_FEEDBACK_FILE, JSON.stringify(feedbacks, null, 2), "utf-8");
   } catch (err) {
-    console.warn("Could not write feedbacks.json:", err);
+    console.warn("Could not write to /tmp/feedbacks.json:", err);
   }
 }
 

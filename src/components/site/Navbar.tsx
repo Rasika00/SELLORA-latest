@@ -1,13 +1,36 @@
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { Menu, X, Search, ShoppingCart, User, ShieldCheck, Gauge, Sun, Moon } from "lucide-react";
+import { Menu, X, Search, ShoppingCart, User, ShieldCheck, Gauge, Sun, Moon, Scale, Layers } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { useTheme } from "@/context/ThemeContext";
+import { useSearch } from "@/context/SearchContext";
+import { useUIMode } from "@/context/UIModeContext";
+import { useEffect } from "react";
 
 export function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [currentUser, setCurrentUser] = useState<any>(null);
   const { itemCount, setIsCartOpen } = useCart();
   const { theme, toggleTheme } = useTheme();
+  const { openSearch } = useSearch();
+  const { mode, toggleMode } = useUIMode();
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem("sellora_user");
+      if (raw) {
+        setCurrentUser(JSON.parse(raw));
+      }
+    } catch {
+      // ignore
+    }
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem("sellora_user");
+    setCurrentUser(null);
+    window.location.reload();
+  };
 
   const links: { label: string; href: string; isRouterLink?: boolean; isHighlight?: boolean }[] = [
     { label: "Laptop", href: "/#products" },
@@ -65,26 +88,71 @@ export function Navbar() {
 
         {/* Right Actions */}
         <div className="flex items-center gap-1 sm:gap-2 shrink-0">
+          {/* Desktop Smart Search Bar Button */}
+          <button
+            type="button"
+            onClick={() => openSearch()}
+            className="hidden md:flex items-center gap-2 rounded-full border border-glass-border bg-foreground/5 hover:border-neon-cyan/50 hover:bg-neon-cyan/10 px-3.5 py-1.5 text-xs text-muted-foreground transition-all duration-300 group shadow-inner shrink-0 cursor-pointer"
+            title="Smart Search (Ctrl + K or /)"
+          >
+            <Search className="h-3.5 w-3.5 text-neon-cyan transition-transform group-hover:scale-110" />
+            <span className="font-sans group-hover:text-foreground hidden lg:inline">Search laptops...</span>
+            <span className="font-sans group-hover:text-foreground inline lg:hidden">Search</span>
+          </button>
+
+          {/* Mobile Quick Search Button */}
+          <button
+            type="button"
+            onClick={() => openSearch()}
+            aria-label="Smart Search"
+            title="Smart Search (Ctrl + K)"
+            className="flex md:hidden items-center justify-center rounded-lg p-1.5 text-muted-foreground transition-all hover:bg-foreground/5 hover:text-neon-cyan shrink-0"
+          >
+            <Search className="h-4 w-4 text-neon-cyan" />
+          </button>
+
           {/* Always Accessible Admin Command Button */}
           <Link
             to="/admin"
             className="flex items-center gap-1.5 rounded-full bg-gradient-to-r from-neon-cyan via-neon-blue to-neon-purple px-3 py-1 sm:px-3.5 sm:py-1.5 text-[10px] sm:text-xs font-mono font-black uppercase tracking-wider text-black shadow-neon-cyan transition-all hover:scale-105 hover:shadow-[0_0_25px_oklch(0.78_0.18_200/0.6)] shrink-0"
             title="Admin Command Center"
           >
-            <ShieldCheck className="h-3 w-3 sm:h-3.5 sm:w-3.5 shrink-0 text-black stroke-[2.5]" />
+            <ShieldCheck className="h-3.5 w-3.5 sm:h-3.5 sm:w-3.5 shrink-0 text-black stroke-[2.5]" />
             <span className="hidden sm:inline">Admin Command</span>
             <span className="inline sm:hidden font-black">Admin</span>
           </Link>
 
-          <Link
-            to="/login"
-            aria-label="Account / Login"
-            className="hidden sm:inline-flex rounded-lg p-1.5 sm:p-2 text-muted-foreground transition-colors hover:bg-foreground/5 hover:text-neon-cyan items-center gap-1.5 shrink-0"
-            title="Terminal Login"
-          >
-            <User className="h-4 w-4" />
-            <span className="text-sm font-medium hidden lg:inline">Sign In</span>
-          </Link>
+          {currentUser ? (
+            <div className="hidden sm:inline-flex items-center gap-1.5 shrink-0">
+              <div
+                className="flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-muted-foreground bg-foreground/5 border border-glass-border shadow-inner"
+                title={`Logged in as ${currentUser.firstName || currentUser.email}`}
+              >
+                <User className="h-3.5 w-3.5 text-neon-cyan" />
+                <span className="text-xs font-mono font-semibold text-foreground max-w-[80px] lg:max-w-[110px] truncate">
+                  {currentUser.firstName || currentUser.email?.split("@")[0]}
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground hover:text-red-400 px-1.5 py-1 rounded hover:bg-foreground/5 transition-colors cursor-pointer"
+                title="Sign Out"
+              >
+                Sign Out
+              </button>
+            </div>
+          ) : (
+            <Link
+              to="/login"
+              aria-label="Account / Login"
+              className="hidden sm:inline-flex rounded-lg p-1.5 sm:p-2 text-muted-foreground transition-colors hover:bg-foreground/5 hover:text-neon-cyan items-center gap-1.5 shrink-0"
+              title="Terminal Login"
+            >
+              <User className="h-4 w-4" />
+              <span className="text-sm font-medium hidden lg:inline">Sign In</span>
+            </Link>
+          )}
 
           {/* Theme Switcher Button */}
           <button
@@ -101,8 +169,40 @@ export function Navbar() {
             )}
           </button>
 
-          <button 
-            aria-label="Cart" 
+          {/* HUD / Simple Mode Toggle */}
+          <button
+            type="button"
+            onClick={toggleMode}
+            aria-label={`Switch to ${mode === "hud" ? "Simple" : "HUD"} Mode`}
+            title={`Switch to ${mode === "hud" ? "Simple" : "HUD"} Mode`}
+            id="ui-mode-toggle"
+            className="relative hidden sm:flex items-center rounded-full border border-glass-border bg-foreground/5 p-0.5 transition-all duration-300 hover:border-neon-cyan/50 shrink-0 overflow-hidden"
+            style={{ minWidth: "130px" }}
+          >
+            {/* Sliding pill indicator */}
+            <span
+              className={`absolute top-0.5 bottom-0.5 w-[48%] rounded-full bg-gradient-to-r from-neon-cyan/30 to-neon-blue/30 border border-neon-cyan/50 shadow-[0_0_10px_oklch(0.78_0.18_200/0.35)] transition-all duration-300 ease-in-out ${
+                mode === "hud" ? "left-0.5" : "left-[50%]"
+              }`}
+            />
+            <span
+              className={`relative z-10 flex-1 rounded-full py-1 text-[10px] font-mono font-bold uppercase tracking-wider text-center transition-colors duration-200 ${
+                mode === "hud" ? "text-neon-cyan" : "text-muted-foreground"
+              }`}
+            >
+              HUD
+            </span>
+            <span
+              className={`relative z-10 flex-1 rounded-full py-1 text-[10px] font-mono font-bold uppercase tracking-wider text-center transition-colors duration-200 ${
+                mode === "simple" ? "text-neon-cyan" : "text-muted-foreground"
+              }`}
+            >
+              Simple
+            </span>
+          </button>
+
+          <button
+            aria-label="Cart"
             onClick={() => setIsCartOpen(true)}
             className="relative rounded-lg p-1.5 sm:p-2 text-muted-foreground transition-colors hover:bg-foreground/5 hover:text-foreground shrink-0"
           >
@@ -128,6 +228,26 @@ export function Navbar() {
       {/* Mobile Menu Dropdown */}
       {mobileMenuOpen && (
         <div className="md:hidden mx-auto mt-2 max-w-full rounded-2xl glass-strong p-4 animate-fade-up border border-glass-border shadow-elevated pointer-events-auto">
+          {/* Mobile Search Bar Trigger */}
+          <div className="mb-3 pb-3 border-b border-glass-border">
+            <button
+              type="button"
+              onClick={() => {
+                setMobileMenuOpen(false);
+                openSearch();
+              }}
+              className="w-full flex items-center justify-between rounded-xl border border-neon-cyan/40 bg-card/90 px-3.5 py-2.5 text-xs text-muted-foreground hover:border-neon-cyan hover:text-foreground transition-all shadow-inner"
+            >
+              <span className="flex items-center gap-2">
+                <Search className="h-4 w-4 text-neon-cyan" />
+                <span>Search laptops, RTX, M3...</span>
+              </span>
+              <span className="font-mono text-[10px] text-neon-cyan bg-neon-cyan/15 px-2 py-0.5 rounded-full border border-neon-cyan/30">
+                FIND
+              </span>
+            </button>
+          </div>
+
           <ul className="flex flex-col gap-2.5">
             {links.map((l) => (
               <li key={l.label}>
@@ -184,6 +304,28 @@ export function Navbar() {
               </button>
             </li>
 
+            {/* Mobile HUD / Simple Mode Toggle */}
+            <li className="border-t border-glass-border pt-2">
+              <button
+                type="button"
+                onClick={toggleMode}
+                id="ui-mode-toggle-mobile"
+                className="flex w-full items-center justify-between rounded-xl px-4 py-2.5 text-sm font-medium text-foreground hover:bg-foreground/5 transition-all"
+              >
+                <span className="flex items-center gap-2">
+                  <Layers className="h-4 w-4 text-neon-cyan" />
+                  <span>{mode === "hud" ? "Switch to Simple Mode" : "Switch to HUD Mode"}</span>
+                </span>
+                <span className={`text-[10px] font-mono uppercase tracking-wider px-2 py-0.5 rounded-full border ${
+                  mode === "hud"
+                    ? "text-neon-cyan bg-neon-cyan/10 border-neon-cyan/20"
+                    : "text-neon-purple bg-neon-purple/10 border-neon-purple/20"
+                }`}>
+                  {mode === "hud" ? "HUD" : "SIMPLE"}
+                </span>
+              </button>
+            </li>
+
             <li className="pt-2 mt-1 border-t border-glass-border flex flex-col gap-2">
               <Link
                 to="/admin"
@@ -193,14 +335,33 @@ export function Navbar() {
                 <ShieldCheck className="h-4 w-4 text-black stroke-[2.5]" />
                 Launch Admin Command Center
               </Link>
-              <Link
-                to="/login"
-                onClick={() => setMobileMenuOpen(false)}
-                className="w-full rounded-xl bg-card border border-glass-border px-4 py-2.5 text-center text-sm font-medium text-muted-foreground hover:bg-foreground/5 hover:text-foreground transition-all flex items-center justify-center gap-2"
-              >
-                <User className="h-4 w-4" />
-                Sign In
-              </Link>
+              {currentUser ? (
+                <div className="w-full rounded-xl bg-card border border-glass-border px-4 py-2.5 flex items-center justify-between text-xs">
+                  <span className="flex items-center gap-2 text-foreground font-mono truncate">
+                    <User className="h-4 w-4 text-neon-cyan shrink-0" />
+                    <span className="truncate">{currentUser.firstName || currentUser.email}</span>
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      handleLogout();
+                      setMobileMenuOpen(false);
+                    }}
+                    className="font-mono text-[10px] text-red-400 hover:underline uppercase shrink-0 ml-2"
+                  >
+                    Sign Out
+                  </button>
+                </div>
+              ) : (
+                <Link
+                  to="/login"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="w-full rounded-xl bg-card border border-glass-border px-4 py-2.5 text-center text-sm font-medium text-muted-foreground hover:bg-foreground/5 hover:text-foreground transition-all flex items-center justify-center gap-2"
+                >
+                  <User className="h-4 w-4" />
+                  Sign In
+                </Link>
+              )}
             </li>
           </ul>
         </div>

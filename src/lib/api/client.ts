@@ -162,15 +162,37 @@ export async function loginUser(credentials: { email: string; password: string }
   return data;
 }
 
+const REMOVED_FEEDBACK_IDS = new Set([
+  "fb-1",
+  "fb-2",
+  "fb-3",
+  "fb-4",
+  "fb-5",
+  "cmtvoy5e50000vee0d4mk6z90",
+]);
+
+const REMOVED_NAMES = [
+  "Alex Mercer",
+  "Maya Lin",
+  "Dr. Vikram Sen",
+  "Marcus Zhao",
+  "Elena Rostova",
+  "Ghost Operator",
+];
+
 export async function getFeedbacks(): Promise<FeedbackItem[]> {
   try {
     const res = await fetch(`${API_BASE}/feedback`);
     if (res.ok) {
       const data = await res.json();
       if (Array.isArray(data) && data.length > 0) {
-        // Also update local cache
-        localStorage.setItem(LOCAL_FEEDBACK_KEY, JSON.stringify(data));
-        return data;
+        const filtered = data.filter(
+          (f: FeedbackItem) =>
+            !REMOVED_FEEDBACK_IDS.has(f.id) && !REMOVED_NAMES.includes(f.name)
+        );
+        const result = filtered.length > 0 ? filtered : initialFeedbacks;
+        localStorage.setItem(LOCAL_FEEDBACK_KEY, JSON.stringify(result));
+        return result;
       }
     }
   } catch (error) {
@@ -183,7 +205,13 @@ export async function getFeedbacks(): Promise<FeedbackItem[]> {
     if (stored) {
       const parsed = JSON.parse(stored);
       if (Array.isArray(parsed) && parsed.length > 0) {
-        return parsed;
+        const filtered = parsed.filter(
+          (f: FeedbackItem) =>
+            !REMOVED_FEEDBACK_IDS.has(f.id) && !REMOVED_NAMES.includes(f.name)
+        );
+        const result = filtered.length > 0 ? filtered : initialFeedbacks;
+        localStorage.setItem(LOCAL_FEEDBACK_KEY, JSON.stringify(result));
+        return result;
       }
     }
   } catch (e) {

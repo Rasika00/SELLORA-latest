@@ -14,11 +14,15 @@ import {
   Layers,
   SlidersHorizontal,
   RotateCcw,
+  Search,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { products as initialProducts, type Product } from "@/data/products";
 import { useCart } from "@/context/CartContext";
 import { getProducts } from "@/lib/api/client";
+import { useUIMode } from "@/context/UIModeContext";
 
 const badgeStyles = {
   cyan: "bg-neon-cyan/15 text-neon-cyan border-neon-cyan/40 shadow-[0_0_20px_oklch(0.78_0.18_200/0.4)]",
@@ -52,7 +56,9 @@ const gpuOptions = [
 export function ProductGrid() {
   const navigate = useNavigate();
   const { addToCart } = useCart();
+  const { isSimple } = useUIMode();
   const [productList, setProductList] = useState<Product[]>(initialProducts);
+  const [searchTerm, setSearchTerm] = useState("");
   const [cats, setCats] = useState<string[]>([]);
   const [procs, setProcs] = useState<string[]>([]);
   const [rams, setRams] = useState<string[]>([]);
@@ -61,6 +67,11 @@ export function ProductGrid() {
   const [compareIds, setCompareIds] = useState<string[]>([]);
   const [visibleCount, setVisibleCount] = useState(8);
   const [showError, setShowError] = useState(false);
+
+  // Simple Mode specific state
+  const [simpleNeed, setSimpleNeed] = useState<string>("all");
+  const [simplePriceRange, setSimplePriceRange] = useState<"all" | "budget" | "mid" | "premium">("all");
+  const [expandedSpecs, setExpandedSpecs] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     let mounted = true;
@@ -76,6 +87,22 @@ export function ProductGrid() {
 
   const filtered = useMemo(() => {
     return productList.filter((p) => {
+      // Search term filter
+      if (searchTerm.trim()) {
+        const query = searchTerm.toLowerCase().trim();
+        const matches =
+          p.name.toLowerCase().includes(query) ||
+          p.cpu.toLowerCase().includes(query) ||
+          p.gpu.toLowerCase().includes(query) ||
+          p.ram.toLowerCase().includes(query) ||
+          p.category.toLowerCase().includes(query) ||
+          p.processor.toLowerCase().includes(query) ||
+          (p.specialHighlight && p.specialHighlight.toLowerCase().includes(query)) ||
+          (p.display && p.display.toLowerCase().includes(query)) ||
+          p.badge.toLowerCase().includes(query);
+        if (!matches) return false;
+      }
+
       // Category filter
       if (cats.length && !cats.includes(p.category)) return false;
 
@@ -127,16 +154,17 @@ export function ProductGrid() {
       if (p.price > maxPrice) return false;
       return true;
     });
-  }, [productList, cats, procs, rams, gpus, maxPrice]);
+  }, [productList, searchTerm, cats, procs, rams, gpus, maxPrice]);
 
   useEffect(() => {
     setVisibleCount(8);
-  }, [cats, procs, rams, gpus, maxPrice]);
+  }, [searchTerm, cats, procs, rams, gpus, maxPrice]);
 
   const toggle = (arr: string[], setArr: (v: string[]) => void, val: string) =>
     setArr(arr.includes(val) ? arr.filter((x) => x !== val) : [...arr, val]);
 
   const resetFilters = () => {
+    setSearchTerm("");
     setCats([]);
     setProcs([]);
     setRams([]);
@@ -145,7 +173,12 @@ export function ProductGrid() {
   };
 
   const activeFilterCount =
-    cats.length + procs.length + rams.length + gpus.length + (maxPrice < 600000 ? 1 : 0);
+    (searchTerm.trim() ? 1 : 0) +
+    cats.length +
+    procs.length +
+    rams.length +
+    gpus.length +
+    (maxPrice < 600000 ? 1 : 0);
 
   const toggleCompare = (e: React.MouseEvent, id: string) => {
     e.preventDefault();
@@ -168,11 +201,237 @@ export function ProductGrid() {
       setTimeout(() => setShowError(false), 3000);
       return;
     }
-    const s1 = compareIds[0] || "1";
-    const s2 = compareIds[1] || "2";
-    const s3 = compareIds[2] || "3";
+    const s1 = compareIds[0] || productList[0]?.id || "1";
+    const s2 =
+      compareIds[1] ||
+      productList.find((p) => p.id !== s1)?.id ||
+      "2";
+    const s3 =
+      compareIds[2] ||
+      productList.find((p) => p.id !== s1 && p.id !== s2)?.id ||
+      "3";
     navigate({ to: `/compare` as any, search: { s1, s2, s3 } as any });
   };
+
+  // Simple Mode: filter by need category
+  const SIMPLE_NEEDS = [
+    { id: "all", label: "All Laptops", emoji: "💻" },
+    { id: "everyday", label: "For Everyday Use", emoji: "🌐" },
+    { id: "gaming", label: "For Gaming", emoji: "🎮" },
+    { id: "work", label: "For Work & Study", emoji: "📚" },
+    { id: "creative", label: "For Creative Work", emoji: "🎨" },
+  ];
+
+  const SIMPLE_PRICE_RANGES = [
+    { id: "all", label: "Any Price" },
+    { id: "budget", label: "Budget (Under ₹80K)" },
+    { id: "mid", label: "Mid-Range (₹80K–₹1.5L)" },
+    { id: "premium", label: "Premium (₹1.5L+)" },
+  ];
+
+  const getSimpleTag = (p: Product): string => {
+    const gpu = p.gpu.toLowerCase();
+    const cpu = p.cpu.toLowerCase();
+    const cat = p.category.toLowerCase();
+    if (cat === "gaming" || gpu.includes("4080") || gpu.includes("4090") || gpu.includes("4070")) return "Great for gaming";
+    if (cat === "workstation" || gpu.includes("ada") || cpu.includes("ultra 9") || cpu.includes("i9")) return "Powerful workstation";
+    if (gpu.includes("4060") || gpu.includes("4050")) return "Gaming & creative work";
+    if (cat === "ultrabook" || cpu.includes("apple") || cpu.includes("m3")) return "Thin, light & portable";
+    if (parseInt(p.ram) >= 32) return "Great for heavy multitasking";
+    return "Perfect for everyday use";
+  };
+
+  const simpleFiltered = useMemo(() => {
+    return productList.filter((p) => {
+      // Need-based filter
+      if (simpleNeed !== "all") {
+        const cat = p.category.toLowerCase();
+        const gpu = p.gpu.toLowerCase();
+        const cpu = p.cpu.toLowerCase();
+        const ram = parseInt(p.ram);
+        if (simpleNeed === "gaming" && cat !== "gaming" && !gpu.includes("4070") && !gpu.includes("4080") && !gpu.includes("4090") && !gpu.includes("4060")) return false;
+        if (simpleNeed === "everyday" && cat !== "ultrabook" && parseInt(p.ram) > 16 && !cpu.includes("i5") && !cpu.includes("ryzen 5")) return false;
+        if (simpleNeed === "work" && cat !== "ultrabook" && cat !== "workstation") return false;
+        if (simpleNeed === "creative" && (cat !== "workstation" || !gpu.includes("ada")) && !cpu.includes("apple") && ram < 32) return false;
+      }
+      // Price range filter
+      if (simplePriceRange === "budget" && p.price >= 80000) return false;
+      if (simplePriceRange === "mid" && (p.price < 80000 || p.price >= 150000)) return false;
+      if (simplePriceRange === "premium" && p.price < 150000) return false;
+      return true;
+    });
+  }, [productList, simpleNeed, simplePriceRange]);
+
+  const toggleExpandSpecs = (id: string) => {
+    setExpandedSpecs((prev) => ({ ...prev, [id]: !prev[id] }));
+  };
+
+  // ──────────────────────────────────────────────────────────
+  // SIMPLE MODE RENDER
+  // ──────────────────────────────────────────────────────────
+  if (isSimple) {
+    return (
+      <section id="products" className="relative py-20 md:py-28">
+        <div id="workstation" className="absolute -top-24" />
+        <div className="pointer-events-none absolute right-0 top-1/3 -z-10 h-80 w-80 rounded-full bg-neon-purple/10 blur-3xl" />
+        <div className="pointer-events-none absolute left-0 bottom-1/4 -z-10 h-80 w-80 rounded-full bg-neon-cyan/10 blur-3xl" />
+
+        <div className="mx-auto w-full max-w-full px-4 sm:px-8 md:px-12">
+          {/* Header */}
+          <div className="mb-10 text-center">
+            <p className="text-sm font-medium text-neon-cyan mb-2">Find your perfect laptop</p>
+            <h2 className="font-display text-3xl sm:text-4xl font-black tracking-tight">
+              Choose the <span className="text-gradient">right laptop</span> for you
+            </h2>
+            <p className="mt-3 text-sm text-muted-foreground max-w-lg mx-auto">
+              Tell us what you need and we'll show you the best options.
+            </p>
+          </div>
+
+          {/* Need-based filter pills */}
+          <div className="mb-6 flex flex-wrap items-center justify-center gap-2">
+            {SIMPLE_NEEDS.map((need) => (
+              <button
+                key={need.id}
+                onClick={() => setSimpleNeed(need.id)}
+                className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition-all ${
+                  simpleNeed === need.id
+                    ? "bg-neon-cyan text-background shadow-neon-cyan"
+                    : "border border-glass-border bg-card text-muted-foreground hover:border-neon-cyan/50 hover:text-foreground"
+                }`}
+              >
+                <span>{need.emoji}</span>
+                <span>{need.label}</span>
+              </button>
+            ))}
+          </div>
+
+          {/* Price range pills */}
+          <div className="mb-10 flex flex-wrap items-center justify-center gap-2">
+            {SIMPLE_PRICE_RANGES.map((range) => (
+              <button
+                key={range.id}
+                onClick={() => setSimplePriceRange(range.id as any)}
+                className={`rounded-full px-4 py-1.5 text-xs font-semibold transition-all ${
+                  simplePriceRange === range.id
+                    ? "bg-neon-purple/30 border border-neon-purple/60 text-neon-purple"
+                    : "border border-glass-border bg-card/50 text-muted-foreground hover:border-neon-purple/40 hover:text-foreground"
+                }`}
+              >
+                {range.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Results count */}
+          <p className="mb-6 text-center text-sm text-muted-foreground">
+            Showing <strong className="text-foreground">{simpleFiltered.length}</strong> {simpleFiltered.length === 1 ? "laptop" : "laptops"}
+          </p>
+
+          {/* Simple product grid */}
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {simpleFiltered.slice(0, visibleCount).map((p) => {
+              const tag = getSimpleTag(p);
+              const specsExpanded = expandedSpecs[p.id];
+              return (
+                <div key={p.id} className="group flex flex-col overflow-hidden rounded-2xl border border-glass-border bg-card transition-all hover:border-neon-cyan/30 hover:shadow-[0_4px_24px_rgba(0,0,0,0.3)]">
+                  {/* Image */}
+                  <Link to="/product/$productId" params={{ productId: p.id }} className="block">
+                    <div className="relative aspect-[4/3] overflow-hidden bg-black">
+                      <img
+                        src={p.img}
+                        alt={`${p.name} laptop`}
+                        loading="lazy"
+                        className="h-full w-full object-cover object-left transition-transform duration-500 group-hover:scale-105"
+                      />
+                    </div>
+                  </Link>
+
+                  {/* Card Body */}
+                  <div className="flex flex-1 flex-col p-5">
+                    <Link to="/product/$productId" params={{ productId: p.id }}>
+                      <h3 className="font-semibold text-base text-foreground leading-snug">{p.name}</h3>
+                    </Link>
+
+                    {/* Simple tag */}
+                    <span className="mt-2 inline-block rounded-full bg-neon-cyan/10 border border-neon-cyan/30 px-3 py-1 text-xs font-medium text-neon-cyan">
+                      {tag}
+                    </span>
+
+                    {/* Expandable full specs */}
+                    <button
+                      onClick={() => toggleExpandSpecs(p.id)}
+                      className="mt-3 flex items-center gap-1 text-xs text-muted-foreground hover:text-neon-cyan transition-colors"
+                    >
+                      {specsExpanded ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
+                      <span>{specsExpanded ? "Hide specs" : "Show full specs"}</span>
+                    </button>
+
+                    {specsExpanded && (
+                      <div className="mt-3 flex flex-col gap-1.5">
+                        <SpecPill icon={Cpu} label={p.cpu} />
+                        <SpecPill icon={MemoryStick} label={p.ram} />
+                        <SpecPill icon={Zap} label={p.gpu} />
+                      </div>
+                    )}
+
+                    {/* Price & actions */}
+                    <div className="mt-auto pt-5">
+                      <p className="font-bold text-xl text-foreground">Rs {p.price.toLocaleString()}</p>
+                      <div className="mt-3 flex gap-2">
+                        <button
+                          type="button"
+                          onClick={() => addToCart(p)}
+                          className="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-neon-cyan/20 border border-neon-cyan/50 py-2.5 text-sm font-semibold text-neon-cyan hover:bg-neon-cyan hover:text-black transition-all"
+                        >
+                          <ShoppingCart className="h-4 w-4" />
+                          Add to Cart
+                        </button>
+                        <Link
+                          to="/product/$productId"
+                          params={{ productId: p.id }}
+                          className="flex-1 flex items-center justify-center rounded-xl bg-gradient-primary py-2.5 text-sm font-semibold text-primary-foreground hover:scale-[1.02] transition-all"
+                        >
+                          View Details
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+
+            {simpleFiltered.length === 0 && (
+              <div className="col-span-full rounded-2xl border border-glass-border p-12 text-center">
+                <p className="text-2xl mb-2">😕</p>
+                <p className="font-semibold text-foreground">No laptops match your selection</p>
+                <p className="text-sm text-muted-foreground mt-1">Try a different category or price range.</p>
+                <button
+                  onClick={() => { setSimpleNeed("all"); setSimplePriceRange("all"); }}
+                  className="mt-4 inline-flex items-center gap-2 rounded-xl bg-neon-cyan/20 border border-neon-cyan/50 px-4 py-2 text-sm font-bold text-neon-cyan hover:bg-neon-cyan hover:text-black transition-all"
+                >
+                  <RotateCcw className="h-3.5 w-3.5" />
+                  Show all laptops
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* Load more */}
+          {visibleCount < simpleFiltered.length && (
+            <div className="mt-10 flex justify-center">
+              <button
+                onClick={() => setVisibleCount((prev) => prev + 8)}
+                className="rounded-full border border-glass-border bg-card px-8 py-3 text-sm font-semibold text-foreground hover:border-neon-cyan/50 hover:text-neon-cyan transition-all"
+              >
+                Show more laptops
+              </button>
+            </div>
+          )}
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section id="products" className="relative py-24 md:py-32">
@@ -243,6 +502,29 @@ export function ProductGrid() {
                       <span>Clear</span>
                     </button>
                   )}
+                </div>
+
+                {/* Sidebar Quick Search */}
+                <div className="mb-4">
+                  <div className="relative flex items-center rounded-xl border border-glass-border bg-background/80 px-3 py-2 focus-within:border-neon-cyan focus-within:ring-1 focus-within:ring-neon-cyan/40 transition-all">
+                    <Search className="h-3.5 w-3.5 text-neon-cyan shrink-0 mr-2" />
+                    <input
+                      type="text"
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      placeholder="Quick filter..."
+                      className="w-full bg-transparent text-xs text-foreground placeholder:text-muted-foreground/60 focus:outline-none"
+                    />
+                    {searchTerm && (
+                      <button
+                        onClick={() => setSearchTerm("")}
+                        className="text-muted-foreground hover:text-foreground ml-1"
+                        title="Clear"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    )}
+                  </div>
                 </div>
 
                 {/* Category Filter */}
@@ -326,12 +608,61 @@ export function ProductGrid() {
 
           {/* Main Content Area */}
           <div className="flex flex-col">
+            {/* Smart Search Bar on top of Product Deck */}
+            <div className="mb-6 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 rounded-2xl glass p-3 sm:p-4 border border-glass-border shadow-inner">
+              <div className="relative flex-1 flex items-center rounded-xl border border-glass-border bg-background/80 px-3.5 py-2.5 focus-within:border-neon-cyan focus-within:ring-2 focus-within:ring-neon-cyan/25 transition-all">
+                <Search className="h-4 w-4 text-neon-cyan shrink-0 mr-2.5" />
+                <input
+                  type="text"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  placeholder="Search catalog by model (Razer, Legion, Zenbook), GPU, CPU, RAM..."
+                  className="w-full bg-transparent text-xs sm:text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none"
+                />
+                {searchTerm && (
+                  <button
+                    onClick={() => setSearchTerm("")}
+                    className="rounded-md p-1 text-muted-foreground hover:bg-foreground/10 hover:text-foreground ml-1"
+                    title="Clear search"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                )}
+              </div>
+
+              <div className="flex items-center justify-between sm:justify-end gap-3 shrink-0 px-1">
+                <span className="font-mono text-xs text-muted-foreground">
+                  Showing <strong className="text-neon-cyan">{filtered.length}</strong> {filtered.length === 1 ? "machine" : "machines"}
+                </span>
+                {searchTerm && (
+                  <button
+                    onClick={() => setSearchTerm("")}
+                    className="text-[11px] font-mono text-neon-cyan hover:underline"
+                  >
+                    Reset
+                  </button>
+                )}
+              </div>
+            </div>
+
             {/* Active Filter Badges Bar */}
             {activeFilterCount > 0 && (
               <div className="mb-6 flex flex-wrap items-center gap-2 rounded-2xl glass p-3 text-xs neon-border">
                 <span className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground mr-1">
                   Active Filters:
                 </span>
+                {searchTerm && (
+                  <span className="inline-flex items-center gap-1 rounded-full border border-neon-cyan/40 bg-neon-cyan/15 px-2.5 py-0.5 text-[11px] font-medium text-neon-cyan">
+                    Search: &ldquo;{searchTerm}&rdquo;
+                    <button
+                      onClick={() => setSearchTerm("")}
+                      className="hover:text-white ml-0.5"
+                      title="Clear search"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </span>
+                )}
                 {cats.map((c) => (
                   <span
                     key={c}

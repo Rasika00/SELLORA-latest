@@ -11,7 +11,10 @@ import { useEffect, useState, type ReactNode } from "react";
 import { Preloader } from "@/components/site/Preloader";
 import { ThemeProvider } from "@/context/ThemeContext";
 import { CartProvider } from "@/context/CartContext";
+import { SearchProvider } from "@/context/SearchContext";
+import { UIModeProvider } from "@/context/UIModeContext";
 import { CartDrawer } from "@/components/cart/CartDrawer";
+import { SmartSearchModal } from "@/components/site/SmartSearchModal";
 import { AiChatbot } from "@/components/chat/AiChatbot";
 
 import appCss from "../styles.css?url";
@@ -110,24 +113,29 @@ function RootComponent() {
 
   return (
     <ThemeProvider>
-      <QueryClientProvider client={queryClient}>
-        <CartProvider>
-          <HeadContent />
-          {showPreloader && <Preloader onComplete={handlePreloaderComplete} />}
-          <CartDrawer />
-          {!showPreloader && <AiChatbot />}
-          {/* Main page content with smooth entrance transition */}
-          <div
-            className={`min-h-screen transition-opacity duration-700 ease-out ${
-              showPreloader ? "opacity-0 pointer-events-none" : "opacity-100"
-            }`}
-          >
-            {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-            <Outlet />
-          </div>
-          <Scripts />
-        </CartProvider>
-      </QueryClientProvider>
+      <UIModeProvider>
+        <QueryClientProvider client={queryClient}>
+          <CartProvider>
+            <SearchProvider>
+              <HeadContent />
+              {showPreloader && <Preloader onComplete={handlePreloaderComplete} />}
+              <CartDrawer />
+              <SmartSearchModal />
+              {!showPreloader && <AiChatbot />}
+              {/* Main page content with smooth entrance transition */}
+              <div
+                className={`min-h-screen transition-opacity duration-700 ease-out ${
+                  showPreloader ? "opacity-0 pointer-events-none" : "opacity-100"
+                }`}
+              >
+                {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+                <Outlet />
+              </div>
+              <Scripts />
+            </SearchProvider>
+          </CartProvider>
+        </QueryClientProvider>
+      </UIModeProvider>
     </ThemeProvider>
   );
 }

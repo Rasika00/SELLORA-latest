@@ -1,9 +1,10 @@
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { Menu, X, Search, ShoppingCart, User, ShieldCheck, Gauge, Sun, Moon, Scale } from "lucide-react";
+import { Menu, X, Search, ShoppingCart, User, ShieldCheck, Gauge, Sun, Moon, Scale, Layers } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { useTheme } from "@/context/ThemeContext";
 import { useSearch } from "@/context/SearchContext";
+import { useUIMode } from "@/context/UIModeContext";
 import { useEffect } from "react";
 
 export function Navbar() {
@@ -12,6 +13,7 @@ export function Navbar() {
   const { itemCount, setIsCartOpen } = useCart();
   const { theme, toggleTheme } = useTheme();
   const { openSearch } = useSearch();
+  const { mode, toggleMode } = useUIMode();
 
   useEffect(() => {
     try {
@@ -167,6 +169,38 @@ export function Navbar() {
             )}
           </button>
 
+          {/* HUD / Simple Mode Toggle */}
+          <button
+            type="button"
+            onClick={toggleMode}
+            aria-label={`Switch to ${mode === "hud" ? "Simple" : "HUD"} Mode`}
+            title={`Switch to ${mode === "hud" ? "Simple" : "HUD"} Mode`}
+            id="ui-mode-toggle"
+            className="relative hidden sm:flex items-center rounded-full border border-glass-border bg-foreground/5 p-0.5 transition-all duration-300 hover:border-neon-cyan/50 shrink-0 overflow-hidden"
+            style={{ minWidth: "130px" }}
+          >
+            {/* Sliding pill indicator */}
+            <span
+              className={`absolute top-0.5 bottom-0.5 w-[48%] rounded-full bg-gradient-to-r from-neon-cyan/30 to-neon-blue/30 border border-neon-cyan/50 shadow-[0_0_10px_oklch(0.78_0.18_200/0.35)] transition-all duration-300 ease-in-out ${
+                mode === "hud" ? "left-0.5" : "left-[50%]"
+              }`}
+            />
+            <span
+              className={`relative z-10 flex-1 rounded-full py-1 text-[10px] font-mono font-bold uppercase tracking-wider text-center transition-colors duration-200 ${
+                mode === "hud" ? "text-neon-cyan" : "text-muted-foreground"
+              }`}
+            >
+              HUD
+            </span>
+            <span
+              className={`relative z-10 flex-1 rounded-full py-1 text-[10px] font-mono font-bold uppercase tracking-wider text-center transition-colors duration-200 ${
+                mode === "simple" ? "text-neon-cyan" : "text-muted-foreground"
+              }`}
+            >
+              Simple
+            </span>
+          </button>
+
           <button
             aria-label="Cart"
             onClick={() => setIsCartOpen(true)}
@@ -266,6 +300,28 @@ export function Navbar() {
                 </span>
                 <span className="text-[10px] font-mono uppercase tracking-wider text-neon-cyan bg-neon-cyan/10 px-2 py-0.5 rounded-full border border-neon-cyan/20">
                   {theme.toUpperCase()}
+                </span>
+              </button>
+            </li>
+
+            {/* Mobile HUD / Simple Mode Toggle */}
+            <li className="border-t border-glass-border pt-2">
+              <button
+                type="button"
+                onClick={toggleMode}
+                id="ui-mode-toggle-mobile"
+                className="flex w-full items-center justify-between rounded-xl px-4 py-2.5 text-sm font-medium text-foreground hover:bg-foreground/5 transition-all"
+              >
+                <span className="flex items-center gap-2">
+                  <Layers className="h-4 w-4 text-neon-cyan" />
+                  <span>{mode === "hud" ? "Switch to Simple Mode" : "Switch to HUD Mode"}</span>
+                </span>
+                <span className={`text-[10px] font-mono uppercase tracking-wider px-2 py-0.5 rounded-full border ${
+                  mode === "hud"
+                    ? "text-neon-cyan bg-neon-cyan/10 border-neon-cyan/20"
+                    : "text-neon-purple bg-neon-purple/10 border-neon-purple/20"
+                }`}>
+                  {mode === "hud" ? "HUD" : "SIMPLE"}
                 </span>
               </button>
             </li>

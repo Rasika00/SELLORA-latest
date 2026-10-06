@@ -12,11 +12,13 @@ import {
   ArrowRight,
   ArrowLeft,
   CheckCircle2,
+  Star,
 } from "lucide-react";
 import { products as initialProducts, type Product } from "@/data/products";
 import { Navbar } from "@/components/site/Navbar";
 import { Footer } from "@/components/site/Footer";
 import { getProducts } from "@/lib/api/client";
+import { useUIMode } from "@/context/UIModeContext";
 
 interface CompareSearchParams {
   s1?: string;
@@ -38,6 +40,7 @@ export const Route = createFileRoute("/compare")({
 function CompareShowdown() {
   const navigate = useNavigate();
   const searchParams = useSearch({ from: "/compare" });
+  const { isSimple } = useUIMode();
 
   const [productList, setProductList] = useState<Product[]>(initialProducts);
 
@@ -186,6 +189,197 @@ function CompareShowdown() {
         return "border-neon-blue/60 bg-neon-blue/20 text-neon-blue shadow-[0_0_15px_oklch(0.7_0.22_260/0.4)]";
     }
   };
+
+  // Simple Mode: compute star ratings (1-5) per category for each laptop
+  const getSimpleRatings = (p: Product) => {
+    const benchScore = p.detailedSpecs?.benchmarkScore || 0;
+    const maxScore = Math.max(
+      slot1?.detailedSpecs?.benchmarkScore || 0,
+      slot2?.detailedSpecs?.benchmarkScore || 0,
+      slot3?.detailedSpecs?.benchmarkScore || 0,
+      1
+    );
+    const gpuLower = (p.gpu || "").toLowerCase();
+    const gameStars = gpuLower.includes("4090") ? 5 : gpuLower.includes("4080") ? 4 : gpuLower.includes("4070") ? 4 : gpuLower.includes("4060") ? 3 : gpuLower.includes("4050") ? 3 : gpuLower.includes("ada") ? 5 : gpuLower.includes("apple") ? 4 : 2;
+    const batteryRaw = p.batteryWeight || "";
+    const batteryNum = parseInt(batteryRaw.match(/(\d+)Wh/)?.[1] || "60");
+    const batteryStars = batteryNum >= 99 ? 5 : batteryNum >= 80 ? 4 : batteryNum >= 70 ? 3 : batteryNum >= 60 ? 2 : 1;
+    const perfStars = Math.round((benchScore / maxScore) * 4) + 1;
+    const portableRaw = batteryRaw.match(/([\d.]+)kg/)?.[1];
+    const weight = portableRaw ? parseFloat(portableRaw) : 2.5;
+    const portableStars = weight <= 1.2 ? 5 : weight <= 1.8 ? 4 : weight <= 2.2 ? 3 : weight <= 2.8 ? 2 : 1;
+    return {
+      gaming: Math.min(5, Math.max(1, gameStars)),
+      battery: Math.min(5, Math.max(1, batteryStars)),
+      performance: Math.min(5, Math.max(1, perfStars)),
+      portable: Math.min(5, Math.max(1, portableStars)),
+    };
+  };
+
+  const getSimpleWinnerExplanation = () => {
+    const w = showdownWinner.product;
+    const gpuLower = w.gpu.toLowerCase();
+    if (gpuLower.includes("4090") || gpuLower.includes("4080")) {
+      return `This one gives you the best performance for gaming and heavy work at this price.`;
+    }
+    if (gpuLower.includes("4070") || gpuLower.includes("4060")) {
+      return `This one gives you the best value for gaming and everyday tasks at this price.`;
+    }
+    if (gpuLower.includes("ada")) {
+      return `This is the top pick for creative professionals who need serious power.`;
+    }
+    if (w.category === "Ultrabook") {
+      return `This is the best option if you want something light, fast, and great for everyday use.`;
+    }
+    return `This one offers the best overall value for money among your three selections.`;
+  };
+
+  // ──────────────────────────────────────────────────────────
+  // SIMPLE MODE RENDER
+  // ──────────────────────────────────────────────────────────
+  if (isSimple) {
+    return (
+      <main className="min-h-screen bg-background text-foreground overflow-x-hidden pt-20 sm:pt-24 pb-24">
+        <Navbar />
+        <div className="mx-auto w-full max-w-full px-3 sm:px-6 md:px-8">
+          <Link to="/" className="group mb-8 inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground">
+            <ArrowLeft className="h-4 w-4" /> Back to laptops
+          </Link>
+
+          {/* Simple header */}
+          <div className="mb-8 text-center">
+            <h1 className="font-display text-3xl sm:text-4xl font-black tracking-tight">Compare Laptops</h1>
+            <p className="mt-2 text-sm text-muted-foreground">See how these laptops compare side by side in plain language.</p>
+          </div>
+
+          {/* Winner Banner */}
+          {winnerCelebrated && (
+            <div className="mb-8 rounded-2xl border-2 border-neon-cyan bg-neon-cyan/10 p-6 text-center">
+              <div className="flex items-center justify-center gap-2 mb-2">
+                <Trophy className="h-6 w-6 text-neon-cyan" />
+                <span className="font-bold text-lg text-foreground">Top Pick: {showdownWinner.product.name}</span>
+              </div>
+              <p className="text-sm text-muted-foreground max-w-md mx-auto">{getSimpleWinnerExplanation()}</p>
+              <Link
+                to="/product/$productId"
+                params={{ productId: showdownWinner.product.id }}
+                className="mt-4 inline-flex items-center gap-2 rounded-full bg-neon-cyan px-6 py-2.5 text-sm font-bold text-background hover:scale-105 transition-all shadow-neon-cyan"
+              >
+                Buy Now — Rs {showdownWinner.product.price.toLocaleString()}
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+            </div>
+          )}
+
+          {!winnerCelebrated && (
+            <div className="mb-8 text-center">
+              <button
+                onClick={handlePickWinner}
+                className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-neon-cyan via-neon-blue to-neon-purple px-6 py-3 font-bold text-sm text-background shadow-neon-cyan hover:scale-105 transition-all"
+              >
+                <Trophy className="h-4 w-4" />
+                Which one should I pick?
+              </button>
+            </div>
+          )}
+
+          {/* Simple comparison cards */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {selectedSlots.map(({ slotNum, product }) => {
+              const isBestPick = winnerCelebrated && product.id === showdownWinner.product.id;
+              const ratings = getSimpleRatings(product);
+              return (
+                <div
+                  key={`slot-${slotNum}`}
+                  className={`rounded-2xl border p-5 transition-all ${
+                    isBestPick
+                      ? "border-2 border-neon-cyan bg-neon-cyan/5 shadow-[0_0_30px_oklch(0.78_0.18_200/0.2)]"
+                      : "border-glass-border bg-card"
+                  }`}
+                >
+                  {isBestPick && (
+                    <div className="flex items-center gap-1.5 mb-3">
+                      <Trophy className="h-4 w-4 text-neon-cyan" />
+                      <span className="text-xs font-bold text-neon-cyan uppercase tracking-wider">Top Pick</span>
+                    </div>
+                  )}
+
+                  <img src={product.img} alt={product.name} className="w-full aspect-[4/3] object-cover object-left rounded-xl mb-4 bg-black" />
+                  <h3 className="font-bold text-lg text-foreground">{product.name}</h3>
+                  <p className="text-sm font-bold text-neon-cyan mt-1">Rs {product.price.toLocaleString()}</p>
+
+                  {/* Star ratings */}
+                  <div className="mt-4 flex flex-col gap-2">
+                    {([
+                      { label: "Gaming", stars: ratings.gaming },
+                      { label: "Battery Life", stars: ratings.battery },
+                      { label: "Performance", stars: ratings.performance },
+                      { label: "Portability", stars: ratings.portable },
+                    ] as const).map(({ label, stars }) => (
+                      <div key={label} className="flex items-center justify-between">
+                        <span className="text-xs text-muted-foreground">{label}</span>
+                        <div className="flex gap-0.5">
+                          {[1, 2, 3, 4, 5].map((s) => (
+                            <Star
+                              key={s}
+                              className={`h-3.5 w-3.5 ${
+                                s <= stars ? "fill-neon-cyan text-neon-cyan" : "text-muted-foreground/30"
+                              }`}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Action */}
+                  <Link
+                    to="/product/$productId"
+                    params={{ productId: product.id }}
+                    className={`mt-5 flex w-full items-center justify-center gap-2 rounded-xl py-3 text-sm font-bold transition-all ${
+                      isBestPick
+                        ? "bg-neon-cyan text-background hover:scale-[1.02] shadow-neon-cyan"
+                        : "border border-glass-border text-muted-foreground hover:border-neon-cyan/50 hover:text-foreground"
+                    }`}
+                  >
+                    {isBestPick ? "Buy Now" : "View Details"}
+                    <ArrowRight className="h-3.5 w-3.5" />
+                  </Link>
+
+                  {/* Swap */}
+                  <div className="mt-3 relative">
+                    <button
+                      onClick={() => setActiveDropdown(activeDropdown === slotNum ? null : slotNum)}
+                      className="w-full rounded-lg border border-glass-border px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground hover:bg-foreground/5 transition-all flex items-center justify-center gap-1"
+                    >
+                      <span>Swap laptop</span>
+                      <ChevronDown className={`h-3.5 w-3.5 transition-transform ${activeDropdown === slotNum ? "rotate-180" : ""}`} />
+                    </button>
+                    {activeDropdown === slotNum && (
+                      <div className="absolute left-0 right-0 top-full mt-1 z-50 rounded-xl border border-glass-border bg-card p-2 shadow-elevated">
+                        <div className="max-h-48 overflow-y-auto flex flex-col gap-1">
+                          {productList.map((m) => (
+                            <button
+                              key={m.id}
+                              onClick={() => handleSwapSlot(slotNum, m.id)}
+                              className="rounded-lg px-3 py-2 text-left text-xs text-foreground hover:bg-foreground/10 truncate"
+                            >
+                              {m.name} — Rs {m.price.toLocaleString()}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+        <Footer />
+      </main>
+    );
+  }
 
   return (
     <main className="min-h-screen bg-background text-foreground overflow-x-hidden selection:bg-neon-cyan/30 pt-20 sm:pt-24 pb-24">

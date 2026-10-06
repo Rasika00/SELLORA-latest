@@ -1,12 +1,13 @@
 import { useState, useEffect } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowLeft, Cpu, MemoryStick, Zap, Fingerprint, Shield, Battery, Expand, ShoppingCart, Gauge } from "lucide-react";
+import { ArrowLeft, Cpu, MemoryStick, Zap, Fingerprint, Shield, Battery, Expand, ShoppingCart, Gauge, Check } from "lucide-react";
 import { products, type Product } from "@/data/products";
 import { Navbar } from "@/components/site/Navbar";
 import { Footer } from "@/components/site/Footer";
 import { PerformanceEstimator } from "@/components/site/PerformanceEstimator";
 import { useCart } from "@/context/CartContext";
 import { getProductById } from "@/lib/api/client";
+import { useUIMode } from "@/context/UIModeContext";
 
 export const Route = createFileRoute("/product/$productId")({
   component: ProductDetails,
@@ -18,6 +19,7 @@ function ProductDetails() {
     products.find((p) => p.id === productId)
   );
   const { addToCart } = useCart();
+  const { isSimple } = useUIMode();
 
   useEffect(() => {
     let mounted = true;
@@ -60,6 +62,158 @@ function ProductDetails() {
     product.badgeColor === "cyan" ? "border-neon-cyan/40" :
     product.badgeColor === "purple" ? "border-neon-purple/40" :
     "border-neon-blue/40";
+
+  // Simple Mode plain highlights
+  const getSimpleHighlights = (p: Product): string[] => {
+    const h: string[] = [];
+    const gpu = p.gpu.toLowerCase();
+    const cpu = p.cpu.toLowerCase();
+    const ram = parseInt(p.ram);
+    if (gpu.includes("4080") || gpu.includes("4090") || gpu.includes("4070")) h.push("Great for gaming & creative work");
+    else if (gpu.includes("4060") || gpu.includes("4050")) h.push("Good for gaming");
+    else if (gpu.includes("ada")) h.push("Professional workstation GPU");
+    else h.push("Good for everyday tasks");
+    if (ram >= 32) h.push("Handles heavy multitasking easily");
+    else if (ram >= 16) h.push("Smooth multitasking");
+    if (p.category === "Ultrabook" || cpu.includes("apple") || cpu.includes("m3")) h.push("Lightweight & portable");
+    if (p.category === "Workstation") h.push("Built for professional workloads");
+    const bat = p.batteryWeight || "";
+    const wh = parseInt(bat.match(/(\d+)Wh/)?.[1] || "0");
+    if (wh >= 80) h.push("Long battery life");
+    return h.slice(0, 4);
+  };
+
+  // ──────────────────────────────────────────────────────────
+  // SIMPLE MODE RENDER
+  // ──────────────────────────────────────────────────────────
+  if (isSimple) {
+    const highlights = getSimpleHighlights(product);
+    const suggestions = [...products]
+      .filter((p) => p.id !== product.id)
+      .sort((a, b) => Math.abs(a.price - product.price) - Math.abs(b.price - product.price))
+      .slice(0, 3);
+
+    return (
+      <main className="min-h-screen bg-background text-foreground overflow-x-hidden">
+        <Navbar />
+        <div className="pt-24 pb-32 mx-auto w-full max-w-full px-4 sm:px-8 md:px-12">
+          <Link to="/" className="group mb-6 inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground">
+            <ArrowLeft className="h-4 w-4" /> Back to laptops
+          </Link>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-start">
+            {/* Image */}
+            <div className="rounded-2xl overflow-hidden border border-glass-border bg-black">
+              <img src={product.img} alt={product.name} className="w-full aspect-[4/3] object-cover object-left" />
+            </div>
+
+            {/* Info */}
+            <div className="flex flex-col gap-5">
+              <div>
+                <p className="text-xs font-medium text-neon-cyan uppercase tracking-wider mb-1">{product.badge}</p>
+                <h1 className="font-display text-3xl sm:text-4xl font-black tracking-tight">{product.name}</h1>
+                <p className="text-2xl font-bold text-foreground mt-2">Rs {product.price.toLocaleString()}</p>
+              </div>
+
+              {/* Plain highlights */}
+              <div className="flex flex-col gap-2">
+                {highlights.map((h) => (
+                  <div key={h} className="flex items-center gap-2">
+                    <Check className="h-4 w-4 text-neon-cyan shrink-0" />
+                    <span className="text-sm text-foreground">{h}</span>
+                  </div>
+                ))}
+              </div>
+
+              {/* Buy actions */}
+              <div className="flex flex-col sm:flex-row gap-3 mt-2">
+                <button
+                  onClick={() => addToCart(product)}
+                  className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-card border border-glass-border py-3.5 text-sm font-semibold text-foreground hover:border-neon-cyan/50 hover:text-neon-cyan transition-all"
+                >
+                  <ShoppingCart className="h-4 w-4" />
+                  Add to Cart
+                </button>
+                <Link
+                  to={`/checkout/${product.id}`}
+                  className="flex-1 flex items-center justify-center rounded-xl bg-neon-cyan py-3.5 text-sm font-bold text-background hover:scale-[1.02] transition-all shadow-neon-cyan"
+                >
+                  Buy Now
+                </Link>
+              </div>
+
+              {/* Specs (simple) */}
+              <div className="rounded-xl border border-glass-border bg-card p-4 flex flex-col gap-2.5 mt-2">
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Specs</p>
+                <div className="flex items-center gap-2 text-sm">
+                  <Cpu className="h-4 w-4 text-neon-cyan shrink-0" />
+                  <span className="text-foreground">{product.cpu}</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm">
+                  <MemoryStick className="h-4 w-4 text-neon-cyan shrink-0" />
+                  <span className="text-foreground">{product.ram} RAM</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm">
+                  <Zap className="h-4 w-4 text-neon-cyan shrink-0" />
+                  <span className="text-foreground">{product.gpu}</span>
+                </div>
+                {product.batteryWeight && (
+                  <div className="flex items-center gap-2 text-sm">
+                    <Battery className="h-4 w-4 text-neon-cyan shrink-0" />
+                    <span className="text-foreground">{product.batteryWeight}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Performance Check in Simple Mode */}
+          <div className="mt-16">
+            <h2 className="font-display text-xl font-bold mb-6">Will it handle your tasks?</h2>
+            <PerformanceEstimator initialProductId={product.id} isCompactEmbedded={true} />
+          </div>
+
+          {/* Similar laptops - simplified */}
+          {suggestions.length > 0 && (
+            <div className="mt-16">
+              <h2 className="font-display text-xl font-bold mb-6">Similar laptops</h2>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                {suggestions.map((s) => (
+                  <Link key={s.id} to="/product/$productId" params={{ productId: s.id }} className="flex flex-col rounded-xl border border-glass-border bg-card overflow-hidden hover:border-neon-cyan/40 transition-all">
+                    <img src={s.img} alt={s.name} className="aspect-[4/3] object-cover object-left bg-black" />
+                    <div className="p-3">
+                      <p className="font-semibold text-sm text-foreground truncate">{s.name}</p>
+                      <p className="text-sm font-bold text-neon-cyan mt-0.5">Rs {s.price.toLocaleString()}</p>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Sticky bottom bar */}
+        <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-glass-border bg-background/90 backdrop-blur-xl px-4 py-3">
+          <div className="mx-auto flex items-center justify-between gap-3">
+            <div>
+              <p className="text-xs text-muted-foreground">From</p>
+              <p className="font-bold text-lg text-foreground">Rs {product.price.toLocaleString()}</p>
+            </div>
+            <div className="flex gap-2">
+              <button onClick={() => addToCart(product)} className="rounded-full border border-glass-border px-5 py-2.5 text-sm font-semibold text-foreground hover:border-neon-cyan/50 hover:text-neon-cyan transition-all">
+                Add to Cart
+              </button>
+              <Link to={`/checkout/${product.id}`} className="rounded-full bg-neon-cyan px-6 py-2.5 text-sm font-bold text-background hover:scale-105 transition-all shadow-neon-cyan">
+                Buy Now
+              </Link>
+            </div>
+          </div>
+        </div>
+
+        <Footer />
+      </main>
+    );
+  }
 
   return (
     <main className="min-h-screen bg-background text-foreground overflow-x-hidden selection:bg-neon-cyan/30">

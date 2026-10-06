@@ -30,6 +30,7 @@ import {
   type SoftwareApp,
   type HardwareProfile,
 } from "@/lib/estimatorEngine";
+import { useUIMode } from "@/context/UIModeContext";
 
 interface PerformanceEstimatorProps {
   initialProductId?: string;
@@ -37,6 +38,7 @@ interface PerformanceEstimatorProps {
 }
 
 export function PerformanceEstimator({ initialProductId, isCompactEmbedded = false }: PerformanceEstimatorProps) {
+  const { isSimple } = useUIMode();
   // 1. Software selection state: default to 3 apps (Premiere, Blender, Cyberpunk)
   const [selectedAppIds, setSelectedAppIds] = useState<string[]>([
     "premiere-pro",
@@ -168,6 +170,145 @@ export function PerformanceEstimator({ initialProductId, isCompactEmbedded = fal
   }, [activeCategory]);
 
   const selectedLaptopProduct = products.find((p) => p.id === selectedLaptopId) || defaultLaptop;
+
+  // Simple Mode state
+  const SIMPLE_USE_CASES = [
+    { id: "gaming", label: "Gaming", emoji: "🎮", desc: "Play PC games" },
+    { id: "video", label: "Video Editing", emoji: "🎬", desc: "Edit videos in Premiere, DaVinci" },
+    { id: "programming", label: "Programming", emoji: "💻", desc: "Code, run servers, IDEs" },
+    { id: "browsing", label: "Everyday Browsing", emoji: "🌐", desc: "Web, Office, video calls" },
+    { id: "3d", label: "3D & Design", emoji: "🎨", desc: "Blender, CAD, illustration" },
+  ];
+
+  const [simpleUseCases, setSimpleUseCases] = useState<string[]>([]);
+
+  const getSimpleVerdict = (laptop: Product, useCases: string[]) => {
+    if (useCases.length === 0) return null;
+    const gpuLower = laptop.gpu.toLowerCase();
+    const ramGb = parseInt(laptop.ram);
+    const results: { use: string; ok: boolean; msg: string }[] = [];
+    if (useCases.includes("gaming")) {
+      const ok = gpuLower.includes("4060") || gpuLower.includes("4070") || gpuLower.includes("4080") || gpuLower.includes("4090") || gpuLower.includes("4050");
+      results.push({ use: "Gaming", ok, msg: ok ? `${laptop.name} can handle gaming smoothly.` : `${laptop.name} may struggle with demanding games — consider a model with a dedicated GPU.` });
+    }
+    if (useCases.includes("video")) {
+      const ok = (gpuLower.includes("4070") || gpuLower.includes("4080") || gpuLower.includes("4090") || gpuLower.includes("ada") || gpuLower.includes("apple")) && ramGb >= 16;
+      results.push({ use: "Video Editing", ok, msg: ok ? `${laptop.name} can handle video editing well.` : `${laptop.name} may struggle with video editing — consider upgrading to more RAM or a stronger GPU.` });
+    }
+    if (useCases.includes("programming")) {
+      const ok = ramGb >= 16;
+      results.push({ use: "Programming", ok, msg: ok ? `${laptop.name} is great for programming and development.` : `${laptop.name} may feel slow with many open projects — 16GB+ RAM is recommended.` });
+    }
+    if (useCases.includes("browsing")) {
+      results.push({ use: "Everyday Browsing", ok: true, msg: `${laptop.name} is perfectly suited for everyday browsing and office work.` });
+    }
+    if (useCases.includes("3d")) {
+      const ok = (gpuLower.includes("4070") || gpuLower.includes("4080") || gpuLower.includes("4090") || gpuLower.includes("ada") || gpuLower.includes("apple")) && ramGb >= 32;
+      results.push({ use: "3D & Design", ok, msg: ok ? `${laptop.name} can handle 3D work and design applications.` : `${laptop.name} may struggle with heavy 3D work — consider a workstation model.` });
+    }
+    return results;
+  };
+
+  // ──────────────────────────────────────────────────────────
+  // SIMPLE MODE RENDER
+  // ──────────────────────────────────────────────────────────
+  if (isSimple) {
+    const verdict = getSimpleVerdict(selectedLaptopProduct, simpleUseCases);
+    return (
+      <section
+        id="estimator"
+        className={`relative border-t border-glass-border ${
+          isCompactEmbedded ? "py-12 bg-transparent" : "py-20 md:py-28 bg-background/50"
+        }`}
+      >
+        <div className="mx-auto w-full max-w-2xl px-4 sm:px-6 md:px-8">
+          {/* Header */}
+          {!isCompactEmbedded && (
+            <div className="mb-10 text-center">
+              <p className="text-sm font-medium text-neon-cyan mb-2">Laptop Performance Check</p>
+              <h2 className="font-display text-3xl sm:text-4xl font-black tracking-tight">
+                Will this laptop <span className="text-gradient">handle it?</span>
+              </h2>
+              <p className="mt-3 text-sm text-muted-foreground">
+                Tell us what you want to do and we'll check if your laptop can handle it.
+              </p>
+            </div>
+          )}
+
+          {/* Laptop selector */}
+          <div className="mb-6">
+            <label className="block text-sm font-semibold text-foreground mb-2">Choose a laptop to test:</label>
+            <select
+              value={selectedLaptopId}
+              onChange={(e) => setSelectedLaptopId(e.target.value)}
+              className="w-full rounded-xl border border-glass-border bg-card px-4 py-3 text-sm text-foreground focus:border-neon-cyan focus:outline-none transition-colors"
+            >
+              {products.map((p) => (
+                <option key={p.id} value={p.id}>{p.name} — Rs {p.price.toLocaleString()}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* Use case checkboxes */}
+          <div className="mb-8">
+            <label className="block text-sm font-semibold text-foreground mb-3">What do you want to do with this laptop?</label>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {SIMPLE_USE_CASES.map((uc) => {
+                const checked = simpleUseCases.includes(uc.id);
+                return (
+                  <button
+                    key={uc.id}
+                    type="button"
+                    onClick={() => setSimpleUseCases((prev) => checked ? prev.filter((x) => x !== uc.id) : [...prev, uc.id])}
+                    className={`flex items-center gap-3 rounded-xl border p-4 text-left transition-all ${
+                      checked
+                        ? "border-neon-cyan bg-neon-cyan/10 text-foreground"
+                        : "border-glass-border bg-card text-muted-foreground hover:border-neon-cyan/40 hover:text-foreground"
+                    }`}
+                  >
+                    <span className="text-xl">{uc.emoji}</span>
+                    <div>
+                      <p className={`text-sm font-semibold ${checked ? "text-neon-cyan" : ""}`}>{uc.label}</p>
+                      <p className="text-xs text-muted-foreground">{uc.desc}</p>
+                    </div>
+                    {checked && <Check className="h-4 w-4 text-neon-cyan ml-auto shrink-0" />}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Verdict */}
+          {verdict && verdict.length > 0 && (
+            <div className="flex flex-col gap-3">
+              <h3 className="text-sm font-semibold text-foreground">Results for <strong>{selectedLaptopProduct.name}</strong>:</h3>
+              {verdict.map(({ use, ok, msg }) => (
+                <div
+                  key={use}
+                  className={`flex items-start gap-3 rounded-xl border p-4 ${
+                    ok ? "border-green-500/40 bg-green-500/10" : "border-amber-500/40 bg-amber-500/10"
+                  }`}
+                >
+                  <span className="text-lg shrink-0">{ok ? "✅" : "⚠️"}</span>
+                  <div>
+                    <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-0.5">{use}</p>
+                    <p className={`text-sm font-medium ${ok ? "text-green-400" : "text-amber-400"}`}>{msg}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {simpleUseCases.length === 0 && (
+            <div className="rounded-xl border border-glass-border bg-card p-6 text-center">
+              <p className="text-2xl mb-2">☝️</p>
+              <p className="text-sm text-muted-foreground">Select one or more tasks above to see results.</p>
+            </div>
+          )}
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section

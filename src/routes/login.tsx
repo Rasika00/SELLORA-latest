@@ -5,6 +5,7 @@ import { ArrowRight, Eye, EyeOff, Lock, Mail, User, Phone, MapPin } from "lucide
 import { Navbar } from "@/components/site/Navbar";
 import { Footer } from "@/components/site/Footer";
 import { loginUser, registerUser } from "@/lib/api/client";
+import { useUIMode } from "@/context/UIModeContext";
 
 export const Route = createFileRoute("/login")({
   component: LoginPage,
@@ -81,6 +82,7 @@ function saveRegisteredUser(user: RegisteredUser) {
 
 function LoginPage() {
   const navigate = useNavigate();
+  const { isSimple } = useUIMode();
   const [isSignUp, setIsSignUp] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [firstName, setFirstName] = useState("");
@@ -278,7 +280,7 @@ function LoginPage() {
       <Navbar />
 
       {/* Subtle ambient background glow */}
-      <div className="pointer-events-none absolute left-1/2 top-1/2 -z-10 h-[400px] w-[500px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-neon-cyan/10 blur-[120px]" />
+      {!isSimple && <div className="pointer-events-none absolute left-1/2 top-1/2 -z-10 h-[400px] w-[500px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-neon-cyan/10 blur-[120px]" />}
 
       <div className="mx-auto max-w-md w-full px-4 pt-32 pb-20 flex-1 flex items-center justify-center">
         <div className="w-full rounded-3xl border border-glass-border bg-card/70 p-8 shadow-elevated backdrop-blur-xl">

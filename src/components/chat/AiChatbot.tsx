@@ -30,6 +30,7 @@ import {
 import { Link } from "@tanstack/react-router";
 import { products, type Product } from "@/data/products";
 import { useCart } from "@/context/CartContext";
+import { useUIMode } from "@/context/UIModeContext";
 
 type Message = {
   id: string;
@@ -100,6 +101,7 @@ ${CATALOG_CONTEXT}
 - Stay positive, concise, structured, and warm!`;
 
 export function AiChatbot() {
+  const { isSimple } = useUIMode();
   const [isOpen, setIsOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
@@ -121,7 +123,9 @@ export function AiChatbot() {
     {
       id: "welcome-1",
       sender: "bot",
-      text: "👋 **Hello and welcome to Sellora!** ✨\n\nI'm **Sellora AI**, your personal hardware advisor & website guide. I'm here to make exploring our store effortless and fun!\n\nFeel free to ask me about:\n• 💻 **Laptop recommendations** for gaming, 3D, coding, or video editing\n• ⚔️ **Comparing models** in our Showdown Arena\n• 🛡️ **3-Year Warranty & Express Shipping**\n• 💰 **Prices, discounts & 0% installments**\n• 🗺️ **A quick tour of the website!**\n\nHow can I help you today? 😊",
+      text: isSimple
+        ? "👋 **Hi! Welcome to Sellora!**\n\nI'm here to help you find the perfect laptop. Just tell me what you need it for and I'll point you in the right direction!\n\nFor example, you could ask:\n• 🎮 Which laptop is best for gaming?\n• 💼 I need a laptop for work and study\n• 💰 What's good under Rs 100,000?\n\nWhat can I help you with? 😊"
+        : "👋 **Hello and welcome to Sellora!** ✨\n\nI'm **Sellora AI**, your personal hardware advisor & website guide. I'm here to make exploring our store effortless and fun!\n\nFeel free to ask me about:\n• 💻 **Laptop recommendations** for gaming, 3D, coding, or video editing\n• ⚔️ **Comparing models** in our Showdown Arena\n• 🛡️ **3-Year Warranty & Express Shipping**\n• 💰 **Prices, discounts & 0% installments**\n• 🗺️ **A quick tour of the website!**\n\nHow can I help you today? 😊",
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       actionLinks: [
         { label: "🗺️ Website Tour", url: "#tour", isRoute: false },
@@ -1035,7 +1039,14 @@ export function AiChatbot() {
               {/* Quick Suggestion Chips */}
               <div className="border-t border-glass-border/60 bg-black/30 px-3 py-2 shrink-0 overflow-x-auto [scrollbar-width:none]">
                 <div className="flex gap-1.5 w-max">
-                  {SUGGESTION_CHIPS.map((chip, idx) => (
+                  {(isSimple ? [
+                    "🎮 Best for gaming",
+                    "💼 Best for work & study",
+                    "💰 Under Rs 100,000",
+                    "🖥️ Help me pick a laptop",
+                    "🔋 Good battery life",
+                    "📞 Talk to support",
+                  ] : SUGGESTION_CHIPS).map((chip, idx) => (
                     <button
                       key={idx}
                       onClick={() => handleSend(chip)}
@@ -1047,6 +1058,7 @@ export function AiChatbot() {
                   ))}
                 </div>
               </div>
+
 
               {/* Chat Input Bar */}
               <div className="border-t border-glass-border bg-black/50 p-2.5 sm:p-3 shrink-0">

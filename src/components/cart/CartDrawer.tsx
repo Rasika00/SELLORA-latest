@@ -2,11 +2,13 @@ import { X, Trash2, Plus, Minus, ShoppingCart, ArrowRight } from "lucide-react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useCart } from "@/context/CartContext";
 import { useEffect, useRef } from "react";
+import { useUIMode } from "@/context/UIModeContext";
 
 export function CartDrawer() {
   const { items, isCartOpen, setIsCartOpen, updateQuantity, removeFromCart, cartTotal } = useCart();
   const drawerRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
+  const { isSimple } = useUIMode();
 
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
@@ -42,7 +44,7 @@ export function CartDrawer() {
         <div className="p-6 border-b border-white/10 flex items-center justify-between">
           <h2 className="font-display text-xl font-bold uppercase flex items-center gap-2">
             <ShoppingCart className="w-5 h-5 text-neon-cyan" />
-            Orbital Drop Cart
+            {isSimple ? "Your Cart" : "Orbital Drop Cart"}
           </h2>
           <button 
             onClick={() => setIsCartOpen(false)}

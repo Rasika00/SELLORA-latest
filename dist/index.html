@@ -1,23 +1,67 @@
 <!DOCTYPE html>
-<html lang="en" style="background-color: #060913; color: #ffffff;">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="icon" type="image/png" href="/logo.png" />
-    <title>SELLORA</title>
-    <style>
-      html, body {
-        background-color: #060913;
-        color: #ffffff;
-        margin: 0;
-        padding: 0;
-        overflow-x: hidden;
-      }
-    </style>
-    <script type="module" crossorigin src="/assets/index-BiznpGz6.js"></script>
-    <link rel="stylesheet" crossorigin href="/assets/styles-C0ITp3HA.css">
-  </head>
-  <body style="background-color: #060913;">
-    <div id="root"></div>
-  </body>
+<html lang="en" class="dark" data-theme="dark">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/png" href="/logo.png" />
+  <title>SELLORA | Next-Gen Computing. Unleashed.</title>
+  <script>
+    (function () {
+      try {
+        var t = localStorage.getItem('sellora_theme');
+        var isLight = t === 'light';
+        var doc = document.documentElement;
+        if (isLight) {
+          doc.classList.remove('dark');
+          doc.classList.add('light');
+          doc.setAttribute('data-theme', 'light');
+          doc.style.backgroundColor = '#F5F6F8';
+          doc.style.color = '#172033';
+          doc.style.backgroundColor = '#FFFFFF';
+          doc.style.color = '#111827';
+        } else {
+          doc.classList.remove('light');
+          doc.classList.add('dark');
+          doc.setAttribute('data-theme', 'dark');
+          doc.style.colorScheme = 'dark';
+          doc.style.backgroundColor = '#060911';
+          doc.style.color = '#FFFFFF';
+        }
+      } catch (e) { }
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Orbitron:wght@600;700;800;900&family=Space+Grotesk:wght@500;600;700&display=swap"
+    rel="stylesheet" />
+  <style>
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      overflow-x: hidden;
+    }
+
+    html.dark,
+    html.dark body {
+      background-color: #060911;
+      color: #ffffff;
+    }
+
+    html.light,
+    html.light body {
+      background-color: #FFFFFF;
+      color: #111827;
+    }
+  </style>
+  <script type="module" crossorigin src="/assets/index-We2KNp0b.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/styles-Bm2rT0-w.css">
+</head>
+
+<body>
+  <div id="root"></div>
+</body>
+
 </html>

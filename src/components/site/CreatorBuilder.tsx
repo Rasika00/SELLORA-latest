@@ -1,6 +1,8 @@
 import { Check, Building2 } from "lucide-react";
+import { useUIMode } from "@/context/UIModeContext";
 
 export function CreatorBuilder() {
+  const { isSimple } = useUIMode();
   const companies = [
     {
       name: "Apple",
@@ -47,16 +49,20 @@ export function CreatorBuilder() {
     <section id="creator" className="relative py-24 md:py-32 border-t border-glass-border">
       <div className="mx-auto w-full max-w-full px-4 sm:px-8 md:px-12">
 
-        {/* Simple Clean Header */}
+        {/* Header */}
         <div className="mb-12 text-center max-w-2xl mx-auto">
-          <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-neon-purple/40 bg-neon-purple/10 px-3.5 py-1 text-[10px] font-mono font-bold tracking-[0.25em] text-neon-purple uppercase">
-            <Building2 className="h-3 w-3" /> Industry Partners
-          </div>
+          {!isSimple && (
+            <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-neon-purple/40 bg-neon-purple/10 px-3.5 py-1 text-[10px] font-mono font-bold tracking-[0.25em] text-neon-purple uppercase">
+              <Building2 className="h-3 w-3" /> Industry Partners
+            </div>
+          )}
           <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-black uppercase tracking-tight text-foreground">
-            Our Brand <span className="text-gradient">Ecosystem</span>
+            {isSimple ? "Top laptop " : "Our Brand "}<span className="text-gradient">{isSimple ? "brands" : "Ecosystem"}</span>
           </h2>
           <p className="mt-3 text-sm md:text-base text-muted-foreground">
-            We partner with the world's most innovative technology companies to bring you purpose-built machines for 3D rendering, AI engineering, and cinematic editing.
+            {isSimple
+              ? "We work with the world's most trusted laptop brands to bring you the best machines."
+              : "We partner with the world's most innovative technology companies to bring you purpose-built machines for 3D rendering, AI engineering, and cinematic editing."}
           </p>
         </div>
 
@@ -87,7 +93,8 @@ export function CreatorBuilder() {
                     {company.desc}
                   </p>
 
-                  {/* Company Stats List */}
+                  {/* Company Stats List - hidden in Simple Mode */}
+                  {!isSimple && (
                   <ul className="mt-6 space-y-3 border-t border-glass-border pt-6 text-xs text-muted-foreground">
                     {company.stats.map((stat) => (
                       <li key={stat} className="flex items-start gap-3">
@@ -98,6 +105,7 @@ export function CreatorBuilder() {
                       </li>
                     ))}
                   </ul>
+                  )}
                 </div>
               </div>
             );

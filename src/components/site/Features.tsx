@@ -10,6 +10,7 @@ import {
   CheckCircle2, 
   type LucideIcon 
 } from "lucide-react";
+import { useUIMode } from "@/context/UIModeContext";
 
 type Feature = {
   icon: LucideIcon;
@@ -98,6 +99,30 @@ const iconBg = {
 };
 
 export function Features() {
+  const { isSimple } = useUIMode();
+
+  // Simple Mode friendly versions of spec and desc
+  const simpleFeatures = [
+    { icon: Monitor, title: "Brilliant Display", spec: "Crystal clear OLED screen", desc: "Sharp, vivid colors that look amazing for work, movies, and gaming.", accent: "cyan" as const },
+    { icon: Cpu, title: "Powerful Graphics", spec: "Top-end GPU", desc: "Handles games, video editing, and design without slowing down.", accent: "purple" as const },
+    { icon: Snowflake, title: "Stays Cool", spec: "Advanced cooling", desc: "Keeps the laptop from overheating even during heavy tasks.", accent: "blue" as const },
+    { icon: MemoryStick, title: "Lots of RAM", spec: "Up to 128GB memory", desc: "Run many apps at once without your laptop feeling slow.", accent: "cyan" as const },
+    { icon: HardDrive, title: "Super-fast Storage", spec: "Up to 4TB SSD", desc: "Files, apps, and games load instantly. No waiting around.", accent: "purple" as const },
+    { icon: Shield, title: "Solid Build", spec: "Aluminum body", desc: "Lightweight yet tough — built to last wherever you take it.", accent: "blue" as const },
+    { icon: Keyboard, title: "Great Keyboard", spec: "RGB backlit keys", desc: "Comfortable to type on with colored backlighting for night use.", accent: "cyan" as const },
+    { icon: Zap, title: "All-day Power", spec: "Large battery", desc: "Long-lasting battery and fast Wi-Fi keep you connected all day.", accent: "purple" as const },
+  ];
+
+  const simpleStandards = [
+    { label: "Clean software, no bloatware", desc: "Ready to use right out of the box" },
+    { label: "3 Year Warranty", desc: "Full support, no extra cost" },
+    { label: "Dust-free assembly", desc: "Built in a controlled environment" },
+    { label: "Certified for professionals", desc: "Verified for Adobe, Autodesk & more" },
+  ];
+
+  const displayFeatures = isSimple ? simpleFeatures : features;
+  const displayStandards = isSimple ? simpleStandards : standards;
+
   return (
     <section id="features" className="relative py-24 md:py-32 border-t border-glass-border">
       <div className="absolute inset-0 -z-10 bg-grid-sm opacity-30 [mask-image:radial-gradient(ellipse_at_center,black_20%,transparent_70%)]" />
@@ -105,19 +130,21 @@ export function Features() {
       <div className="mx-auto w-full max-w-full px-4 sm:px-8 md:px-12">
         <div className="mx-auto max-w-2xl text-center">
           <p className="font-display text-xs tracking-[0.3em] text-neon-cyan">
-            TECH &amp; WORKSTATION ARCHITECTURE
+            {isSimple ? "WHAT'S INSIDE" : "TECH & WORKSTATION ARCHITECTURE"}
           </p>
           <h2 className="font-display mt-3 text-3xl sm:text-4xl md:text-5xl font-black uppercase tracking-tight">
             Built from the <span className="text-gradient">silicon up</span>
           </h2>
           <p className="mt-4 text-sm md:text-base text-muted-foreground">
-            Every component re-engineered. Simple, uncompromising specifications designed for heavy workstation workloads and professional creators.
+            {isSimple
+              ? "Every laptop is built with quality components. Here's what makes them great."
+              : "Every component re-engineered. Simple, uncompromising specifications designed for heavy workstation workloads and professional creators."}
           </p>
         </div>
 
-        {/* 8-Card Simple Specs Grid */}
+        {/* 8-Card Specs Grid */}
         <div className="mt-16 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {features.map((f) => {
+          {displayFeatures.map((f) => {
             const Icon = f.icon;
             return (
               <div
@@ -140,10 +167,10 @@ export function Features() {
           })}
         </div>
 
-        {/* Simple Workstation Standards Bar */}
+        {/* Standards Bar */}
         <div className="mt-16 rounded-2xl border border-glass-border bg-black/40 p-6 sm:p-8 backdrop-blur-xl">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {standards.map((s) => (
+            {displayStandards.map((s) => (
               <div key={s.label} className="flex items-start gap-3">
                 <CheckCircle2 className="h-5 w-5 text-neon-cyan shrink-0 mt-0.5" />
                 <div>

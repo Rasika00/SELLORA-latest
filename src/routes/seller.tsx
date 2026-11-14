@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { getCurrentUser, setCurrentUser, logout, type UserSession } from "@/lib/auth";
+import { useUIMode } from "@/context/UIModeContext";
 import {
   getSellerStats,
   getSellerProducts,
@@ -66,6 +67,7 @@ export const Route = createFileRoute("/seller")({
 
 export function SellerHubView() {
   const navigate = useNavigate();
+  const { mode, toggleMode } = useUIMode();
   const [user, setUser] = useState<UserSession | null>(null);
   const [mounted, setMounted] = useState(false);
   const [activeTab, setActiveTab] = useState<"dashboard" | "inventory" | "orders" | "earnings" | "settings">("dashboard");
@@ -506,6 +508,21 @@ export function SellerHubView() {
 
         {/* Right Header Navigation & Profile */}
         <div className="flex items-center gap-3 sm:gap-4">
+          {/* UI Mode Toggle (HUD vs Simple) */}
+          <button
+            type="button"
+            onClick={toggleMode}
+            id="seller-ui-mode-toggle"
+            aria-label={`Switch to ${mode === "hud" ? "simple" : "HUD"} mode`}
+            title={`Current: ${mode.toUpperCase()} mode. Click to switch.`}
+            className="flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 hover:border-neon-cyan/50 px-2.5 py-1 text-xs text-muted-foreground transition-all shrink-0 cursor-pointer"
+          >
+            <Layers className={`h-3.5 w-3.5 ${mode === "hud" ? "text-neon-cyan" : "text-neon-purple"} transition-transform hover:scale-110`} />
+            <span className="font-mono text-[10px] uppercase font-bold tracking-wider hidden sm:inline">
+              {mode === "hud" ? <span className="text-neon-cyan">HUD</span> : <span className="text-neon-purple">SIMPLE</span>}
+            </span>
+          </button>
+
           <button
             onClick={handleRefresh}
             disabled={refreshing}

@@ -1,40 +1,52 @@
 import { ShieldCheck, Download, Globe, ArrowRight, LifeBuoy, MessageSquare } from "lucide-react";
+import { useUIMode } from "@/context/UIModeContext";
 
 export function Support() {
+  const { isSimple } = useUIMode();
+
   const supportCards = [
     {
       icon: MessageSquare,
-      title: "Direct Engineer Access",
-      tag: "24/7 Concierge",
-      desc: "Connect via live video or encrypted terminal directly with the orbital engineering team who calibrated your silicon.",
+      title: isSimple ? "Chat with us anytime" : "Direct Engineer Access",
+      tag: isSimple ? "24/7 Support" : "24/7 Concierge",
+      desc: isSimple
+        ? "Got a question? Our team is available 24/7 to help you choose the right laptop or fix any issues."
+        : "Connect via live video or encrypted terminal directly with the orbital engineering team who calibrated your silicon.",
       accent: "cyan" as const,
       link: "https://google.com",
     },
     {
       icon: ShieldCheck,
-      title: "3 Year Orbital Warranty",
-      tag: "Zero Cost",
-      desc: "Comprehensive global coverage with express air courier pickup and clean room thermal repasting.",
+      title: isSimple ? "3 Year Warranty included" : "3 Year Orbital Warranty",
+      tag: isSimple ? "Free" : "Zero Cost",
+      desc: isSimple
+        ? "Every Sellora laptop comes with a 3 year warranty. If something breaks, we'll fix or replace it at no cost to you."
+        : "Comprehensive global coverage with express air courier pickup and clean room thermal repasting.",
       accent: "purple" as const,
       link: "https://google.com",
     },
     {
       icon: Download,
-      title: "Driver & BIOS Vault",
-      tag: "Studio Verified",
-      desc: "Download ISV certified GPU studio drivers, custom fan curves, and unlocked overclocking BIOS profiles.",
+      title: isSimple ? "Easy software updates" : "Driver & BIOS Vault",
+      tag: isSimple ? "Always updated" : "Studio Verified",
+      desc: isSimple
+        ? "Download the latest drivers and updates in one click. We make sure your laptop always runs at its best."
+        : "Download ISV certified GPU studio drivers, custom fan curves, and unlocked overclocking BIOS profiles.",
       accent: "blue" as const,
       link: "https://google.com",
     },
     {
       icon: Globe,
-      title: "Global Service Hubs",
+      title: isSimple ? "Help wherever you are" : "Global Service Hubs",
       tag: "45 Countries",
-      desc: "Locate certified orbital service centers or request next day on site replacement at your studio.",
+      desc: isSimple
+        ? "Find a service center near you or request a home visit. We have support teams in 45+ countries."
+        : "Locate certified orbital service centers or request next day on site replacement at your studio.",
       accent: "cyan" as const,
       link: "https://google.com",
     },
   ];
+
 
   const glow = {
     cyan: "border-neon-cyan/40 bg-neon-cyan/5 text-neon-cyan shadow-[0_0_25px_oklch(0.78_0.18_200/0.15)]",
@@ -56,14 +68,18 @@ export function Support() {
         
         {/* Header */}
         <div className="mx-auto max-w-2xl text-center mb-16">
+          {!isSimple && (
           <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-neon-cyan/40 bg-neon-cyan/10 px-3.5 py-1 text-[10px] font-mono font-bold tracking-[0.25em] text-neon-cyan uppercase">
             <LifeBuoy className="h-3 w-3 animate-pulse" /> Orbital ProCare
           </div>
+          )}
           <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-black uppercase tracking-tight text-foreground">
-            We Stand Behind <span className="text-gradient">Every Rig</span>
+            {isSimple ? "We're here to " : "We Stand Behind "}<span className="text-gradient">{isSimple ? "help you" : "Every Rig"}</span>
           </h2>
           <p className="mt-3 text-sm md:text-base text-muted-foreground">
-            Uncompromising global concierge support. Access studio drivers, check your 3 year warranty status, or connect directly with our engineering team.
+            {isSimple
+              ? "Got questions? Need help? Our team is here to support you before, during, and after your purchase."
+              : "Uncompromising global concierge support. Access studio drivers, check your 3 year warranty status, or connect directly with our engineering team."}
           </p>
         </div>
 

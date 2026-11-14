@@ -1,8 +1,10 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
-import { Menu, X, Search, ShoppingCart, User, ShieldCheck, Gauge, Sun, Moon, Scale, Store, LogOut } from "lucide-react";
+import { Menu, X, Search, ShoppingCart, User, ShieldCheck, Gauge, Sun, Moon, Scale, Store, LogOut, Layers } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { useTheme } from "@/context/ThemeContext";
+import { useSearch } from "@/context/SearchContext";
+import { useUIMode } from "@/context/UIModeContext";
 import { getCurrentUser, logout, type UserSession } from "@/lib/auth";
 
 export function Navbar() {
@@ -10,6 +12,8 @@ export function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { itemCount, setIsCartOpen } = useCart();
   const { theme, toggleTheme } = useTheme();
+  const { openSearch } = useSearch();
+  const { mode, toggleMode } = useUIMode();
   const [currentUser, setCurrentUser] = useState<UserSession | null>(null);
 
   useEffect(() => {
@@ -90,6 +94,29 @@ export function Navbar() {
 
         {/* Right Actions */}
         <div className="flex items-center gap-1 sm:gap-2 shrink-0">
+          {/* Desktop Smart Search Bar Button */}
+          <button
+            type="button"
+            onClick={() => openSearch()}
+            className="hidden md:flex items-center gap-2 rounded-full border border-glass-border bg-foreground/5 hover:border-neon-cyan/50 hover:bg-neon-cyan/10 px-3.5 py-1.5 text-xs text-muted-foreground transition-all duration-300 group shadow-inner shrink-0 cursor-pointer"
+            title="Smart Search (Ctrl + K or /)"
+          >
+            <Search className="h-3.5 w-3.5 text-neon-cyan transition-transform group-hover:scale-110" />
+            <span className="font-sans group-hover:text-foreground hidden lg:inline">Search laptops...</span>
+            <span className="font-sans group-hover:text-foreground inline lg:hidden">Search</span>
+          </button>
+
+          {/* Mobile Quick Search Button */}
+          <button
+            type="button"
+            onClick={() => openSearch()}
+            aria-label="Smart Search"
+            title="Smart Search (Ctrl + K)"
+            className="flex md:hidden items-center justify-center rounded-lg p-1.5 text-muted-foreground transition-all hover:bg-foreground/5 hover:text-neon-cyan shrink-0"
+          >
+            <Search className="h-4 w-4 text-neon-cyan" />
+          </button>
+
           {/* Role-Based Dashboard Quick Access */}
           {currentUser?.role === "admin" && (
             <Link
@@ -158,6 +185,21 @@ export function Navbar() {
               </Link>
             </div>
           )}
+
+          {/* UI Mode Toggle (HUD vs Simple) */}
+          <button
+            type="button"
+            onClick={toggleMode}
+            id="ui-mode-toggle"
+            aria-label={`Switch to ${mode === "hud" ? "simple" : "HUD"} mode`}
+            title={`Current: ${mode.toUpperCase()} mode. Click to switch.`}
+            className="flex items-center gap-1.5 rounded-full border border-glass-border bg-foreground/5 hover:border-neon-cyan/50 px-2.5 py-1 text-xs text-muted-foreground transition-all duration-300 shrink-0 cursor-pointer"
+          >
+            <Layers className={`h-3.5 w-3.5 ${mode === "hud" ? "text-neon-cyan" : "text-neon-purple"} transition-transform hover:scale-110`} />
+            <span className="font-mono text-[10px] uppercase font-bold tracking-wider hidden sm:inline">
+              {mode === "hud" ? <span className="text-neon-cyan">HUD</span> : <span className="text-neon-purple">SIMPLE</span>}
+            </span>
+          </button>
 
           {/* Theme Switcher Button */}
           <button
@@ -253,6 +295,28 @@ export function Navbar() {
                 </span>
                 <span className="text-[10px] font-mono uppercase tracking-wider text-neon-cyan bg-neon-cyan/10 px-2 py-0.5 rounded-full border border-neon-cyan/20">
                   {theme.toUpperCase()}
+                </span>
+              </button>
+            </li>
+
+            {/* Mobile HUD / Simple Mode Toggle */}
+            <li className="border-t border-glass-border pt-2">
+              <button
+                type="button"
+                onClick={toggleMode}
+                id="ui-mode-toggle-mobile"
+                className="flex w-full items-center justify-between rounded-xl px-4 py-2.5 text-sm font-medium text-foreground hover:bg-foreground/5 transition-all"
+              >
+                <span className="flex items-center gap-2">
+                  <Layers className="h-4 w-4 text-neon-cyan" />
+                  <span>{mode === "hud" ? "Switch to Simple Mode" : "Switch to HUD Mode"}</span>
+                </span>
+                <span className={`text-[10px] font-mono uppercase tracking-wider px-2 py-0.5 rounded-full border ${
+                  mode === "hud"
+                    ? "text-neon-cyan bg-neon-cyan/10 border-neon-cyan/20"
+                    : "text-neon-purple bg-neon-purple/10 border-neon-purple/20"
+                }`}>
+                  {mode === "hud" ? "HUD" : "SIMPLE"}
                 </span>
               </button>
             </li>

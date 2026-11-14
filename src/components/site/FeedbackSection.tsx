@@ -17,14 +17,17 @@ import {
 } from "lucide-react";
 import { getFeedbacks, submitFeedback, likeFeedback } from "@/lib/api/client";
 import { type FeedbackItem } from "@/data/feedbacks";
+import { useUIMode } from "@/context/UIModeContext";
 
 const categories = ["All", "5 Stars", "Gaming", "Ultrabook", "Workstation"] as const;
 
 export function FeedbackSection() {
+  const { isSimple } = useUIMode();
   const [feedbacks, setFeedbacks] = useState<FeedbackItem[]>([]);
   const [activeTab, setActiveTab] = useState<string>("All");
   const [showForm, setShowForm] = useState(false);
   const [likedMap, setLikedMap] = useState<Record<string, boolean>>({});
+  const [showSimpleFilters, setShowSimpleFilters] = useState(false);
 
   // Form State
   const [name, setName] = useState("");
@@ -368,8 +371,21 @@ export function FeedbackSection() {
         )}
 
         {/* Filter Navigation Tabs */}
-        <div className="mb-8 flex flex-wrap items-center justify-between gap-4 border-b border-glass-border pb-4">
+        <div className="mb-8 border-b border-glass-border pb-4">
+          {isSimple && (
+            <button
+              onClick={() => setShowSimpleFilters(!showSimpleFilters)}
+              className="mb-3 flex items-center gap-2 text-sm text-muted-foreground hover:text-neon-cyan transition-colors"
+            >
+              <Filter className="h-3.5 w-3.5" />
+              <span>More filters</span>
+              <ChevronDown className={`h-3.5 w-3.5 transition-transform ${showSimpleFilters ? "rotate-180" : ""}`} />
+            </button>
+          )}
+          {(!isSimple || showSimpleFilters) && (
+        <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="flex flex-wrap items-center gap-2">
+
             {categories.map((tab) => {
               const isActive = activeTab === tab;
               const count = feedbacks.filter((f) => {
@@ -400,6 +416,8 @@ export function FeedbackSection() {
           <p className="text-xs font-mono text-muted-foreground">
             Showing <span className="text-neon-cyan font-bold">{filteredFeedbacks.length}</span> verified telemetry logs
           </p>
+        </div>
+          )}
         </div>
 
         {/* Feedbacks Grid */}

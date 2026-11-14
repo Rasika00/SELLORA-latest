@@ -6,7 +6,6 @@ import { CreatorBuilder } from "@/components/site/CreatorBuilder";
 import { PerformanceEstimator } from "@/components/site/PerformanceEstimator";
 import { ProductGrid } from "@/components/site/ProductGrid";
 import { Support } from "@/components/site/Support";
-import { FeedbackSection } from "@/components/site/FeedbackSection";
 import { Footer } from "@/components/site/Footer";
 
 export const Route = createFileRoute("/")({
@@ -31,8 +30,8 @@ function Index() {
       <Features />
       <Support />
       <PerformanceEstimator />
-      <FeedbackSection />
       <Footer />
     </main>
   );
 }
+

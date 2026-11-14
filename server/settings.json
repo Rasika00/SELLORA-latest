@@ -1,0 +1,17 @@
+{
+  "storeName": "SELLORA",
+  "tagline": "High Performance Laptops & Mobile Workstations",
+  "supportEmail": "support@sellora.dev",
+  "supportPhone": "+94 11 234 5678",
+  "address": "No. 45 Galle Road, Colombo 03, Sri Lanka",
+  "currency": "LKR",
+  "freeShippingThreshold": 500000,
+  "taxRatePercent": 0,
+  "maintenanceMode": false,
+  "maintenanceMessage": "SELLORA is currently undergoing scheduled infrastructure upgrades. Storefront access will resume shortly.",
+  "autoApproveProducts": false,
+  "autoApproveSellers": false,
+  "requireEmailVerification": true,
+  "orderNotifications": true,
+  "security2FA": false
+}

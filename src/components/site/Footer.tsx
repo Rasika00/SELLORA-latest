@@ -1,11 +1,36 @@
+import { Link } from "@tanstack/react-router";
 import { useTheme } from "@/context/ThemeContext";
 
 export function Footer() {
   const { theme } = useTheme();
   const cols = [
-    { title: "Series", links: ["Phantom", "Atelier", "Forge", "Edge", "Strike"] },
-    { title: "Support", links: ["Warranty", "Drivers", "Repair", "Community"] },
-    { title: "Company", links: ["About", "Press", "Careers", "Sustainability"] },
+    {
+      title: "Series",
+      links: [
+        { label: "Phantom Workstations", href: "/#catalog" },
+        { label: "Atelier Pro Rigs", href: "/#catalog" },
+        { label: "Forge Battlegrounds", href: "/#catalog" },
+        { label: "Edge Ultraportables", href: "/#catalog" },
+      ],
+    },
+    {
+      title: "Customer Hub",
+      links: [
+        { label: "Sign In", href: "/login" },
+        { label: "Create Account", href: "/register" },
+        { label: "Track My Orders", href: "/account" },
+        { label: "Rate My Machine", href: "/account" },
+      ],
+    },
+    {
+      title: "Vendors & Partners",
+      links: [
+        { label: "Sell on SELLORA", href: "/seller-register" },
+        { label: "Vendor Hub Console", href: "/seller" },
+        { label: "Admin Console", href: "/admin" },
+        { label: "Escrow & Payout Policy", href: "/#warranty" },
+      ],
+    },
   ];
   return (
     <footer className="relative border-t border-glass-border py-16">
@@ -30,10 +55,10 @@ export function Footer() {
               <p className="font-display text-[10px] tracking-[0.25em] text-neon-cyan">{c.title.toUpperCase()}</p>
               <ul className="mt-4 space-y-2">
                 {c.links.map((l) => (
-                  <li key={l}>
-                    <a href="#" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
-                      {l}
-                    </a>
+                  <li key={l.label}>
+                    <Link to={l.href as any} className="text-sm text-muted-foreground transition-colors hover:text-foreground">
+                      {l.label}
+                    </Link>
                   </li>
                 ))}
               </ul>

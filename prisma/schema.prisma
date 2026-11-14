@@ -24,23 +24,34 @@ model Product {
   specialHighlight String?
   img              String
   detailedSpecs    Json?
+  status           String      @default("APPROVED")
+  seller           User?       @relation("SellerProducts", fields: [sellerId], references: [id])
+  sellerId         String?
   createdAt        DateTime    @default(now())
   updatedAt        DateTime    @updatedAt
   orderItems       OrderItem[]
+  reviews          Review[]
 }
 
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  password  String
-  firstName String?
-  lastName  String?
-  phone     String?
-  address   String?
-  role      String   @default("customer")
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  orders    Order[]
+  id           String    @id @default(cuid())
+  email        String    @unique
+  password     String
+  firstName    String?
+  lastName     String?
+  phone        String?
+  address      String?
+  role         String    @default("customer")
+  storeName    String?
+  storeBio     String?
+  sellerStatus String    @default("NONE")
+  isActive     Boolean   @default(true)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  orders       Order[]
+  products     Product[] @relation("SellerProducts")
+  reviews      Review[]
+  addresses    Address[]
 }
 
 model Order {
@@ -57,6 +68,7 @@ model Order {
   totalAmount     Float
   status          String      @default("PENDING")
   items           OrderItem[]
+  reviews         Review[]
   createdAt       DateTime    @default(now())
   updatedAt       DateTime    @updatedAt
 }
@@ -72,6 +84,22 @@ model OrderItem {
   createdAt DateTime @default(now())
 }
 
+model Review {
+  id        String   @id @default(cuid())
+  rating    Int      @default(5)
+  comment   String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId String
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  orderId   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, productId, orderId])
+}
+
 model Feedback {
   id               String   @id @default(cuid())
   name             String
@@ -84,5 +112,20 @@ model Feedback {
   likes            Int      @default(0)
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
+}
+
+model Address {
+  id            String   @id @default(cuid())
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId        String
+  label         String   @default("Home")
+  recipientName String
+  phone         String
+  streetAddress String
+  city          String
+  postalCode    String?
+  isDefault     Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 }
 

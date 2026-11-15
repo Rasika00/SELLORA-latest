@@ -1,6 +1,5 @@
-import { Play, ArrowRight, Plus, Search, Sparkles } from "lucide-react";
+import { Play, ArrowRight, Plus } from "lucide-react";
 import heroLaptop from "@/assets/hero-laptop-editorial.png";
-import { useSearch } from "@/context/SearchContext";
 
 const metrics = [
   "RTX 5090 READY",
@@ -16,7 +15,6 @@ const metrics = [
 ];
 
 export function Hero() {
-  const { openSearch } = useSearch();
   return (
     <section className="relative isolate overflow-hidden pt-28 md:pt-32">
       {/* Backdrops */}
@@ -90,67 +88,16 @@ export function Hero() {
             and shipped in 3D. Cinematic OLED, desktop class silicon, aerospace grade chassis.
           </p>
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
-            <a
-              href="#products"
-              className="group relative inline-flex items-center justify-center gap-2 rounded-full bg-gradient-primary px-7 py-3.5 text-sm font-semibold text-primary-foreground shadow-neon-cyan transition-transform duration-300 hover:scale-105 w-full sm:w-auto"
-            >
+            <button className="group relative inline-flex items-center justify-center gap-2 rounded-full bg-gradient-primary px-7 py-3.5 text-sm font-semibold text-primary-foreground shadow-neon-cyan transition-transform duration-300 hover:scale-105 w-full sm:w-auto">
               Explore Series
               <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-            </a>
-            <a
-              href="https://res.cloudinary.com/ybzqvcg1/video/upload/v1790518577/Sellora.mp4"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="group inline-flex items-center justify-center gap-2 rounded-full glass-strong px-7 py-3.5 text-sm font-semibold text-foreground neon-border-hover w-full sm:w-auto transition-transform duration-300 hover:scale-105"
-            >
+            </button>
+            <button className="group inline-flex items-center justify-center gap-2 rounded-full glass-strong px-7 py-3.5 text-sm font-semibold text-foreground neon-border-hover w-full sm:w-auto">
               <span className="flex h-6 w-6 items-center justify-center rounded-full bg-gradient-primary">
                 <Play className="h-3 w-3 fill-primary-foreground text-primary-foreground" />
               </span>
               Watch the Film
-            </a>
-          </div>
-        </div>
-
-        {/* Hero Smart Search Bar */}
-        <div className="mx-auto mt-10 max-w-2xl w-full animate-fade-up [animation-delay:0.35s]">
-          <div
-            onClick={() => openSearch()}
-            className="group relative flex items-center justify-between gap-3 rounded-2xl border border-neon-cyan/40 bg-card/85 p-2 sm:p-2.5 backdrop-blur-xl shadow-[0_0_30px_oklch(0.78_0.18_200/0.15)] transition-all duration-300 hover:border-neon-cyan hover:shadow-[0_0_40px_oklch(0.78_0.18_200/0.3)] hover:scale-[1.01] cursor-pointer"
-          >
-            <div className="flex items-center gap-3 pl-2 sm:pl-3 flex-1 min-w-0">
-              <Search className="h-5 w-5 text-neon-cyan shrink-0 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-6" />
-              <span className="text-xs sm:text-sm text-muted-foreground group-hover:text-foreground/90 truncate">
-                Search by GPU, processor, or model (e.g. &ldquo;RTX 4090&rdquo;, &ldquo;MacBook M3 Max&rdquo;)...
-              </span>
-            </div>
-
-            <div className="flex items-center gap-2 shrink-0">
-              <button
-                type="button"
-                className="rounded-xl bg-gradient-to-r from-neon-cyan to-neon-blue px-3.5 sm:px-4 py-2 text-xs font-mono font-bold text-black shadow-neon-cyan transition-transform group-hover:scale-105 flex items-center gap-1.5"
-              >
-                <span>Search</span>
-                <ArrowRight className="h-3.5 w-3.5" />
-              </button>
-            </div>
-          </div>
-
-          {/* Quick Trending spec pills */}
-          <div className="mt-3 flex flex-wrap items-center justify-center gap-2 text-xs text-muted-foreground">
-            <span className="font-mono text-[11px] text-neon-cyan/90 flex items-center gap-1">
-              <Sparkles className="h-3 w-3" />
-              Trending:
-            </span>
-            {["RTX 4090", "MacBook Pro M3", "OLED 240Hz", "Intel Core Ultra 9", "Dual Screen", "Workstation"].map((tag) => (
-              <button
-                key={tag}
-                type="button"
-                onClick={() => openSearch(tag)}
-                className="rounded-full border border-glass-border bg-foreground/5 px-2.5 py-0.5 text-[11px] font-mono text-muted-foreground transition-all hover:border-neon-cyan/40 hover:bg-neon-cyan/10 hover:text-neon-cyan hover:scale-105 cursor-pointer"
-              >
-                {tag}
-              </button>
-            ))}
+            </button>
           </div>
         </div>
 

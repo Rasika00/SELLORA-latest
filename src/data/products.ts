@@ -20,7 +20,21 @@ export type Product = {
   display?: string;
   batteryWeight?: string;
   specialHighlight?: string;
+  stock?: number;
   img: string;
+  status?: "APPROVED" | "PENDING_APPROVAL" | "REJECTED" | string;
+  sellerId?: string | null;
+  seller?: {
+    id: string;
+    storeName?: string | null;
+    storeBio?: string | null;
+    sellerStatus?: string;
+    email?: string;
+    phone?: string | null;
+    address?: string | null;
+    firstName?: string | null;
+    lastName?: string | null;
+  } | null;
   detailedSpecs?: {
     displayTech: string;
     refreshRate: string;

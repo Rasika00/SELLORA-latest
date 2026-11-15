@@ -6,31 +6,13 @@ import {
   Zap, 
   ShieldCheck, 
   Headphones, 
-  Search, 
-  Sparkles,
   Play
 } from "lucide-react";
 import heroLaptop from "@/assets/hero-laptop.png";
-import { useSearch } from "@/context/SearchContext";
-
-const metrics = [
-  "RTX 5090 READY",
-  "OLED 240Hz",
-  "LIQUID COOLING",
-  "INTEL CORE ULTRA 9",
-  "64GB DDR5X",
-  "THUNDERBOLT 5",
-  "MINI LED 4K",
-  "AI NPU 80 TOPS",
-  "VAPOR CHAMBER",
-  "WIFI 7",
-];
 
 export function Hero() {
-  const { openSearch } = useSearch();
-
   return (
-    <section className="relative isolate overflow-hidden pt-24 sm:pt-28 pb-8">
+    <section className="relative isolate overflow-hidden pt-24 sm:pt-28 pb-10">
       {/* Background ambient lighting */}
       <div className="absolute inset-0 -z-20 bg-gradient-hero" />
       <div className="pointer-events-none absolute left-[15%] top-1/4 -z-10 h-72 w-72 rounded-full bg-primary/15 blur-3xl" />
@@ -142,63 +124,6 @@ export function Hero() {
                 />
               </div>
             </div>
-          </div>
-        </div>
-
-        {/* Hero Smart Search Bar */}
-        <div className="mx-auto mt-6 max-w-md w-full animate-fade-up [animation-delay:0.3s]">
-          <div
-            onClick={() => openSearch()}
-            className="group relative flex items-center justify-between gap-2 rounded-full border border-border hover:border-primary/40 bg-card/90 p-1 pl-3 backdrop-blur-xl shadow-card transition-all duration-200 hover:shadow-elevated hover:scale-[1.01] cursor-pointer"
-          >
-            <div className="flex items-center gap-2 pl-0.5 flex-1 min-w-0">
-              <Search className="h-3.5 w-3.5 text-primary shrink-0 transition-transform duration-200 group-hover:scale-110" />
-              <span className="text-[11px] text-foreground/75 group-hover:text-foreground truncate">
-                Search GPU, CPU, or model (e.g. RTX 4090)...
-              </span>
-            </div>
-
-            <div className="flex items-center gap-1.5 shrink-0">
-              <button
-                type="button"
-                className="rounded-full bg-primary px-2.5 py-1 text-[10px] font-mono font-bold text-primary-foreground shadow-sm transition-transform group-hover:scale-105 flex items-center gap-1"
-              >
-                <span>Search</span>
-                <ArrowRight className="h-2.5 w-2.5" />
-              </button>
-            </div>
-          </div>
-
-          {/* Quick Trending spec pills */}
-          <div className="mt-2 flex flex-wrap items-center justify-center gap-1 text-[10px] text-muted-foreground">
-            <span className="font-mono text-[9.5px] text-primary font-bold flex items-center gap-0.5">
-              <Sparkles className="h-2 w-2" />
-              Trending:
-            </span>
-            {["RTX 4090", "MacBook Pro M3", "OLED 240Hz", "Intel Core Ultra 9", "Dual Screen", "Workstation"].map((tag) => (
-              <button
-                key={tag}
-                type="button"
-                onClick={() => openSearch(tag)}
-                className="rounded-full border border-border bg-secondary/60 px-2 py-0.5 text-[9.5px] font-mono text-foreground/80 transition-all hover:border-primary/40 hover:bg-secondary hover:text-foreground cursor-pointer"
-              >
-                {tag}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Scrolling metrics ticker */}
-        <div className="relative mt-8 overflow-hidden border-y border-border py-3 bg-card/30 backdrop-blur-sm [mask-image:linear-gradient(90deg,transparent,black_10%,black_90%,transparent)]">
-          <div className="flex w-max animate-marquee gap-12">
-            {[...metrics, ...metrics].map((m, i) => (
-              <div key={i} className="flex items-center gap-3">
-                <span className="h-1 w-1 rounded-full bg-primary" />
-                <span className="font-mono text-xs tracking-[0.25em] text-muted-foreground">
-                  {m}
-                </span>
-              </div>
-            ))}
           </div>
         </div>
       </div>

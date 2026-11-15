@@ -8,7 +8,7 @@ import {
   Headphones, 
   Play
 } from "lucide-react";
-import { Laptop3D } from "./Laptop3D";
+import heroLaptop from "@/assets/hero-laptop.png";
 
 export function Hero() {
   return (
@@ -113,8 +113,15 @@ export function Hero() {
               <div className="pointer-events-none absolute -left-8 top-1/4 h-64 w-64 rounded-full bg-primary/25 blur-3xl" />
               <div className="pointer-events-none absolute -right-6 top-1/3 h-64 w-64 rounded-full bg-accent/30 blur-3xl" />
 
-              <div className="relative w-full max-w-[680px] xl:max-w-[740px] flex items-center justify-center">
-                <Laptop3D />
+              <div className="relative w-full max-w-[640px] xl:max-w-[700px] flex items-center justify-center">
+                <img
+                  src={heroLaptop}
+                  alt="SELLORA Performance Laptop"
+                  width={1050}
+                  height={590}
+                  className="w-full h-auto max-h-[460px] object-contain drop-shadow-[0_25px_50px_rgba(0,0,0,0.85)] transition-transform duration-500 hover:scale-[1.02]"
+                  loading="eager"
+                />
               </div>
             </div>
           </div>

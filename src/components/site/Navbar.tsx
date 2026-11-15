@@ -83,7 +83,7 @@ export function Navbar() {
               ) : (
                 <a
                   href={l.href}
-                  className="text-xs font-medium text-muted-foreground transition-colors hover:text-foreground tracking-wide"
+                  className="text-xs font-semibold text-foreground/85 transition-colors hover:text-foreground tracking-wide"
                 >
                   {l.label}
                 </a>

@@ -101,56 +101,56 @@
 html.light,
 :root.light,
 .light {
-  /* Enterprise-grade Light Mode (Linear / Stripe / Apple aesthetics) */
+  /* High-Contrast Enterprise Light Mode (Linear / Stripe / Apple aesthetics) */
   --background: oklch(0.985 0.005 250);           /* #F8FAFC - soft off-white canvas */
-  --foreground: oklch(0.16 0.02 260);             /* #0F172A - deep rich charcoal */
+  --foreground: oklch(0.09 0.015 260);            /* #050811 - deep charcoal black for maximum legibility */
 
   --card: oklch(1 0 0 / 0.98);                    /* #FFFFFF - pure crisp content surfaces */
-  --card-foreground: oklch(0.16 0.02 260);
+  --card-foreground: oklch(0.09 0.015 260);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.16 0.02 260);
+  --popover-foreground: oklch(0.09 0.015 260);
 
-  --primary: oklch(0.48 0.16 215);                /* authoritative deep cyan #0891B2 */
+  --primary: oklch(0.42 0.17 215);                /* deep high-contrast cyan #0E7490 */
   --primary-foreground: oklch(1 0 0);
 
-  --secondary: oklch(0.95 0.008 250);             /* #F1F5F9 */
-  --secondary-foreground: oklch(0.20 0.02 260);   /* #1E293B */
+  --secondary: oklch(0.94 0.01 250);              /* #EEF2F6 */
+  --secondary-foreground: oklch(0.12 0.02 260);   /* #0F172A */
 
-  --muted: oklch(0.95 0.008 250);                 /* #F1F5F9 */
-  --muted-foreground: oklch(0.46 0.02 260);       /* #64748B - accessible secondary text */
+  --muted: oklch(0.94 0.01 250);                  /* #EEF2F6 */
+  --muted-foreground: oklch(0.30 0.025 260);      /* #293548 - high-contrast visible text (AAA accessible) */
 
-  --accent: oklch(0.52 0.20 295);                 /* rich violet #7C3AED */
+  --accent: oklch(0.44 0.22 295);                 /* rich deep violet #6D28D9 */
   --accent-foreground: oklch(1 0 0);
 
-  --destructive: oklch(0.55 0.22 25);
+  --destructive: oklch(0.50 0.22 25);
   --destructive-foreground: oklch(1 0 0);
 
-  --border: oklch(0.88 0.01 250 / 0.85);          /* #E2E8F0 - clean neutral hairline border */
-  --input: oklch(0.97 0.006 250);
-  --ring: oklch(0.48 0.16 215);
+  --border: oklch(0.85 0.015 250 / 0.90);         /* #CBD5E1 - crisp neutral border */
+  --input: oklch(0.96 0.006 250);
+  --ring: oklch(0.42 0.17 215);
 
   /* Light mode tuned accents */
-  --neon-cyan: oklch(0.46 0.16 215);              /* #0891B2 */
-  --neon-purple: oklch(0.50 0.20 295);            /* #7C3AED */
-  --neon-blue: oklch(0.46 0.18 255);              /* #2563EB */
+  --neon-cyan: oklch(0.42 0.17 215);              /* #0E7490 */
+  --neon-purple: oklch(0.44 0.22 295);            /* #6D28D9 */
+  --neon-blue: oklch(0.42 0.18 255);              /* #1D4ED8 */
 
-  --glass: oklch(1 0 0 / 0.90);
-  --glass-border: oklch(0.86 0.015 250 / 0.75);   /* neat clean border */
+  --glass: oklch(1 0 0 / 0.92);
+  --glass-border: oklch(0.84 0.02 250 / 0.85);    /* clear crisp border */
 
   /* Light Gradients */
-  --gradient-primary: linear-gradient(135deg, oklch(0.48 0.16 215), oklch(0.50 0.20 295));
-  --gradient-hero: radial-gradient(ellipse at 50% 30%, oklch(0.50 0.20 295 / 0.05), transparent 60%),
-                   radial-gradient(ellipse at 25% 75%, oklch(0.48 0.16 215 / 0.06), transparent 55%);
-  --gradient-glow: radial-gradient(circle, oklch(0.48 0.16 215 / 0.10), transparent 70%);
+  --gradient-primary: linear-gradient(135deg, oklch(0.40 0.17 215), oklch(0.42 0.22 295));
+  --gradient-hero: radial-gradient(ellipse at 50% 30%, oklch(0.44 0.22 295 / 0.06), transparent 60%),
+                   radial-gradient(ellipse at 25% 75%, oklch(0.42 0.17 215 / 0.07), transparent 55%);
+  --gradient-glow: radial-gradient(circle, oklch(0.42 0.17 215 / 0.12), transparent 70%);
 
   /* Light Shadows - soft, clean, Apple-level depth */
-  --shadow-neon-cyan: 0 4px 12px -2px oklch(0.48 0.16 215 / 0.2);
-  --shadow-neon-purple: 0 4px 12px -2px oklch(0.50 0.20 295 / 0.2);
-  --shadow-card: 0 1px 3px rgba(15, 23, 42, 0.04), 0 8px 20px -4px rgba(15, 23, 42, 0.06);
-  --shadow-elevated: 0 12px 28px -6px rgba(15, 23, 42, 0.08), 0 1px 3px rgba(15, 23, 42, 0.04);
+  --shadow-neon-cyan: 0 4px 12px -2px oklch(0.42 0.17 215 / 0.25);
+  --shadow-neon-purple: 0 4px 12px -2px oklch(0.44 0.22 295 / 0.25);
+  --shadow-card: 0 1px 3px rgba(15, 23, 42, 0.05), 0 8px 20px -4px rgba(15, 23, 42, 0.08);
+  --shadow-elevated: 0 12px 28px -6px rgba(15, 23, 42, 0.10), 0 1px 3px rgba(15, 23, 42, 0.05);
 
   /* Grid overlay */
-  --grid-color: oklch(0.16 0.02 260 / 0.03);
+  --grid-color: oklch(0.16 0.02 260 / 0.04);
 }
 
 @layer base {

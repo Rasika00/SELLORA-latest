@@ -944,14 +944,14 @@ function FilterGroup({
   activeCount?: number;
 }) {
   return (
-    <div className="mb-5 border-t border-glass-border pt-4 first:border-t-0 first:pt-0">
+    <div className="mb-5 border-t border-border pt-4 first:border-t-0 first:pt-0">
       <div className="mb-3 flex items-center justify-between">
-        <div className="flex items-center gap-1.5 font-display text-[10px] tracking-[0.25em] text-muted-foreground">
-          {Icon && <Icon className="h-3.5 w-3.5 text-neon-cyan/80" />}
+        <div className="flex items-center gap-1.5 font-display text-[10px] tracking-[0.25em] text-foreground/80 font-bold uppercase">
+          {Icon && <Icon className="h-3.5 w-3.5 text-primary" />}
           <span>{label}</span>
         </div>
         {activeCount > 0 && (
-          <span className="rounded-full bg-neon-cyan/15 text-neon-cyan border border-neon-cyan/30 px-1.5 py-0.2 text-[9px] font-mono font-bold">
+          <span className="rounded-full bg-primary/15 text-primary border border-primary/30 px-1.5 py-0.2 text-[9px] font-mono font-bold">
             {activeCount}
           </span>
         )}
@@ -965,10 +965,10 @@ function Chip({ active, onClick, children }: { active: boolean; onClick: () => v
   return (
     <button
       onClick={onClick}
-      className={`rounded-full border px-3 py-1.5 text-xs transition-all ${
+      className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-all ${
         active
-          ? "border-neon-cyan/60 bg-neon-cyan/15 text-neon-cyan shadow-[0_0_15px_oklch(0.78_0.18_200/0.35)]"
-          : "border-glass-border bg-white/[0.02] text-muted-foreground hover:text-foreground"
+          ? "border-primary bg-primary/15 text-primary font-bold shadow-sm"
+          : "border-border bg-secondary/50 text-foreground hover:bg-secondary hover:border-border-hover"
       }`}
     >
       {children}
@@ -978,9 +978,9 @@ function Chip({ active, onClick, children }: { active: boolean; onClick: () => v
 
 function SpecPill({ icon: Icon, label }: { icon: React.ElementType; label: string }) {
   return (
-    <div className="flex w-full items-center gap-2.5 rounded-lg border border-glass-border bg-white/[0.02] px-3 py-2">
-      <Icon className="h-4 w-4 shrink-0 text-neon-cyan" />
-      <span className="text-[11px] font-medium text-muted-foreground leading-snug">{label}</span>
+    <div className="flex w-full items-center gap-2.5 rounded-lg border border-border bg-secondary/50 px-3 py-1.5">
+      <Icon className="h-3.5 w-3.5 shrink-0 text-primary" />
+      <span className="text-[11px] font-semibold text-foreground leading-snug">{label}</span>
     </div>
   );
 }

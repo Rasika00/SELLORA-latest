@@ -325,9 +325,9 @@ function CompareShowdown() {
                     </div>
                   )}
 
-                  <img src={product.img} alt={product.name} className="w-full aspect-[4/3] object-cover object-left rounded-xl mb-4 bg-black" />
+                  <img src={product.img} alt={product.name} className="w-full aspect-[4/3] object-cover object-left rounded-xl mb-4 bg-secondary/40 border border-border" />
                   <h3 className="font-bold text-lg text-foreground">{product.name}</h3>
-                  <p className="text-sm font-bold text-neon-cyan mt-1">Rs {product.price.toLocaleString()}</p>
+                  <p className="text-sm font-bold text-primary mt-1">Rs {product.price.toLocaleString()}</p>
 
                   {/* Star ratings */}
                   <div className="mt-4 flex flex-col gap-2">
@@ -359,8 +359,8 @@ function CompareShowdown() {
                     params={{ productId: product.id }}
                     className={`mt-5 flex w-full items-center justify-center gap-2 rounded-xl py-3 text-sm font-bold transition-all ${
                       isBestPick
-                        ? "bg-neon-cyan text-background hover:scale-[1.02] shadow-neon-cyan"
-                        : "border border-glass-border text-muted-foreground hover:border-neon-cyan/50 hover:text-foreground"
+                        ? "bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm"
+                        : "border border-border bg-secondary/40 text-foreground font-semibold hover:bg-secondary"
                     }`}
                   >
                     {isBestPick ? "Buy Now" : "View Details"}
@@ -371,19 +371,19 @@ function CompareShowdown() {
                   <div className="mt-3 relative">
                     <button
                       onClick={() => setActiveDropdown(activeDropdown === slotNum ? null : slotNum)}
-                      className="w-full rounded-lg border border-glass-border px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground hover:bg-foreground/5 transition-all flex items-center justify-center gap-1"
+                      className="w-full rounded-lg border border-border bg-secondary/30 px-3 py-1.5 text-xs text-foreground font-medium hover:bg-secondary transition-all flex items-center justify-center gap-1"
                     >
                       <span>Swap laptop</span>
                       <ChevronDown className={`h-3.5 w-3.5 transition-transform ${activeDropdown === slotNum ? "rotate-180" : ""}`} />
                     </button>
                     {activeDropdown === slotNum && (
-                      <div className="absolute left-0 right-0 top-full mt-1 z-50 rounded-xl border border-glass-border bg-card p-2 shadow-elevated">
+                      <div className="absolute left-0 right-0 top-full mt-1 z-50 rounded-xl border border-border bg-card p-2 shadow-elevated">
                         <div className="max-h-48 overflow-y-auto flex flex-col gap-1">
                           {productList.map((m) => (
                             <button
                               key={m.id}
                               onClick={() => handleSwapSlot(slotNum, m.id)}
-                              className="rounded-lg px-3 py-2 text-left text-xs text-foreground hover:bg-foreground/10 truncate"
+                              className="rounded-lg px-3 py-2 text-left text-xs text-foreground hover:bg-secondary font-medium truncate"
                             >
                               {m.name} — Rs {m.price.toLocaleString()}
                             </button>
@@ -577,20 +577,20 @@ function CompareShowdown() {
                             isDropdownOpen ? null : slotNum
                           )
                         }
-                        className="inline-flex items-center gap-1 rounded-lg border border-glass-border bg-white/[0.06] px-2.5 py-1.5 text-xs font-medium text-muted-foreground hover:bg-white/15 hover:text-foreground transition-all"
+                        className="inline-flex items-center gap-1 rounded-lg border border-border bg-secondary/50 px-2.5 py-1.5 text-xs font-semibold text-foreground hover:bg-secondary transition-all"
                       >
                         <span>Swap</span>
                         <ChevronDown
                           className={`h-3.5 w-3.5 transition-transform ${
-                            isDropdownOpen ? "rotate-180 text-neon-cyan" : ""
+                            isDropdownOpen ? "rotate-180 text-primary" : ""
                           }`}
                         />
                       </button>
 
                       {/* Dropdown Menu */}
                       {isDropdownOpen && (
-                        <div className="absolute right-0 top-full mt-2 w-56 rounded-2xl glass-strong p-2 shadow-elevated border border-white/20 z-50 animate-fade-up">
-                          <p className="px-3 py-1.5 font-display text-[10px] tracking-widest text-muted-foreground uppercase border-b border-white/10 mb-1">
+                        <div className="absolute right-0 top-full mt-2 w-56 rounded-2xl bg-card p-2 shadow-elevated border border-border z-50 animate-fade-up">
+                          <p className="px-3 py-1.5 font-display text-[10px] tracking-widest text-muted-foreground uppercase border-b border-border mb-1 font-semibold">
                             Select Model for Slot #{slotNum}
                           </p>
                           <div className="max-h-60 overflow-y-auto flex flex-col gap-1">
@@ -600,8 +600,8 @@ function CompareShowdown() {
                                 onClick={() => handleSwapSlot(slotNum, m.id)}
                                 className={`flex items-center justify-between rounded-xl px-3 py-2 text-left text-xs transition-colors ${
                                   m.id === id
-                                    ? "bg-neon-cyan/20 text-neon-cyan font-bold border border-neon-cyan/40"
-                                    : "text-foreground hover:bg-white/10"
+                                    ? "bg-primary/15 text-primary font-bold border border-primary/30"
+                                    : "text-foreground hover:bg-secondary font-medium"
                                 }`}
                               >
                                 <span className="font-display uppercase tracking-wider truncate">
@@ -620,13 +620,13 @@ function CompareShowdown() {
 
                   {/* Price */}
                   <div className="mt-2 flex items-baseline gap-2">
-                    <span className="font-display text-2xl sm:text-3xl font-black text-neon-cyan">
+                    <span className="font-display text-2xl sm:text-3xl font-black text-primary">
                       Rs {product.price.toLocaleString()}
                     </span>
                   </div>
 
                   {/* Specs List with Icons */}
-                  <div className="mt-5 flex flex-col gap-2.5 border-t border-glass-border pt-4">
+                  <div className="mt-5 flex flex-col gap-2.5 border-t border-border pt-4">
                     {/* Benchmark Score spec row */}
                     <SpecRow
                       icon={Sparkles}
@@ -664,9 +664,9 @@ function CompareShowdown() {
 
                 {/* Special Highlight Box & CTA Button */}
                 <div className="mt-6">
-                  <div className="rounded-xl border border-glass-border bg-white/[0.03] p-3.5 mb-5 group hover:border-neon-cyan/30 transition-colors">
-                    <div className="flex items-center gap-1.5 text-muted-foreground text-[10px] font-mono uppercase tracking-widest">
-                      <Sparkles className="h-3.5 w-3.5 text-neon-cyan shrink-0" />
+                  <div className="rounded-xl border border-border bg-secondary/40 p-3.5 mb-5 group hover:border-primary/40 transition-colors">
+                    <div className="flex items-center gap-1.5 text-muted-foreground text-[10px] font-mono uppercase tracking-widest font-semibold">
+                      <Sparkles className="h-3.5 w-3.5 text-primary shrink-0" />
                       <span>SPECIAL HIGHLIGHT</span>
                     </div>
                     <p className="mt-1 font-sans text-xs sm:text-sm font-bold text-foreground leading-snug">
@@ -680,8 +680,8 @@ function CompareShowdown() {
                     params={{ productId: product.id }}
                     className={`group/btn flex items-center justify-center gap-2 w-full rounded-xl py-3.5 font-display text-xs font-bold uppercase tracking-widest transition-all ${
                       isBestPick
-                        ? "bg-gradient-to-r from-neon-cyan via-neon-blue to-neon-purple text-background shadow-[0_0_25px_oklch(0.78_0.18_200/0.6)] hover:scale-[1.02] font-black"
-                        : "border border-glass-border bg-white/[0.03] text-muted-foreground hover:bg-white/10 hover:text-foreground"
+                        ? "bg-primary text-primary-foreground shadow-elevated hover:bg-primary/90 font-black"
+                        : "border border-border bg-secondary/40 text-foreground font-semibold hover:bg-secondary"
                     }`}
                   >
                     <span>{isBestPick ? "WINNER · CONFIGURE & BUY" : "CONFIGURE & BUY"}</span>

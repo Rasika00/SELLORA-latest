@@ -44,13 +44,13 @@ export function Hero() {
             aria-label="Global hub for performance computing in 3D"
             className="font-display pointer-events-none select-none flex flex-col items-center justify-center w-full mx-auto text-center font-black uppercase leading-[0.82] tracking-[-0.02em] animate-fade-up [animation-delay:0.1s]"
           >
-            <span className="block text-3xl sm:text-5xl md:text-7xl lg:text-8xl xl:text-[7.5rem] text-foreground/95">
+            <span className="block text-3xl sm:text-5xl md:text-7xl lg:text-8xl xl:text-[7.5rem] text-foreground">
               GLOBAL HUB
             </span>
-            <span className="block text-3xl sm:text-5xl md:text-7xl lg:text-8xl xl:text-[7.5rem] text-foreground/90">
+            <span className="block text-3xl sm:text-5xl md:text-7xl lg:text-8xl xl:text-[7.5rem] text-foreground">
               FOR <span className="text-gradient">PERFORMANCE</span>
             </span>
-            <span className="block text-3xl sm:text-5xl md:text-7xl lg:text-8xl xl:text-[7.5rem] text-foreground/85">
+            <span className="block text-3xl sm:text-5xl md:text-7xl lg:text-8xl xl:text-[7.5rem] text-foreground">
               COMPUTING
             </span>
           </h1>
@@ -119,7 +119,7 @@ export function Hero() {
           >
             <div className="flex items-center gap-2 pl-0.5 flex-1 min-w-0">
               <Search className="h-3.5 w-3.5 text-primary shrink-0 transition-transform duration-200 group-hover:scale-110" />
-              <span className="text-[11px] text-muted-foreground group-hover:text-foreground truncate">
+              <span className="text-[11px] text-foreground/75 group-hover:text-foreground truncate">
                 Search GPU, CPU, or model (e.g. RTX 4090)...
               </span>
             </div>
@@ -137,7 +137,7 @@ export function Hero() {
 
           {/* Quick Trending spec pills */}
           <div className="mt-2 flex flex-wrap items-center justify-center gap-1 text-[10px] text-muted-foreground">
-            <span className="font-mono text-[9.5px] text-primary flex items-center gap-0.5">
+            <span className="font-mono text-[9.5px] text-primary font-bold flex items-center gap-0.5">
               <Sparkles className="h-2 w-2" />
               Trending:
             </span>
@@ -146,7 +146,7 @@ export function Hero() {
                 key={tag}
                 type="button"
                 onClick={() => openSearch(tag)}
-                className="rounded-full border border-border bg-secondary/40 px-2 py-0.5 text-[9.5px] font-mono text-muted-foreground transition-all hover:border-primary/40 hover:bg-secondary hover:text-foreground cursor-pointer"
+                className="rounded-full border border-border bg-secondary/60 px-2 py-0.5 text-[9.5px] font-mono text-foreground/80 transition-all hover:border-primary/40 hover:bg-secondary hover:text-foreground cursor-pointer"
               >
                 {tag}
               </button>

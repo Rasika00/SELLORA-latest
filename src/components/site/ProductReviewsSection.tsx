@@ -144,7 +144,7 @@ export function ProductReviewsSection({ productId, productName }: ProductReviews
 
           <div className="flex items-center gap-4">
             <div className="text-right">
-              <div className="text-3xl font-display font-black text-white flex items-center justify-end gap-2">
+              <div className="text-3xl font-display font-black text-foreground flex items-center justify-end gap-2">
                 <span>{reviewData.averageRating > 0 ? reviewData.averageRating.toFixed(1) : "New"}</span>
                 <Star className="h-6 w-6 text-amber-400 fill-amber-400" />
               </div>
@@ -158,8 +158,8 @@ export function ProductReviewsSection({ productId, productName }: ProductReviews
         {/* Rating Breakdown & Stats */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
           {/* Average Rating Card */}
-          <div className="rounded-2xl glass p-6 border border-white/10 flex flex-col items-center justify-center text-center">
-            <div className="text-5xl font-display font-black text-white mb-2">
+          <div className="rounded-2xl bg-card p-6 border border-border shadow-card flex flex-col items-center justify-center text-center">
+            <div className="text-5xl font-display font-black text-foreground mb-2">
               {reviewData.averageRating > 0 ? reviewData.averageRating.toFixed(1) : "—"}
             </div>
             <div className="flex items-center gap-1 mb-2 text-amber-400">
@@ -177,14 +177,14 @@ export function ProductReviewsSection({ productId, productName }: ProductReviews
             <div className="text-xs font-mono text-muted-foreground">
               Based on {reviewData.totalCount} customer ratings
             </div>
-            <div className="mt-4 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-[11px] font-mono flex items-center gap-1.5">
+            <div className="mt-4 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-300 text-[11px] font-mono flex items-center gap-1.5 font-semibold">
               <CheckCircle2 className="h-3.5 w-3.5" />
               <span>100% Verified Delivery Receipts</span>
             </div>
           </div>
 
           {/* Star Distribution Bars */}
-          <div className="lg:col-span-2 rounded-2xl glass p-6 border border-white/10 space-y-2.5 flex flex-col justify-center">
+          <div className="lg:col-span-2 rounded-2xl bg-card p-6 border border-border shadow-card space-y-2.5 flex flex-col justify-center">
             {[5, 4, 3, 2, 1].map((stars) => {
               const count = reviewData.distribution[stars] || 0;
               const percent = reviewData.totalCount > 0 ? (count / reviewData.totalCount) * 100 : 0;
@@ -194,9 +194,9 @@ export function ProductReviewsSection({ productId, productName }: ProductReviews
                     <span>{stars}</span>
                     <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
                   </span>
-                  <div className="flex-1 h-2 rounded-full bg-white/10 overflow-hidden">
+                  <div className="flex-1 h-2 rounded-full bg-secondary overflow-hidden">
                     <div
-                      className="h-full bg-gradient-to-r from-neon-cyan to-neon-purple rounded-full transition-all duration-500"
+                      className="h-full bg-gradient-to-r from-primary to-accent rounded-full transition-all duration-500"
                       style={{ width: `${percent}%` }}
                     />
                   </div>
@@ -210,15 +210,15 @@ export function ProductReviewsSection({ productId, productName }: ProductReviews
         {/* Verified Review Submission Form (Only shown to buyers who ordered this laptop) */}
         {user ? (
           eligibility.eligible ? (
-            <div className="mb-12 rounded-3xl glass p-6 sm:p-8 border border-neon-cyan/30 shadow-[0_0_30px_rgba(0,242,254,0.1)] relative overflow-hidden animate-fade-in">
-              <div className="pointer-events-none absolute -top-24 -right-24 h-64 w-64 rounded-full bg-neon-cyan/15 blur-[90px]" />
+            <div className="mb-12 rounded-3xl bg-card p-6 sm:p-8 border border-primary/30 shadow-card relative overflow-hidden animate-fade-in">
+              <div className="pointer-events-none absolute -top-24 -right-24 h-64 w-64 rounded-full bg-primary/10 blur-[90px]" />
 
               <div className="relative z-10">
-                <div className="flex items-center gap-2 mb-2 text-neon-cyan font-mono text-xs">
+                <div className="flex items-center gap-2 mb-2 text-primary font-mono text-xs font-semibold">
                   <PackageCheck className="h-4 w-4" />
                   <span>Verified Purchase Detected &bull; Order {eligibility.orderNumber}</span>
                 </div>
-                <h4 className="text-xl font-display font-bold text-white mb-2">
+                <h4 className="text-xl font-display font-bold text-foreground mb-2">
                   Share Your Verified Review for {productName}
                 </h4>
                 <p className="text-xs text-muted-foreground mb-6">
@@ -226,15 +226,15 @@ export function ProductReviewsSection({ productId, productName }: ProductReviews
                 </p>
 
                 {submitError && (
-                  <div className="mb-4 p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs flex items-center gap-2">
-                    <AlertTriangle className="h-4 w-4 shrink-0 text-rose-400" />
+                  <div className="mb-4 p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-500 text-xs flex items-center gap-2">
+                    <AlertTriangle className="h-4 w-4 shrink-0 text-rose-500" />
                     <span>{submitError}</span>
                   </div>
                 )}
 
                 {submitSuccess && (
-                  <div className="mb-4 p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs flex items-center gap-2">
-                    <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-400" />
+                  <div className="mb-4 p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-300 text-xs flex items-center gap-2">
+                    <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-500" />
                     <span>Thank you! Your verified hardware review is now published.</span>
                   </div>
                 )}
@@ -259,12 +259,12 @@ export function ProductReviewsSection({ productId, productName }: ProductReviews
                             className={`h-7 w-7 transition-colors ${
                               star <= (hoverRating || rating)
                                 ? "fill-amber-400 text-amber-400"
-                                : "text-white/20"
+                                : "text-muted-foreground/30"
                             }`}
                           />
                         </button>
                       ))}
-                      <span className="text-xs font-mono text-amber-400 font-bold ml-2">
+                      <span className="text-xs font-mono text-amber-500 font-bold ml-2">
                         {rating} out of 5 Stars
                       </span>
                     </div>
@@ -281,7 +281,7 @@ export function ProductReviewsSection({ productId, productName }: ProductReviews
                       placeholder="Describe thermal performance, screen accuracy, build quality, gaming FPS, or battery longevity under real load..."
                       value={comment}
                       onChange={(e) => setComment(e.target.value)}
-                      className="w-full bg-black/50 border border-white/10 rounded-xl p-4 text-white placeholder-muted-foreground focus:outline-none focus:border-neon-cyan transition-colors resize-none leading-relaxed"
+                      className="w-full bg-secondary/50 border border-border rounded-xl p-4 text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:border-primary transition-colors resize-none leading-relaxed"
                     />
                   </div>
 
@@ -290,7 +290,7 @@ export function ProductReviewsSection({ productId, productName }: ProductReviews
                     <button
                       type="submit"
                       disabled={isSubmitting}
-                      className="px-6 py-2.5 rounded-xl bg-neon-cyan text-black font-display font-bold uppercase tracking-wider shadow-[0_0_15px_rgba(0,242,254,0.4)] hover:shadow-[0_0_25px_rgba(0,242,254,0.7)] transition-all flex items-center gap-2"
+                      className="px-6 py-2.5 rounded-xl bg-primary text-primary-foreground font-display font-bold uppercase tracking-wider shadow-sm hover:bg-primary/90 transition-all flex items-center gap-2"
                     >
                       <Send className="h-4 w-4" />
                       <span>{isSubmitting ? "Publishing Review..." : "Publish Verified Review"}</span>
@@ -300,20 +300,20 @@ export function ProductReviewsSection({ productId, productName }: ProductReviews
               </div>
             </div>
           ) : eligibility.alreadyReviewed ? (
-            <div className="mb-12 p-4 rounded-2xl bg-white/5 border border-white/10 text-xs text-muted-foreground flex items-center gap-3">
-              <CheckCircle2 className="h-5 w-5 text-emerald-400 shrink-0" />
+            <div className="mb-12 p-4 rounded-2xl bg-secondary/50 border border-border text-xs text-foreground flex items-center gap-3">
+              <CheckCircle2 className="h-5 w-5 text-emerald-500 shrink-0" />
               <span>You have already submitted a verified review for this machine on your completed order.</span>
             </div>
           ) : null
         ) : (
-          <div className="mb-12 p-5 rounded-2xl bg-white/5 border border-white/10 text-xs text-muted-foreground flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="mb-12 p-5 rounded-2xl bg-secondary/50 border border-border text-xs text-muted-foreground flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="flex items-center gap-3">
-              <ShieldCheck className="h-5 w-5 text-neon-cyan shrink-0" />
-              <span>Ordered this laptop? Sign in with your customer account to publish a verified field review.</span>
+              <ShieldCheck className="h-5 w-5 text-primary shrink-0" />
+              <span className="text-foreground">Ordered this laptop? Sign in with your customer account to publish a verified field review.</span>
             </div>
             <a
               href="/login"
-              className="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white font-mono text-xs font-bold transition-all text-center shrink-0"
+              className="px-4 py-2 rounded-xl bg-primary text-primary-foreground font-mono text-xs font-bold transition-all text-center shrink-0 hover:bg-primary/90"
             >
               Sign In to Review
             </a>
@@ -326,21 +326,21 @@ export function ProductReviewsSection({ productId, productName }: ProductReviews
             {reviewData.reviews.map((rev) => (
               <div
                 key={rev.id}
-                className="p-6 rounded-2xl glass border border-white/10 hover:border-white/20 transition-all space-y-3"
+                className="p-6 rounded-2xl bg-card border border-border shadow-card hover:border-primary/30 transition-all space-y-3"
               >
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/5 pb-3">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-border pb-3">
                   <div className="flex items-center gap-3">
-                    <div className="h-9 w-9 rounded-full bg-gradient-to-tr from-neon-cyan/20 to-neon-purple/20 border border-white/10 flex items-center justify-center font-bold text-xs text-neon-cyan font-mono">
+                    <div className="h-9 w-9 rounded-full bg-primary/10 border border-primary/30 flex items-center justify-center font-bold text-xs text-primary font-mono">
                       {(rev.user?.firstName?.[0] || rev.user?.email?.[0] || "U").toUpperCase()}
                     </div>
                     <div>
-                      <div className="text-sm font-bold text-white flex items-center gap-2">
+                      <div className="text-sm font-bold text-foreground flex items-center gap-2">
                         <span>
                           {rev.user?.firstName
                             ? `${rev.user.firstName} ${rev.user.lastName || ""}`.trim()
                             : rev.user?.email?.split("@")[0] || "Verified Operator"}
                         </span>
-                        <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-[10px] font-mono flex items-center gap-1 font-semibold">
+                        <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-300 text-[10px] font-mono flex items-center gap-1 font-semibold">
                           <CheckCircle2 className="h-3 w-3" />
                           <span>Verified Purchase</span>
                         </span>
@@ -355,23 +355,23 @@ export function ProductReviewsSection({ productId, productName }: ProductReviews
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-1 text-amber-400">
+                  <div className="flex items-center gap-1 text-amber-500">
                     {[1, 2, 3, 4, 5].map((s) => (
                       <Star
                         key={s}
                         className={`h-4 w-4 ${
-                          s <= rev.rating ? "fill-amber-400 text-amber-400" : "text-white/20"
+                          s <= rev.rating ? "fill-amber-500 text-amber-500" : "text-muted-foreground/30"
                         }`}
                       />
                     ))}
                   </div>
                 </div>
 
-                <p className="text-xs sm:text-sm text-foreground/90 leading-relaxed font-sans pt-1">
+                <p className="text-xs sm:text-sm text-foreground/90 font-medium leading-relaxed font-sans pt-1">
                   "{rev.comment}"
                 </p>
 
-                <div className="pt-2 flex justify-between items-center text-[11px] font-mono text-muted-foreground/60 border-t border-white/5">
+                <div className="pt-2 flex justify-between items-center text-[11px] font-mono text-muted-foreground border-t border-border">
                   <span>Hardware verified on SELLORA Network</span>
                   <span>{new Date(rev.createdAt).toLocaleDateString()}</span>
                 </div>
@@ -379,9 +379,9 @@ export function ProductReviewsSection({ productId, productName }: ProductReviews
             ))}
           </div>
         ) : (
-          <div className="p-12 rounded-3xl glass border border-dashed border-white/10 text-center">
-            <MessageSquare className="h-12 w-12 text-muted-foreground mx-auto mb-3 opacity-30" />
-            <h4 className="font-display font-bold text-white text-base">No Customer Reviews Yet</h4>
+          <div className="p-12 rounded-3xl bg-card border border-dashed border-border text-center">
+            <MessageSquare className="h-12 w-12 text-muted-foreground mx-auto mb-3 opacity-40" />
+            <h4 className="font-display font-bold text-foreground text-base">No Customer Reviews Yet</h4>
             <p className="text-xs text-muted-foreground mt-1 max-w-sm mx-auto">
               Be the first verified operator to order this machine and publish a field benchmark report.
             </p>

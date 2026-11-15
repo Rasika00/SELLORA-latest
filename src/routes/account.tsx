@@ -5,6 +5,7 @@ import {
   getCustomerOrders,
   getCustomerReviews,
   updateCustomerReview,
+  deleteCustomerReview,
   updateCustomerProfile,
   submitProductReview,
   getCustomerAddresses,
@@ -406,6 +407,26 @@ export function CustomerAccountHub() {
       setEditReviewError(err.message || "Failed to update review.");
     } finally {
       setIsEditingReview(false);
+    }
+  };
+
+  // Delete Customer Review
+  const [deletingReviewId, setDeletingReviewId] = useState<string | null>(null);
+  const handleDeleteReview = async (reviewId: string) => {
+    if (!window.confirm("Are you sure you want to delete this verified review?")) return;
+    setDeletingReviewId(reviewId);
+    try {
+      const res = await deleteCustomerReview(reviewId);
+      if (res.success) {
+        setReviews((prev) => prev.filter((r) => r.id !== reviewId));
+        if (user) await loadCustomerData(user);
+      } else {
+        alert(res.error || "Failed to delete review");
+      }
+    } catch (err: any) {
+      alert(err.message || "Failed to delete review");
+    } finally {
+      setDeletingReviewId(null);
     }
   };
 
@@ -1118,14 +1139,27 @@ export function CustomerAccountHub() {
                               ))}
                             </div>
 
-                            {/* C3.1 Edit Submitted Review Button */}
-                            <button
-                              onClick={() => handleOpenEditReview(rev)}
-                              className="px-3 py-1.5 rounded-xl bg-white/5 hover:bg-neon-cyan/20 text-white hover:text-neon-cyan border border-white/10 text-xs font-mono font-bold flex items-center gap-1.5 transition-all"
-                            >
-                              <Edit2 className="h-3 w-3" />
-                              <span>Edit Review</span>
-                            </button>
+                            {/* Edit & Delete Submitted Review Buttons */}
+                            <div className="flex items-center gap-2">
+                              <button
+                                type="button"
+                                onClick={() => handleOpenEditReview(rev)}
+                                className="px-3 py-1.5 rounded-xl bg-white/5 hover:bg-neon-cyan/20 text-white hover:text-neon-cyan border border-white/10 text-xs font-mono font-bold flex items-center gap-1.5 transition-all cursor-pointer"
+                              >
+                                <Edit2 className="h-3 w-3" />
+                                <span>Edit</span>
+                              </button>
+                              <button
+                                type="button"
+                                disabled={deletingReviewId === rev.id}
+                                onClick={() => handleDeleteReview(rev.id)}
+                                className="px-3 py-1.5 rounded-xl bg-white/5 hover:bg-rose-500/20 text-white hover:text-rose-400 border border-white/10 hover:border-rose-500/30 text-xs font-mono font-bold flex items-center gap-1.5 transition-all cursor-pointer disabled:opacity-50"
+                                title="Delete Review"
+                              >
+                                <Trash2 className="h-3 w-3" />
+                                <span>{deletingReviewId === rev.id ? "Deleting..." : "Delete"}</span>
+                              </button>
+                            </div>
                           </div>
                         </div>
 
@@ -1153,9 +1187,6 @@ export function CustomerAccountHub() {
                 <div>
                   <h2 className="text-2xl font-display font-bold text-white flex items-center gap-3">
                     <span>Customer Profile &amp; Delivery Settings</span>
-                    <span className="text-xs px-2.5 py-0.5 rounded-full bg-neon-cyan/20 text-neon-cyan font-mono border border-neon-cyan/40">
-                      C1.1
-                    </span>
                   </h2>
                   <p className="text-xs text-muted-foreground mt-1">
                     Manage your contact credentials and default shipping destination.

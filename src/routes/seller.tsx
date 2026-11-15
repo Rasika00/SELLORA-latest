@@ -692,10 +692,6 @@ export function SellerHubView() {
                   <div>
                     <h2 className="text-2xl font-display font-bold text-white flex items-center gap-3">
                       <span>{user.storeName || "Vendor"} Operating Center</span>
-                      <span className="text-xs px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-mono border border-emerald-500/40 flex items-center gap-1.5">
-                        <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
-                        Live Store Feed
-                      </span>
                     </h2>
                     <p className="text-xs text-muted-foreground mt-1">
                       Real-time store gross sales, dispatch queue, and machine inventory metrics.
@@ -705,10 +701,10 @@ export function SellerHubView() {
                   <button
                     onClick={handleRefresh}
                     disabled={refreshing}
-                    className="px-3.5 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-xs font-mono text-muted-foreground hover:text-white flex items-center gap-2 transition-colors self-start sm:self-auto"
+                    className="px-3.5 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-xs font-mono text-muted-foreground hover:text-white flex items-center gap-2 transition-colors self-start sm:self-auto cursor-pointer"
                   >
                     <RefreshCw className={`h-3.5 w-3.5 ${refreshing ? "animate-spin text-neon-cyan" : ""}`} />
-                    <span>Refresh Telemetry</span>
+                    <span>Refresh</span>
                   </button>
                 </div>
 
@@ -1425,9 +1421,6 @@ export function SellerHubView() {
                 <div>
                   <h2 className="text-2xl font-display font-bold text-white flex items-center gap-3">
                     <span>Storefront Profile &amp; Branding Settings</span>
-                    <span className="text-xs px-2.5 py-0.5 rounded-full bg-neon-cyan/20 text-neon-cyan font-mono border border-neon-cyan/40">
-                      S4.1 Merchant Engine
-                    </span>
                   </h2>
                   <p className="text-xs text-muted-foreground mt-1">
                     Manage your store brand name, hardware bio specialization, partner hotline, and dispatch origin address.
@@ -1622,9 +1615,6 @@ export function SellerHubView() {
                   <div>
                     <h2 className="text-2xl font-display font-bold text-white flex items-center gap-3">
                       <span>Vendor Earnings &amp; Payout Ledger</span>
-                      <span className="text-xs px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-mono border border-emerald-500/40">
-                        S5.1 Payout Engine
-                      </span>
                     </h2>
                     <p className="text-xs text-muted-foreground mt-1">
                       Gross store sales, marketplace commission deductions, cleared bank payouts, and escrow ledger.

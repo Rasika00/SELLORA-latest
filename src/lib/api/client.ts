@@ -1052,6 +1052,17 @@ export async function updateCustomerReview(
   }
 }
 
+export async function deleteCustomerReview(reviewId: string): Promise<{ success: boolean; error?: string }> {
+  try {
+    const res = await fetch(`${API_BASE}/reviews/${reviewId}`, {
+      method: "DELETE",
+    });
+    return await res.json();
+  } catch (err: any) {
+    return { success: false, error: err.message };
+  }
+}
+
 export async function updateCustomerProfile(
   userId: string,
   payload: {

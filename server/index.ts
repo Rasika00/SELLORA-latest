@@ -211,7 +211,7 @@ app.get("/api/products/:id", async (req, res) => {
   try {
     if (process.env.DATABASE_URL) {
       const product = await Promise.race([
-        prisma.product.findUnique({ 
+        prisma.product.findUnique({
           where: { id },
           include: {
             seller: {
@@ -691,14 +691,14 @@ app.post("/api/auth/register", async (req, res) => {
     const assignedRole = email.toLowerCase().includes("admin")
       ? "admin"
       : role === "seller"
-      ? "seller"
-      : "customer";
+        ? "seller"
+        : "customer";
 
     const sellerStatus = assignedRole === "admin"
       ? "APPROVED"
       : assignedRole === "seller"
-      ? "PENDING"
-      : "NONE";
+        ? "PENDING"
+        : "NONE";
 
     const user = await prisma.user.create({
       data: {

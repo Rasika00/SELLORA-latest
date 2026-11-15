@@ -399,10 +399,6 @@ function TabDashboard({
         <div>
           <h2 className="text-2xl font-display font-bold text-white flex items-center gap-3">
             <span>Executive Command Center</span>
-            <span className="text-xs px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-mono border border-emerald-500/40 flex items-center gap-1.5">
-              <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
-              Live PostgreSQL Feed
-            </span>
           </h2>
           <p className="text-xs text-muted-foreground mt-1">
             Real-time platform metrics, revenue tracking, and hardware fleet telemetry.
@@ -412,10 +408,10 @@ function TabDashboard({
         <button
           onClick={fetchStats}
           disabled={isLoading}
-          className="px-3.5 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-xs font-mono text-muted-foreground hover:text-white flex items-center gap-2 transition-colors self-start sm:self-auto"
+          className="px-3.5 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-xs font-mono text-muted-foreground hover:text-white flex items-center gap-2 transition-colors self-start sm:self-auto cursor-pointer"
         >
           <RefreshCw className={`h-3.5 w-3.5 ${isLoading ? "animate-spin text-neon-cyan" : ""}`} />
-          <span>Refresh Telemetry</span>
+          <span>Refresh</span>
         </button>
       </div>
 
@@ -500,77 +496,21 @@ function TabDashboard({
         </div>
       </div>
 
-      {/* Middle Grid: System Nodes & Telemetry */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Real PostgreSQL Cluster Node */}
-        <div className="rounded-2xl border border-white/10 bg-black/40 backdrop-blur-xl p-6 space-y-4">
-          <div className="flex items-center justify-between border-b border-white/10 pb-3">
-            <h3 className="text-base font-display font-bold flex items-center gap-2">
-              <Server className="h-4 w-4 text-neon-cyan" />
-              <span>Database & Cluster Infrastructure</span>
-            </h3>
-            <span className="text-[11px] font-mono text-emerald-400 flex items-center gap-1.5">
-              <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
-              Cluster Active
-            </span>
-          </div>
-
-          <div className="space-y-3">
-            <div className="flex items-center justify-between p-3.5 bg-white/[0.03] rounded-xl border border-white/5">
-              <div className="flex items-center gap-3">
-                <div className="h-2.5 w-2.5 rounded-full bg-neon-cyan animate-pulse" />
-                <div>
-                  <div className="font-semibold text-xs text-white">PostgreSQL Primary Cluster</div>
-                  <div className="text-[10px] text-muted-foreground font-mono">localhost:5432 &bull; selloradb</div>
-                </div>
-              </div>
-              <div className="text-right">
-                <span className="text-xs font-mono font-bold text-neon-cyan">
-                  {stats?.dbStatus?.latencyMs ?? 1} ms
-                </span>
-                <span className="text-[10px] text-muted-foreground block font-mono">Latency</span>
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between p-3.5 bg-white/[0.03] rounded-xl border border-white/5">
-              <div className="flex items-center gap-3">
-                <div className="h-2.5 w-2.5 rounded-full bg-neon-purple animate-pulse" />
-                <div>
-                  <div className="font-semibold text-xs text-white">Prisma Client ORM Engine</div>
-                  <div className="text-[10px] text-muted-foreground font-mono">Version 6.19 &bull; Connection Pool Active</div>
-                </div>
-              </div>
-              <span className="text-xs font-mono text-neon-purple font-bold">Synchronized</span>
-            </div>
-
-            <div className="flex items-center justify-between p-3.5 bg-white/[0.03] rounded-xl border border-white/5">
-              <div className="flex items-center gap-3">
-                <div className="h-2.5 w-2.5 rounded-full bg-emerald-400 animate-pulse" />
-                <div>
-                  <div className="font-semibold text-xs text-white">Express API Core Gateway</div>
-                  <div className="text-[10px] text-muted-foreground font-mono">Port 3001 &bull; REST & Auth Endpoints</div>
-                </div>
-              </div>
-              <span className="text-xs font-mono text-emerald-400 font-bold">100% Online</span>
-            </div>
-          </div>
+      {/* Quick Recent Transactions Feed */}
+      <div className="rounded-2xl border border-white/10 bg-black/40 backdrop-blur-xl p-6 space-y-4">
+        <div className="flex items-center justify-between border-b border-white/10 pb-3">
+          <h3 className="text-base font-display font-bold flex items-center gap-2">
+            <Zap className="h-4 w-4 text-amber-400" />
+            <span>Recent Transactions</span>
+          </h3>
+          <button
+            onClick={() => setActiveTab("orders")}
+            className="text-xs text-neon-cyan hover:underline flex items-center gap-1 font-mono cursor-pointer"
+          >
+            <span>View All</span>
+            <ArrowRight className="h-3 w-3" />
+          </button>
         </div>
-
-        {/* Quick Recent Transactions Feed */}
-        <div className="rounded-2xl border border-white/10 bg-black/40 backdrop-blur-xl p-6 space-y-4">
-          <div className="flex items-center justify-between border-b border-white/10 pb-3">
-            <h3 className="text-base font-display font-bold flex items-center gap-2">
-              <Zap className="h-4 w-4 text-amber-400" />
-              <span>Recent Transactions (PostgreSQL Feed)</span>
-            </h3>
-            <button
-              onClick={() => setActiveTab("orders")}
-              className="text-xs text-neon-cyan hover:underline flex items-center gap-1 font-mono"
-            >
-              <span>View All</span>
-              <ArrowRight className="h-3 w-3" />
-            </button>
-          </div>
 
           <div className="divide-y divide-white/5">
             {recentOrders.map((order: any) => (
@@ -615,7 +555,6 @@ function TabDashboard({
             )}
           </div>
         </div>
-      </div>
     </div>
   );
 }

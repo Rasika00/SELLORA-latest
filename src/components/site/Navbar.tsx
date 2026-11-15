@@ -98,11 +98,11 @@ export function Navbar() {
           <button
             type="button"
             onClick={() => openSearch()}
-            className="hidden md:flex items-center gap-2 rounded-full border border-glass-border bg-foreground/5 hover:border-neon-cyan/50 hover:bg-neon-cyan/10 px-3.5 py-1.5 text-xs text-muted-foreground transition-all duration-300 group shadow-inner shrink-0 cursor-pointer"
+            className="hidden md:flex items-center gap-1.5 rounded-full border border-glass-border bg-foreground/5 hover:border-neon-cyan/50 hover:bg-neon-cyan/10 px-2.5 py-1 text-[11px] text-muted-foreground transition-all duration-300 group shadow-inner shrink-0 cursor-pointer"
             title="Smart Search (Ctrl + K or /)"
           >
-            <Search className="h-3.5 w-3.5 text-neon-cyan transition-transform group-hover:scale-110" />
-            <span className="font-sans group-hover:text-foreground hidden lg:inline">Search laptops...</span>
+            <Search className="h-3 w-3 text-neon-cyan transition-transform group-hover:scale-110" />
+            <span className="font-sans group-hover:text-foreground hidden lg:inline">Search...</span>
             <span className="font-sans group-hover:text-foreground inline lg:hidden">Search</span>
           </button>
 

@@ -117,9 +117,9 @@ export function Hero() {
                 <img
                   src={heroLaptop}
                   alt="SELLORA Performance Laptop"
-                  width={1050}
-                  height={590}
-                  className="w-full h-auto max-h-[460px] object-contain drop-shadow-[0_25px_50px_rgba(0,0,0,0.85)] transition-transform duration-500 hover:scale-[1.02]"
+                  width={1376}
+                  height={768}
+                  className="w-full h-auto max-h-[460px] object-contain drop-shadow-[0_30px_60px_rgba(0,0,0,0.7)] transition-transform duration-500 hover:scale-[1.02]"
                   loading="eager"
                 />
               </div>

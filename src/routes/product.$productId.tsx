@@ -10,18 +10,12 @@ import {
   Battery,
   Expand,
   ShoppingCart,
-  Gauge,
   Check,
-  Store,
-  CheckCircle2,
-  Truck,
-  MapPin,
   Sparkles,
 } from "lucide-react";
 import { products, type Product } from "@/data/products";
 import { Navbar } from "@/components/site/Navbar";
 import { Footer } from "@/components/site/Footer";
-import { PerformanceEstimator } from "@/components/site/PerformanceEstimator";
 import { ProductReviewsSection } from "@/components/site/ProductReviewsSection";
 import { useCart } from "@/context/CartContext";
 import { getProductById } from "@/lib/api/client";
@@ -234,11 +228,6 @@ function ProductDetails() {
             </div>
           )}
 
-          {/* Performance Check in Simple Mode */}
-          <div className="mt-16">
-            <h2 className="font-display text-xl font-bold mb-6">Will it handle your tasks?</h2>
-            <PerformanceEstimator initialProductId={product.id} isCompactEmbedded={true} />
-          </div>
 
           {/* Customer Reviews & Verified Buyer Feedback Section */}
           <div className="mt-16">
@@ -356,91 +345,11 @@ function ProductDetails() {
                 Engineered with {product.processor}. Built for unprecedented performance.
               </p>
 
-              {/* Live Inventory Stock Badge */}
-              <div className="mt-4 flex items-center gap-2 animate-fade-up [animation-delay:0.22s]">
-                {stockCount > 5 ? (
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono font-semibold bg-emerald-500/10 border border-emerald-500/25 text-emerald-500">
-                    <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-                    <span>In Stock: {stockCount} units ready for express dispatch</span>
-                  </span>
-                ) : stockCount > 0 ? (
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono font-semibold bg-amber-500/10 border border-amber-500/25 text-amber-500">
-                    <span className="h-2 w-2 rounded-full bg-amber-500 animate-ping" />
-                    <span>Low Stock: Only {stockCount} units remaining in inventory!</span>
-                  </span>
-                ) : (
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono font-semibold bg-destructive/10 border border-destructive/25 text-destructive">
-                    <span className="h-2 w-2 rounded-full bg-destructive" />
-                    <span>Out of Stock (Currently replenishing)</span>
-                  </span>
-                )}
-              </div>
-
-              {/* Benchmark Quick Badge */}
-              {benchmark && (
-                <div className="mt-3 flex items-center gap-2.5 flex-wrap animate-fade-up [animation-delay:0.23s]">
-                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/25 text-xs font-mono text-primary">
-                    <Sparkles className="h-3.5 w-3.5" />
-                    <span>Benchmark Score: <strong className="text-foreground font-bold">{benchmark.totalScore.toLocaleString()} pts</strong></span>
-                  </div>
-                </div>
-              )}
-
-              <div className="mt-5 flex flex-wrap gap-2.5 animate-fade-up [animation-delay:0.25s]">
-                <a
-                  href="#product-estimator"
-                  className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-2 text-xs font-mono font-bold uppercase tracking-wider text-primary transition-all hover:bg-primary hover:text-primary-foreground shadow-sm"
-                >
-                  <Gauge className="h-3.5 w-3.5" />
-                  <span>Test My Apps on This Machine ↓</span>
-                </a>
-              </div>
-
-              {/* Multi-Seller Merchant & Fulfillment Intelligence Card */}
-              <div className="mt-6 w-full rounded-2xl border border-border bg-card p-5 shadow-card relative overflow-hidden animate-fade-up [animation-delay:0.28s]">
-                <div className="flex items-start justify-between gap-3 mb-3">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2.5 rounded-xl bg-primary/10 border border-primary/25 text-primary shrink-0">
-                      <Store className="h-5 w-5" />
-                    </div>
-                    <div>
-                      <span className="text-[10px] uppercase font-mono tracking-widest text-muted-foreground block">
-                        Sold &amp; Dispatched by
-                      </span>
-                      <h4 className="font-display text-base font-bold text-foreground flex items-center gap-2">
-                        <span>{product.seller?.storeName || "SELLORA Central Direct"}</span>
-                        <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 border border-primary/25 px-2 py-0.5 text-[9px] font-mono font-bold uppercase text-primary">
-                          <CheckCircle2 className="h-2.5 w-2.5" /> Verified
-                        </span>
-                      </h4>
-                    </div>
-                  </div>
-
-                  <span className="rounded-lg bg-secondary border border-border px-2 py-1 text-[10px] font-mono text-muted-foreground shrink-0">
-                    Direct Partner
-                  </span>
-                </div>
-
-                {product.seller?.storeBio ? (
-                  <p className="text-xs text-muted-foreground leading-relaxed italic mb-4">
-                    "{product.seller.storeBio}"
-                  </p>
-                ) : (
-                  <p className="text-xs text-muted-foreground leading-relaxed mb-4">
-                    Authorized hardware distributor with official regional warranty coverage and certified diagnostics.
-                  </p>
-                )}
-
-                <div className="grid grid-cols-2 gap-2 pt-3 border-t border-border text-[11px] font-mono text-muted-foreground">
-                  <div className="flex items-center gap-2">
-                    <Truck className="h-3.5 w-3.5 text-primary shrink-0" />
-                    <span>Dispatches in 24h</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <MapPin className="h-3.5 w-3.5 text-primary shrink-0" />
-                    <span>{product.seller?.address || "Global Hub"}</span>
-                  </div>
-                </div>
+              {/* Product Price */}
+              <div className="mt-4 flex items-baseline gap-3 animate-fade-up [animation-delay:0.22s]">
+                <span className="font-display text-3xl sm:text-4xl font-black text-foreground">
+                  Rs {product.price.toLocaleString()}
+                </span>
               </div>
 
               {/* Auto Suggestion Comparison Algorithm */}
@@ -525,27 +434,6 @@ function ProductDetails() {
         </div>
       </section>
 
-      {/* Interactive Workload & Game Estimator Section */}
-      <section id="product-estimator" className="relative py-20 border-b border-border scroll-mt-20 bg-background">
-        <div className="mx-auto w-full max-w-[1360px] px-4 sm:px-6 md:px-8">
-          <div className="mb-8 flex items-center justify-between border-b border-border pb-4">
-            <div>
-              <span className="font-mono text-[10px] tracking-[0.25em] text-primary uppercase font-bold">
-                REAL-TIME HARDWARE ESTIMATOR
-              </span>
-              <h3 className="font-display text-2xl sm:text-3xl font-bold uppercase tracking-tight text-foreground mt-1">
-                Will {product.name} Run Your Daily Workload?
-              </h3>
-            </div>
-            <div className="hidden sm:flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3.5 py-1 text-xs font-mono text-primary">
-              <Gauge className="h-3.5 w-3.5" />
-              <span>{product.gpu} Evaluated</span>
-            </div>
-          </div>
-
-          <PerformanceEstimator initialProductId={product.id} isCompactEmbedded={true} />
-        </div>
-      </section>
 
       {/* Customer Reviews & Verified Buyer Feedback Section */}
       <ProductReviewsSection productId={product.id} productName={product.name} />

@@ -9,14 +9,33 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SellerRegisterRouteImport } from './routes/seller-register'
+import { Route as SellerRouteImport } from './routes/seller'
+import { Route as RegisterRouteImport } from './routes/register'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as CompareRouteImport } from './routes/compare'
 import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as AdminRouteImport } from './routes/admin'
+import { Route as AccountRouteImport } from './routes/account'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ProductProductIdRouteImport } from './routes/product.$productId'
 import { Route as CheckoutProductIdRouteImport } from './routes/checkout.$productId'
 
+const SellerRegisterRoute = SellerRegisterRouteImport.update({
+  id: '/seller-register',
+  path: '/seller-register',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SellerRoute = SellerRouteImport.update({
+  id: '/seller',
+  path: '/seller',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RegisterRoute = RegisterRouteImport.update({
+  id: '/register',
+  path: '/register',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
@@ -37,6 +56,11 @@ const AdminRoute = AdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AccountRoute = AccountRouteImport.update({
+  id: '/account',
+  path: '/account',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -55,29 +79,41 @@ const CheckoutProductIdRoute = CheckoutProductIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/account': typeof AccountRoute
   '/admin': typeof AdminRoute
   '/checkout': typeof CheckoutRouteWithChildren
   '/compare': typeof CompareRoute
   '/login': typeof LoginRoute
+  '/register': typeof RegisterRoute
+  '/seller': typeof SellerRoute
+  '/seller-register': typeof SellerRegisterRoute
   '/checkout/$productId': typeof CheckoutProductIdRoute
   '/product/$productId': typeof ProductProductIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/account': typeof AccountRoute
   '/admin': typeof AdminRoute
   '/checkout': typeof CheckoutRouteWithChildren
   '/compare': typeof CompareRoute
   '/login': typeof LoginRoute
+  '/register': typeof RegisterRoute
+  '/seller': typeof SellerRoute
+  '/seller-register': typeof SellerRegisterRoute
   '/checkout/$productId': typeof CheckoutProductIdRoute
   '/product/$productId': typeof ProductProductIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/account': typeof AccountRoute
   '/admin': typeof AdminRoute
   '/checkout': typeof CheckoutRouteWithChildren
   '/compare': typeof CompareRoute
   '/login': typeof LoginRoute
+  '/register': typeof RegisterRoute
+  '/seller': typeof SellerRoute
+  '/seller-register': typeof SellerRegisterRoute
   '/checkout/$productId': typeof CheckoutProductIdRoute
   '/product/$productId': typeof ProductProductIdRoute
 }
@@ -85,43 +121,80 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/account'
     | '/admin'
     | '/checkout'
     | '/compare'
     | '/login'
+    | '/register'
+    | '/seller'
+    | '/seller-register'
     | '/checkout/$productId'
     | '/product/$productId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/account'
     | '/admin'
     | '/checkout'
     | '/compare'
     | '/login'
+    | '/register'
+    | '/seller'
+    | '/seller-register'
     | '/checkout/$productId'
     | '/product/$productId'
   id:
     | '__root__'
     | '/'
+    | '/account'
     | '/admin'
     | '/checkout'
     | '/compare'
     | '/login'
+    | '/register'
+    | '/seller'
+    | '/seller-register'
     | '/checkout/$productId'
     | '/product/$productId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AccountRoute: typeof AccountRoute
   AdminRoute: typeof AdminRoute
   CheckoutRoute: typeof CheckoutRouteWithChildren
   CompareRoute: typeof CompareRoute
   LoginRoute: typeof LoginRoute
+  RegisterRoute: typeof RegisterRoute
+  SellerRoute: typeof SellerRoute
+  SellerRegisterRoute: typeof SellerRegisterRoute
   ProductProductIdRoute: typeof ProductProductIdRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/seller-register': {
+      id: '/seller-register'
+      path: '/seller-register'
+      fullPath: '/seller-register'
+      preLoaderRoute: typeof SellerRegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/seller': {
+      id: '/seller'
+      path: '/seller'
+      fullPath: '/seller'
+      preLoaderRoute: typeof SellerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/register': {
+      id: '/register'
+      path: '/register'
+      fullPath: '/register'
+      preLoaderRoute: typeof RegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/login': {
       id: '/login'
       path: '/login'
@@ -148,6 +221,13 @@ declare module '@tanstack/react-router' {
       path: '/admin'
       fullPath: '/admin'
       preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/account': {
+      id: '/account'
+      path: '/account'
+      fullPath: '/account'
+      preLoaderRoute: typeof AccountRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -188,10 +268,14 @@ const CheckoutRouteWithChildren = CheckoutRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AccountRoute: AccountRoute,
   AdminRoute: AdminRoute,
   CheckoutRoute: CheckoutRouteWithChildren,
   CompareRoute: CompareRoute,
   LoginRoute: LoginRoute,
+  RegisterRoute: RegisterRoute,
+  SellerRoute: SellerRoute,
+  SellerRegisterRoute: SellerRegisterRoute,
   ProductProductIdRoute: ProductProductIdRoute,
 }
 export const routeTree = rootRouteImport

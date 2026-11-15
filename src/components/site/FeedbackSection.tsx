@@ -231,7 +231,7 @@ export function FeedbackSection() {
                           value={name}
                           onChange={(e) => setName(e.target.value)}
                           placeholder="e.g. Alex Mercer"
-                          className="w-full rounded-xl border border-glass-border bg-black/40 pl-9 pr-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/50 focus:border-neon-cyan focus:outline-none focus:ring-1 focus:ring-neon-cyan transition-all"
+                          className="w-full rounded-xl border border-border bg-secondary/50 pl-9 pr-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/60 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-all"
                         />
                       </div>
                     </div>
@@ -247,7 +247,7 @@ export function FeedbackSection() {
                           value={role}
                           onChange={(e) => setRole(e.target.value)}
                           placeholder="e.g. Lead 3D Artist, Pro Gamer"
-                          className="w-full rounded-xl border border-glass-border bg-black/40 pl-9 pr-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/50 focus:border-neon-cyan focus:outline-none focus:ring-1 focus:ring-neon-cyan transition-all"
+                          className="w-full rounded-xl border border-border bg-secondary/50 pl-9 pr-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/60 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-all"
                         />
                       </div>
                     </div>
@@ -265,7 +265,7 @@ export function FeedbackSection() {
                           value={rigModel}
                           onChange={(e) => setRigModel(e.target.value)}
                           placeholder="e.g. Razer Blade 18, MacBook Pro 16"
-                          className="w-full rounded-xl border border-glass-border bg-black/40 pl-9 pr-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/50 focus:border-neon-cyan focus:outline-none focus:ring-1 focus:ring-neon-cyan transition-all"
+                          className="w-full rounded-xl border border-border bg-secondary/50 pl-9 pr-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/60 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-all"
                         />
                       </div>
                     </div>
@@ -277,7 +277,7 @@ export function FeedbackSection() {
                       <select
                         value={category}
                         onChange={(e: any) => setCategory(e.target.value)}
-                        className="w-full rounded-xl border border-glass-border bg-black/40 px-3 py-2.5 text-sm text-foreground focus:border-neon-cyan focus:outline-none focus:ring-1 focus:ring-neon-cyan transition-all"
+                        className="w-full rounded-xl border border-border bg-secondary/50 px-3 py-2.5 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-all"
                       >
                         <option value="Gaming" className="bg-card text-foreground">Gaming</option>
                         <option value="Ultrabook" className="bg-card text-foreground">Ultrabook / Creative</option>
@@ -336,7 +336,7 @@ export function FeedbackSection() {
                       value={message}
                       onChange={(e) => setMessage(e.target.value)}
                       placeholder="Describe thermals, screen quality, battery, gaming benchmarks, or build impressions..."
-                      className="w-full rounded-xl border border-glass-border bg-black/40 p-3 text-sm text-foreground placeholder:text-muted-foreground/50 focus:border-neon-cyan focus:outline-none focus:ring-1 focus:ring-neon-cyan transition-all"
+                      className="w-full rounded-xl border border-border bg-secondary/50 p-3 text-sm text-foreground placeholder:text-muted-foreground/60 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-all"
                     />
                   </div>
 
@@ -344,7 +344,7 @@ export function FeedbackSection() {
                     <button
                       type="button"
                       onClick={() => setShowForm(false)}
-                      className="rounded-xl border border-glass-border px-4 py-2.5 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
+                      className="rounded-xl border border-border px-4 py-2.5 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
                     >
                       Cancel
                     </button>
@@ -398,14 +398,14 @@ export function FeedbackSection() {
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
-                  className={`inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 text-xs font-medium transition-all ${
+                  className={`inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 text-xs font-semibold transition-all ${
                     isActive
-                      ? "border border-neon-cyan/60 bg-neon-cyan/15 text-neon-cyan shadow-[0_0_15px_oklch(0.78_0.18_200/0.3)] font-bold"
-                      : "border border-glass-border bg-white/[0.02] text-muted-foreground hover:text-foreground hover:bg-white/5"
+                      ? "border border-primary bg-primary text-primary-foreground shadow-sm"
+                      : "border border-border bg-secondary/50 text-foreground hover:bg-secondary"
                   }`}
                 >
                   <span>{tab}</span>
-                  <span className={`text-[10px] font-mono px-1.5 py-0.2 rounded-full ${isActive ? "bg-neon-cyan/30 text-white" : "bg-white/10 text-muted-foreground"}`}>
+                  <span className={`text-[10px] font-mono px-1.5 py-0.2 rounded-full ${isActive ? "bg-primary-foreground/20 text-primary-foreground font-bold" : "bg-card text-foreground font-medium"}`}>
                     {count}
                   </span>
                 </button>
@@ -434,13 +434,13 @@ export function FeedbackSection() {
             return (
               <div
                 key={item.id}
-                className="group relative flex flex-col justify-between rounded-3xl border border-glass-border bg-card/60 p-6 backdrop-blur-xl transition-all duration-300 hover:border-neon-cyan/50 hover:shadow-elevated"
+                className="group relative flex flex-col justify-between rounded-3xl border border-border bg-card p-6 shadow-card transition-all duration-300 hover:border-primary/50 hover:shadow-elevated"
               >
                 <div>
                   {/* Top Meta: Avatar + Name + Rating */}
                   <div className="flex items-start justify-between gap-3 mb-4">
                     <div className="flex items-center gap-3">
-                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-neon-cyan/30 to-neon-purple/30 border border-neon-cyan/40 font-display text-xs font-black text-neon-cyan shadow-[0_0_12px_rgba(0,242,254,0.3)]">
+                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary/10 border border-primary/30 font-display text-xs font-black text-primary">
                         {initials}
                       </div>
                       <div>
@@ -450,36 +450,36 @@ export function FeedbackSection() {
                           </h4>
                           {item.verifiedPurchase && (
                             <span title="Verified Rig Owner">
-                              <ShieldCheck className="h-3.5 w-3.5 text-neon-cyan shrink-0" />
+                              <ShieldCheck className="h-3.5 w-3.5 text-primary shrink-0" />
                             </span>
                           )}
                         </div>
-                        <p className="text-[11px] text-muted-foreground font-mono">{item.role}</p>
+                        <p className="text-[11px] text-muted-foreground font-mono font-medium">{item.role}</p>
                       </div>
                     </div>
 
-                    <span className="text-[10px] font-mono text-muted-foreground shrink-0">
+                    <span className="text-[10px] font-mono text-muted-foreground shrink-0 font-medium">
                       {item.date}
                     </span>
                   </div>
 
                   {/* Stars + Rig model badge */}
                   <div className="mb-3.5 flex flex-wrap items-center justify-between gap-2">
-                    <div className="flex items-center gap-0.5 text-amber-400">
+                    <div className="flex items-center gap-0.5 text-amber-500">
                       {[...Array(5)].map((_, i) => (
                         <Star
                           key={i}
                           className={`h-3.5 w-3.5 ${
                             i < item.rating
-                              ? "fill-amber-400 text-amber-400"
-                              : "fill-white/10 text-white/20"
+                              ? "fill-amber-500 text-amber-500"
+                              : "fill-muted/40 text-muted-foreground/30"
                           }`}
                         />
                       ))}
                     </div>
 
                     {item.rigModel && (
-                      <span className="inline-flex items-center gap-1 rounded-full border border-glass-border bg-white/[0.03] px-2.5 py-0.5 text-[10px] font-mono text-neon-cyan">
+                      <span className="inline-flex items-center gap-1 rounded-full border border-border bg-secondary/50 px-2.5 py-0.5 text-[10px] font-mono font-bold text-primary">
                         <Laptop className="h-3 w-3" />
                         <span>{item.rigModel}</span>
                       </span>
@@ -487,27 +487,27 @@ export function FeedbackSection() {
                   </div>
 
                   {/* Feedback Message */}
-                  <p className="text-xs text-muted-foreground leading-relaxed italic">
+                  <p className="text-xs text-foreground/90 font-medium leading-relaxed italic">
                     "{item.message}"
                   </p>
                 </div>
 
                 {/* Footer of Card: Category tag + Helpful like button */}
-                <div className="mt-6 flex items-center justify-between border-t border-glass-border pt-4 text-[11px]">
-                  <span className="rounded-full bg-white/5 border border-white/10 px-2.5 py-0.5 text-[10px] font-mono text-muted-foreground uppercase">
+                <div className="mt-6 flex items-center justify-between border-t border-border pt-4 text-[11px]">
+                  <span className="rounded-full bg-secondary border border-border px-2.5 py-0.5 text-[10px] font-mono font-semibold text-muted-foreground uppercase">
                     {item.category}
                   </span>
 
                   <button
                     onClick={(e) => handleLike(item.id, e)}
-                    className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-mono transition-all ${
+                    className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-mono font-semibold transition-all ${
                       isLiked
-                        ? "bg-neon-cyan/20 text-neon-cyan border border-neon-cyan/50"
-                        : "bg-white/[0.02] text-muted-foreground border border-glass-border hover:bg-white/5 hover:text-foreground"
+                        ? "bg-primary/15 text-primary border border-primary/40"
+                        : "bg-secondary/40 text-foreground border border-border hover:bg-secondary"
                     }`}
                     title="Mark review as helpful"
                   >
-                    <ThumbsUp className={`h-3 w-3 ${isLiked ? "fill-neon-cyan" : ""}`} />
+                    <ThumbsUp className={`h-3 w-3 ${isLiked ? "fill-primary" : ""}`} />
                     <span>Helpful ({item.likes})</span>
                   </button>
                 </div>

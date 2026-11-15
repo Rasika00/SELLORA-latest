@@ -528,8 +528,8 @@ export function PerformanceEstimator({ initialProductId, isCompactEmbedded = fal
                     <div
                       className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-md border transition-all ${
                         isSelected
-                          ? "bg-neon-cyan border-neon-cyan text-background group-hover:bg-rose-500 group-hover:border-rose-500 group-hover:text-white"
-                          : "border-white/20 bg-black/40 group-hover:border-white/40"
+                          ? "bg-primary border-primary text-primary-foreground group-hover:bg-rose-500 group-hover:border-rose-500 group-hover:text-white"
+                          : "border-border bg-secondary group-hover:border-primary/50"
                       }`}
                       title={isSelected ? `Click to remove ${app.name}` : `Click to add ${app.name}`}
                     >
@@ -546,15 +546,15 @@ export function PerformanceEstimator({ initialProductId, isCompactEmbedded = fal
                     {app.tagline}
                   </p>
 
-                  <div className="mt-3 pt-3 border-t border-glass-border flex flex-wrap items-center gap-1.5">
-                    <span className="rounded bg-white/5 px-2 py-0.5 text-[9px] font-mono font-medium text-neon-cyan border border-neon-cyan/20">
+                  <div className="mt-3 pt-3 border-t border-border flex flex-wrap items-center gap-1.5">
+                    <span className="rounded bg-primary/10 px-2 py-0.5 text-[9px] font-mono font-medium text-primary border border-primary/20">
                       {app.badge}
                     </span>
-                    <span className="rounded bg-white/5 px-1.5 py-0.5 text-[9px] font-mono text-muted-foreground">
+                    <span className="rounded bg-secondary px-1.5 py-0.5 text-[9px] font-mono text-muted-foreground">
                       Min {app.minRamGb}GB RAM
                     </span>
                     {app.minVramGb > 0 && (
-                      <span className="rounded bg-white/5 px-1.5 py-0.5 text-[9px] font-mono text-muted-foreground">
+                      <span className="rounded bg-secondary px-1.5 py-0.5 text-[9px] font-mono text-muted-foreground">
                         {app.minVramGb}GB VRAM
                       </span>
                     )}
@@ -566,10 +566,10 @@ export function PerformanceEstimator({ initialProductId, isCompactEmbedded = fal
         </div>
 
         {/* STEP 2: Hardware Selection / Custom Rig Sandbox */}
-        <div className="rounded-3xl border border-glass-border bg-card/70 p-6 sm:p-8 backdrop-blur-2xl shadow-elevated mb-8">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-glass-border">
+        <div className="rounded-2xl border border-border bg-card p-6 sm:p-8 shadow-card mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-border">
             <div className="flex items-center gap-2.5">
-              <span className="flex h-6 w-6 items-center justify-center rounded-full bg-neon-purple text-background text-xs font-black">
+              <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-bold">
                 2
               </span>
               <div>
@@ -583,12 +583,12 @@ export function PerformanceEstimator({ initialProductId, isCompactEmbedded = fal
             </div>
 
             {/* Mode Switcher */}
-            <div className="flex rounded-xl bg-black/40 p-1 border border-glass-border shrink-0">
+            <div className="flex rounded-xl bg-secondary p-1 border border-border shrink-0">
               <button
                 onClick={() => setHardwareMode("catalog")}
                 className={`flex items-center gap-2 rounded-lg px-3.5 py-2 text-xs font-semibold transition-all ${
                   hardwareMode === "catalog"
-                    ? "bg-neon-cyan text-background shadow-neon-cyan"
+                    ? "bg-primary text-primary-foreground shadow-sm"
                     : "text-muted-foreground hover:text-foreground"
                 }`}
               >
@@ -599,7 +599,7 @@ export function PerformanceEstimator({ initialProductId, isCompactEmbedded = fal
                 onClick={() => setHardwareMode("custom")}
                 className={`flex items-center gap-2 rounded-lg px-3.5 py-2 text-xs font-semibold transition-all ${
                   hardwareMode === "custom"
-                    ? "bg-neon-purple text-white shadow-neon-purple"
+                    ? "bg-primary text-primary-foreground shadow-sm"
                     : "text-muted-foreground hover:text-foreground"
                 }`}
               >
@@ -653,14 +653,14 @@ export function PerformanceEstimator({ initialProductId, isCompactEmbedded = fal
               </div>
 
               {/* Quick Spec Card for selected model */}
-              <div className="flex items-center gap-4 rounded-2xl glass p-4 border border-glass-border">
+              <div className="flex items-center gap-4 rounded-2xl bg-secondary/50 p-4 border border-border">
                 <img
                   src={selectedLaptopProduct.img}
                   alt={selectedLaptopProduct.name}
-                  className="h-20 w-20 rounded-xl object-cover border border-white/10 bg-black shrink-0"
+                  className="h-20 w-20 rounded-xl object-cover border border-border bg-secondary shrink-0"
                 />
                 <div className="min-w-0">
-                  <span className="text-[10px] font-mono text-neon-cyan uppercase tracking-wider">
+                  <span className="text-[10px] font-mono text-primary uppercase tracking-wider font-semibold">
                     {selectedLaptopProduct.category}
                   </span>
                   <h4 className="font-display text-sm font-bold text-foreground truncate">
@@ -952,11 +952,11 @@ export function PerformanceEstimator({ initialProductId, isCompactEmbedded = fal
                         </div>
 
                         {/* Estimated Metric Highlight */}
-                        <div className="rounded-xl bg-black/40 border border-glass-border p-3 mb-3">
+                        <div className="rounded-xl bg-secondary/50 border border-border p-3 mb-3">
                           <span className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground block">
                             {item.metricLabel}
                           </span>
-                          <span className="font-display text-sm font-bold text-neon-cyan">
+                          <span className="font-display text-sm font-bold text-primary">
                             {item.metricValue}
                           </span>
                           <p className="text-xs font-semibold text-foreground/90 mt-1">

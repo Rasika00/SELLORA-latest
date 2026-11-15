@@ -19,6 +19,7 @@ import { Navbar } from "@/components/site/Navbar";
 import { Footer } from "@/components/site/Footer";
 import { getProducts } from "@/lib/api/client";
 import { useUIMode } from "@/context/UIModeContext";
+import { calculateBenchmark, type BenchmarkBreakdown } from "@/lib/benchmarkEngine";
 
 interface CompareSearchParams {
   s1?: string;
@@ -94,7 +95,7 @@ function CompareShowdown() {
     { slotNum: 3, product: slot3, id: slot3Id, setId: setSlot3Id },
   ];
 
-  // Determine top showdown winner strictly within the selected 3 laptops
+  // Determine top showdown winner strictly within the selected 3 laptops using the 10,000-Point Benchmark Engine
   const showdownWinner = useMemo(() => {
     const candidates = [
       { slotNum: 1, product: slot1 },
@@ -102,15 +103,23 @@ function CompareShowdown() {
       { slotNum: 3, product: slot3 },
     ];
 
-    let winnerCandidate = candidates[0];
+    const candidatesWithBench = candidates.map((c) => {
+      const breakdown = calculateBenchmark(c.product);
+      return {
+        ...c,
+        breakdown,
+        score: breakdown.totalScore,
+      };
+    });
+
+    let winnerCandidate = candidatesWithBench[0];
     let highestScore = -Infinity;
 
-    candidates.forEach((c) => {
-      const score = c.product.detailedSpecs?.benchmarkScore || 0;
-      if (score > highestScore) {
-        highestScore = score;
+    candidatesWithBench.forEach((c) => {
+      if (c.score > highestScore) {
+        highestScore = c.score;
         winnerCandidate = c;
-      } else if (score === highestScore) {
+      } else if (c.score === highestScore) {
         // Break tie by price-to-performance (lower price)
         if (c.product.price < winnerCandidate.product.price) {
           winnerCandidate = c;
@@ -119,16 +128,21 @@ function CompareShowdown() {
     });
 
     const winner = winnerCandidate.product;
-    const rivals = candidates.filter((c) => c.slotNum !== winnerCandidate.slotNum);
+    const winnerBreakdown = winnerCandidate.breakdown;
+    const rivals = candidatesWithBench.filter((c) => c.slotNum !== winnerCandidate.slotNum);
     
     // Sort rivals by benchmark score descending to find runner-up
-    const sortedRivals = [...rivals].sort(
-      (a, b) => (b.product.detailedSpecs?.benchmarkScore || 0) - (a.product.detailedSpecs?.benchmarkScore || 0)
-    );
+    const sortedRivals = [...rivals].sort((a, b) => b.score - a.score);
     const runnerUp = sortedRivals[0];
-    const runnerUpScore = runnerUp?.product.detailedSpecs?.benchmarkScore || 0;
+    const runnerUpScore = runnerUp?.score || 0;
+    const runnerUpBreakdown = runnerUp?.breakdown || winnerBreakdown;
     const scoreDiff = highestScore - runnerUpScore;
     const pctDiff = runnerUpScore > 0 ? Math.round((scoreDiff / runnerUpScore) * 100) : 0;
+
+    const deltaScoreFormula = "Δ Score = Winner score − Runner-up score";
+    const showdownMessage = scoreDiff > 0
+      ? `${winner.name} wins by +${scoreDiff.toLocaleString()} points in the synthetic compute and gaming model.`
+      : `${winner.name} takes the crown with unmatched performance-per-rupee balance.`;
 
     let explanation = "";
     if (scoreDiff > 0) {
@@ -148,9 +162,13 @@ function CompareShowdown() {
       scoreDiff,
       pctDiff,
       explanation,
+      deltaScoreFormula,
+      showdownMessage,
+      winnerBreakdown,
+      runnerUpBreakdown,
       runnerUpProduct: runnerUp?.product,
       runnerUpSlotNum: runnerUp?.slotNum,
-      candidates,
+      candidates: candidatesWithBench,
     };
   }, [slot1, slot2, slot3]);
 
@@ -254,16 +272,19 @@ function CompareShowdown() {
 
           {/* Winner Banner */}
           {winnerCelebrated && (
-            <div className="mb-8 rounded-2xl border-2 border-neon-cyan bg-neon-cyan/10 p-6 text-center">
+            <div className="mb-8 rounded-2xl border border-primary/40 bg-card p-6 text-center shadow-card">
               <div className="flex items-center justify-center gap-2 mb-2">
-                <Trophy className="h-6 w-6 text-neon-cyan" />
+                <Trophy className="h-6 w-6 text-primary" />
                 <span className="font-bold text-lg text-foreground">Top Pick: {showdownWinner.product.name}</span>
+              </div>
+              <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 border border-primary/25 px-3 py-1 text-xs font-mono font-bold text-primary mb-2">
+                <span>Benchmark Score: {showdownWinner.benchmarkScore.toLocaleString()} pts</span>
               </div>
               <p className="text-sm text-muted-foreground max-w-md mx-auto">{getSimpleWinnerExplanation()}</p>
               <Link
                 to="/product/$productId"
                 params={{ productId: showdownWinner.product.id }}
-                className="mt-4 inline-flex items-center gap-2 rounded-full bg-neon-cyan px-6 py-2.5 text-sm font-bold text-background hover:scale-105 transition-all shadow-neon-cyan"
+                className="mt-4 inline-flex items-center gap-2 rounded-full bg-primary px-6 py-2.5 text-sm font-bold text-primary-foreground hover:bg-primary/90 transition-all shadow-sm"
               >
                 Buy Now — Rs {showdownWinner.product.price.toLocaleString()}
                 <ArrowRight className="h-4 w-4" />
@@ -275,7 +296,7 @@ function CompareShowdown() {
             <div className="mb-8 text-center">
               <button
                 onClick={handlePickWinner}
-                className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-neon-cyan via-neon-blue to-neon-purple px-6 py-3 font-bold text-sm text-background shadow-neon-cyan hover:scale-105 transition-all"
+                className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-2.5 font-bold text-sm text-primary-foreground shadow-sm hover:shadow hover:bg-primary/90 transition-all"
               >
                 <Trophy className="h-4 w-4" />
                 Which one should I pick?
@@ -293,20 +314,20 @@ function CompareShowdown() {
                   key={`slot-${slotNum}`}
                   className={`rounded-2xl border p-5 transition-all ${
                     isBestPick
-                      ? "border-2 border-neon-cyan bg-neon-cyan/5 shadow-[0_0_30px_oklch(0.78_0.18_200/0.2)]"
-                      : "border-glass-border bg-card"
+                      ? "border-primary/50 bg-card shadow-elevated"
+                      : "border-border bg-card shadow-card"
                   }`}
                 >
                   {isBestPick && (
                     <div className="flex items-center gap-1.5 mb-3">
-                      <Trophy className="h-4 w-4 text-neon-cyan" />
-                      <span className="text-xs font-bold text-neon-cyan uppercase tracking-wider">Top Pick</span>
+                      <Trophy className="h-4 w-4 text-primary" />
+                      <span className="text-xs font-bold text-primary uppercase tracking-wider font-mono">Top Pick</span>
                     </div>
                   )}
 
-                  <img src={product.img} alt={product.name} className="w-full aspect-[4/3] object-cover object-left rounded-xl mb-4 bg-black" />
+                  <img src={product.img} alt={product.name} className="w-full aspect-[4/3] object-cover object-left rounded-xl mb-4 bg-secondary/40 border border-border" />
                   <h3 className="font-bold text-lg text-foreground">{product.name}</h3>
-                  <p className="text-sm font-bold text-neon-cyan mt-1">Rs {product.price.toLocaleString()}</p>
+                  <p className="text-sm font-bold text-primary mt-1">Rs {product.price.toLocaleString()}</p>
 
                   {/* Star ratings */}
                   <div className="mt-4 flex flex-col gap-2">
@@ -338,8 +359,8 @@ function CompareShowdown() {
                     params={{ productId: product.id }}
                     className={`mt-5 flex w-full items-center justify-center gap-2 rounded-xl py-3 text-sm font-bold transition-all ${
                       isBestPick
-                        ? "bg-neon-cyan text-background hover:scale-[1.02] shadow-neon-cyan"
-                        : "border border-glass-border text-muted-foreground hover:border-neon-cyan/50 hover:text-foreground"
+                        ? "bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm"
+                        : "border border-border bg-secondary/40 text-foreground font-semibold hover:bg-secondary"
                     }`}
                   >
                     {isBestPick ? "Buy Now" : "View Details"}
@@ -350,19 +371,19 @@ function CompareShowdown() {
                   <div className="mt-3 relative">
                     <button
                       onClick={() => setActiveDropdown(activeDropdown === slotNum ? null : slotNum)}
-                      className="w-full rounded-lg border border-glass-border px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground hover:bg-foreground/5 transition-all flex items-center justify-center gap-1"
+                      className="w-full rounded-lg border border-border bg-secondary/30 px-3 py-1.5 text-xs text-foreground font-medium hover:bg-secondary transition-all flex items-center justify-center gap-1"
                     >
                       <span>Swap laptop</span>
                       <ChevronDown className={`h-3.5 w-3.5 transition-transform ${activeDropdown === slotNum ? "rotate-180" : ""}`} />
                     </button>
                     {activeDropdown === slotNum && (
-                      <div className="absolute left-0 right-0 top-full mt-1 z-50 rounded-xl border border-glass-border bg-card p-2 shadow-elevated">
+                      <div className="absolute left-0 right-0 top-full mt-1 z-50 rounded-xl border border-border bg-card p-2 shadow-elevated">
                         <div className="max-h-48 overflow-y-auto flex flex-col gap-1">
                           {productList.map((m) => (
                             <button
                               key={m.id}
                               onClick={() => handleSwapSlot(slotNum, m.id)}
-                              className="rounded-lg px-3 py-2 text-left text-xs text-foreground hover:bg-foreground/10 truncate"
+                              className="rounded-lg px-3 py-2 text-left text-xs text-foreground hover:bg-secondary font-medium truncate"
                             >
                               {m.name} — Rs {m.price.toLocaleString()}
                             </button>
@@ -411,7 +432,7 @@ function CompareShowdown() {
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
             {!winnerCelebrated ? (
               <div className="flex items-center gap-4 sm:gap-5">
-                <div className="flex h-14 w-14 sm:h-16 sm:w-16 shrink-0 items-center justify-center rounded-2xl border bg-neon-cyan/20 border-neon-cyan/50 text-neon-cyan shadow-neon-cyan">
+                <div className="flex h-14 w-14 sm:h-16 sm:w-16 shrink-0 items-center justify-center rounded-2xl border bg-primary/10 border-primary/30 text-primary shadow-sm">
                   <Trophy className="h-7 w-7 sm:h-8 sm:w-8" />
                 </div>
                 <div>
@@ -425,14 +446,14 @@ function CompareShowdown() {
               </div>
             ) : (
               <div className="flex items-start sm:items-center gap-4 sm:gap-5">
-                <div className="flex h-14 w-14 sm:h-16 sm:w-16 shrink-0 items-center justify-center rounded-2xl border bg-neon-cyan text-background border-neon-cyan shadow-[0_0_35px_oklch(0.78_0.18_200)] animate-bounce">
+                <div className="flex h-14 w-14 sm:h-16 sm:w-16 shrink-0 items-center justify-center rounded-2xl border bg-primary text-primary-foreground border-primary shadow-sm">
                   <Trophy className="h-7 w-7 sm:h-8 sm:w-8" />
                 </div>
 
                 <div>
-                  <p className="font-display text-[10px] sm:text-xs font-bold tracking-[0.25em] text-neon-cyan uppercase flex flex-wrap items-center gap-2">
+                  <p className="font-mono text-[10px] sm:text-xs font-bold tracking-[0.2em] text-primary uppercase flex flex-wrap items-center gap-2">
                     <span>SHOWDOWN CHAMPION · SLOT #{showdownWinner.slotNum}</span>
-                    <span className="inline-flex items-center gap-1 rounded-full bg-neon-cyan px-2.5 py-0.5 text-[9px] font-black text-background">
+                    <span className="inline-flex items-center gap-1 rounded-full bg-primary px-2.5 py-0.5 text-[9px] font-bold text-primary-foreground">
                       <CheckCircle2 className="h-3 w-3" /> BEST OF YOUR 3 SELECTED LAPTOPS
                     </span>
                   </p>
@@ -442,6 +463,16 @@ function CompareShowdown() {
                   <p className="mt-1.5 text-xs sm:text-sm text-muted-foreground max-w-2xl leading-relaxed">
                     {showdownWinner.explanation}
                   </p>
+
+                  {/* Showdown Delta Score Difference Callout */}
+                  <div className="mt-3.5 flex flex-wrap items-center gap-3">
+                    <div className="inline-flex items-center gap-2 rounded-xl border border-primary/30 bg-primary/10 px-3 py-1.5 shadow-sm">
+                      <div className="text-[10px] font-mono uppercase tracking-widest text-primary font-bold">SCORE DIFFERENCE</div>
+                      <div className="font-display text-sm font-black text-foreground">
+                        {showdownWinner.scoreDiff > 0 ? `+${showdownWinner.scoreDiff.toLocaleString()} pts` : "TIED"}
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             )}
@@ -449,7 +480,7 @@ function CompareShowdown() {
             {!winnerCelebrated ? (
               <button
                 onClick={handlePickWinner}
-                className="group/win shrink-0 inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-neon-cyan via-neon-blue to-neon-purple px-6 py-3.5 font-display text-xs sm:text-sm font-extrabold uppercase tracking-widest text-background shadow-neon-cyan hover:scale-105 transition-all"
+                className="group/win shrink-0 inline-flex items-center justify-center gap-2 rounded-full bg-primary px-6 py-3 font-mono text-xs sm:text-sm font-bold uppercase tracking-wider text-primary-foreground shadow-sm hover:shadow hover:bg-primary/90 transition-all"
               >
                 <span>PICK WINNER WITHIN SELECTION</span>
                 <ArrowRight className="h-4 w-4 transition-transform group-hover/win:translate-x-1" />
@@ -458,12 +489,12 @@ function CompareShowdown() {
               <div className="flex items-center gap-3 shrink-0">
                 <button
                   onClick={() => setWinnerCelebrated(false)}
-                  className="rounded-full border border-glass-border bg-white/5 px-4 py-2 text-xs font-display uppercase tracking-widest text-muted-foreground hover:bg-white/10 hover:text-foreground transition-all"
+                  className="rounded-full border border-border bg-secondary px-4 py-2 text-xs font-mono uppercase tracking-wider text-muted-foreground hover:bg-secondary/80 hover:text-foreground transition-all"
                 >
                   Reset Winner
                 </button>
-                <div className="rounded-2xl border border-neon-cyan/40 bg-neon-cyan/10 px-4 py-2 text-center">
-                  <div className="text-[10px] font-mono uppercase tracking-widest text-neon-cyan font-bold">Top Score</div>
+                <div className="rounded-xl border border-primary/30 bg-primary/10 px-4 py-2 text-center shadow-sm">
+                  <div className="text-[10px] font-mono uppercase tracking-widest text-primary font-bold">Top Score</div>
                   <div className="font-display text-lg font-black text-foreground">{showdownWinner.benchmarkScore.toLocaleString()} pts</div>
                 </div>
               </div>
@@ -477,19 +508,20 @@ function CompareShowdown() {
             const isBestPick = winnerCelebrated && product.id === showdownWinner.product.id;
             const isRunnerUp = winnerCelebrated && !isBestPick;
             const isDropdownOpen = activeDropdown === slotNum;
-            const benchScore = product.detailedSpecs?.benchmarkScore || 0;
+            const benchBreakdown = calculateBenchmark(product);
+            const benchScore = benchBreakdown.totalScore;
             const scoreDelta = benchScore - showdownWinner.benchmarkScore;
 
             return (
               <div
                 key={`slot-${slotNum}`}
                 id={`slot-card-${product.id}`}
-                className={`relative flex flex-col justify-between rounded-3xl glass p-5 sm:p-6 transition-all duration-500 animate-fade-up ${
+                className={`relative flex flex-col justify-between rounded-2xl border bg-card p-5 sm:p-6 transition-all duration-300 animate-fade-up ${
                   isBestPick
-                    ? "border-2 border-neon-cyan bg-gradient-to-b from-neon-cyan/15 via-white/[0.04] to-transparent shadow-[0_0_50px_oklch(0.78_0.18_200/0.35)] ring-2 ring-neon-cyan/50 lg:-translate-y-2"
+                    ? "border-2 border-primary shadow-elevated lg:-translate-y-2 ring-1 ring-primary/40"
                     : isRunnerUp
-                    ? "border border-glass-border opacity-90 hover:opacity-100"
-                    : "border border-glass-border hover:border-white/30"
+                    ? "border-border shadow-card opacity-90 hover:opacity-100"
+                    : "border-border shadow-card hover:border-primary/40"
                 }`}
                 style={{ animationDelay: `${0.15 + slotNum * 0.1}s` }}
               >
@@ -501,20 +533,20 @@ function CompareShowdown() {
                     </span>
 
                     {isBestPick ? (
-                      <span className="inline-flex items-center gap-1.5 rounded-full border border-neon-cyan/80 bg-neon-cyan/25 px-3 py-1 font-display text-[10px] font-extrabold tracking-widest text-neon-cyan shadow-[0_0_25px_oklch(0.78_0.18_200/0.6)] animate-pulse">
+                      <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/50 bg-primary/15 px-3 py-1 font-mono text-[10px] font-bold tracking-wider text-primary shadow-sm">
                         <Trophy className="h-3 w-3" />
                         SHOWDOWN WINNER
                       </span>
                     ) : isRunnerUp ? (
-                      <span className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/5 px-2.5 py-0.5 font-display text-[9px] font-semibold tracking-wider text-muted-foreground">
+                      <span className="inline-flex items-center gap-1 rounded-full border border-border bg-secondary px-2.5 py-0.5 font-mono text-[9px] font-semibold tracking-wider text-muted-foreground">
                         CONTENDER ({scoreDelta === 0 ? "TIED" : `${scoreDelta.toLocaleString()} pts`})
                       </span>
                     ) : null}
                   </div>
 
                   {/* Laptop Image Container */}
-                  <div className="relative aspect-[16/10] w-full overflow-hidden rounded-2xl bg-black/70 border border-white/5 group my-3">
-                    <div className="absolute inset-0 bg-gradient-to-br from-neon-cyan/10 via-transparent to-neon-purple/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                  <div className="relative aspect-[16/10] w-full overflow-hidden rounded-xl bg-secondary/50 border border-border group my-3">
+                    <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-accent/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                     <img
                       src={product.img}
                       alt={`${product.name} render`}
@@ -531,9 +563,11 @@ function CompareShowdown() {
 
                   {/* Title and Swap Dropdown Row */}
                   <div className="flex items-center justify-between gap-2 mt-4 relative z-20">
-                    <h3 className="font-display text-xl sm:text-2xl font-black uppercase tracking-tight text-foreground truncate">
-                      {product.name}
-                    </h3>
+                    <div className="min-w-0">
+                      <h3 className="font-display text-xl sm:text-2xl font-black uppercase tracking-tight text-foreground truncate">
+                        {product.name}
+                      </h3>
+                    </div>
 
                     {/* Swap Dropdown Trigger */}
                     <div className="relative shrink-0">
@@ -543,20 +577,20 @@ function CompareShowdown() {
                             isDropdownOpen ? null : slotNum
                           )
                         }
-                        className="inline-flex items-center gap-1 rounded-lg border border-glass-border bg-white/[0.06] px-2.5 py-1.5 text-xs font-medium text-muted-foreground hover:bg-white/15 hover:text-foreground transition-all"
+                        className="inline-flex items-center gap-1 rounded-lg border border-border bg-secondary/50 px-2.5 py-1.5 text-xs font-semibold text-foreground hover:bg-secondary transition-all"
                       >
                         <span>Swap</span>
                         <ChevronDown
                           className={`h-3.5 w-3.5 transition-transform ${
-                            isDropdownOpen ? "rotate-180 text-neon-cyan" : ""
+                            isDropdownOpen ? "rotate-180 text-primary" : ""
                           }`}
                         />
                       </button>
 
                       {/* Dropdown Menu */}
                       {isDropdownOpen && (
-                        <div className="absolute right-0 top-full mt-2 w-56 rounded-2xl glass-strong p-2 shadow-elevated border border-white/20 z-50 animate-fade-up">
-                          <p className="px-3 py-1.5 font-display text-[10px] tracking-widest text-muted-foreground uppercase border-b border-white/10 mb-1">
+                        <div className="absolute right-0 top-full mt-2 w-56 rounded-2xl bg-card p-2 shadow-elevated border border-border z-50 animate-fade-up">
+                          <p className="px-3 py-1.5 font-display text-[10px] tracking-widest text-muted-foreground uppercase border-b border-border mb-1 font-semibold">
                             Select Model for Slot #{slotNum}
                           </p>
                           <div className="max-h-60 overflow-y-auto flex flex-col gap-1">
@@ -566,8 +600,8 @@ function CompareShowdown() {
                                 onClick={() => handleSwapSlot(slotNum, m.id)}
                                 className={`flex items-center justify-between rounded-xl px-3 py-2 text-left text-xs transition-colors ${
                                   m.id === id
-                                    ? "bg-neon-cyan/20 text-neon-cyan font-bold border border-neon-cyan/40"
-                                    : "text-foreground hover:bg-white/10"
+                                    ? "bg-primary/15 text-primary font-bold border border-primary/30"
+                                    : "text-foreground hover:bg-secondary font-medium"
                                 }`}
                               >
                                 <span className="font-display uppercase tracking-wider truncate">
@@ -585,23 +619,19 @@ function CompareShowdown() {
                   </div>
 
                   {/* Price */}
-                  <div className="mt-1 flex items-baseline gap-2">
-                    <span className="font-display text-2xl sm:text-3xl font-black text-neon-cyan">
+                  <div className="mt-2 flex items-baseline gap-2">
+                    <span className="font-display text-2xl sm:text-3xl font-black text-primary">
                       Rs {product.price.toLocaleString()}
                     </span>
                   </div>
 
                   {/* Specs List with Icons */}
-                  <div className="mt-6 flex flex-col gap-2.5 border-t border-glass-border pt-5">
+                  <div className="mt-5 flex flex-col gap-2.5 border-t border-border pt-4">
                     {/* Benchmark Score spec row */}
                     <SpecRow
                       icon={Sparkles}
                       label="Benchmark Score"
-                      value={
-                        product.detailedSpecs?.benchmarkScore
-                          ? `${product.detailedSpecs.benchmarkScore.toLocaleString()} pts`
-                          : "N/A"
-                      }
+                      value={`${benchBreakdown.totalScore.toLocaleString()} pts`}
                       highlight={isBestPick}
                     />
                     <SpecRow
@@ -634,9 +664,9 @@ function CompareShowdown() {
 
                 {/* Special Highlight Box & CTA Button */}
                 <div className="mt-6">
-                  <div className="rounded-xl border border-glass-border bg-white/[0.03] p-3.5 mb-5 group hover:border-neon-cyan/30 transition-colors">
-                    <div className="flex items-center gap-1.5 text-muted-foreground text-[10px] font-mono uppercase tracking-widest">
-                      <Sparkles className="h-3.5 w-3.5 text-neon-cyan shrink-0" />
+                  <div className="rounded-xl border border-border bg-secondary/40 p-3.5 mb-5 group hover:border-primary/40 transition-colors">
+                    <div className="flex items-center gap-1.5 text-muted-foreground text-[10px] font-mono uppercase tracking-widest font-semibold">
+                      <Sparkles className="h-3.5 w-3.5 text-primary shrink-0" />
                       <span>SPECIAL HIGHLIGHT</span>
                     </div>
                     <p className="mt-1 font-sans text-xs sm:text-sm font-bold text-foreground leading-snug">
@@ -650,8 +680,8 @@ function CompareShowdown() {
                     params={{ productId: product.id }}
                     className={`group/btn flex items-center justify-center gap-2 w-full rounded-xl py-3.5 font-display text-xs font-bold uppercase tracking-widest transition-all ${
                       isBestPick
-                        ? "bg-gradient-to-r from-neon-cyan via-neon-blue to-neon-purple text-background shadow-[0_0_25px_oklch(0.78_0.18_200/0.6)] hover:scale-[1.02] font-black"
-                        : "border border-glass-border bg-white/[0.03] text-muted-foreground hover:bg-white/10 hover:text-foreground"
+                        ? "bg-primary text-primary-foreground shadow-elevated hover:bg-primary/90 font-black"
+                        : "border border-border bg-secondary/40 text-foreground font-semibold hover:bg-secondary"
                     }`}
                   >
                     <span>{isBestPick ? "WINNER · CONFIGURE & BUY" : "CONFIGURE & BUY"}</span>

@@ -166,22 +166,15 @@ export function Navbar() {
               </button>
             </div>
           ) : (
-            <div className="flex items-center gap-1.5 shrink-0">
+            <div className="flex items-center shrink-0">
               <Link
                 to="/login"
                 aria-label="Account / Login"
-                className="hidden sm:inline-flex rounded-lg p-1.5 sm:px-2.5 sm:py-1.5 text-muted-foreground transition-colors hover:bg-foreground/5 hover:text-neon-cyan items-center gap-1.5 shrink-0 text-xs font-mono"
+                className="hidden sm:inline-flex items-center gap-1.5 rounded-full border border-glass-border bg-foreground/5 hover:border-neon-cyan/50 hover:bg-neon-cyan/10 px-3 py-1 text-xs font-mono text-muted-foreground hover:text-neon-cyan transition-all duration-300 shrink-0"
                 title="Sign In to Account"
               >
-                <User className="h-3.5 w-3.5" />
-                <span className="hidden lg:inline">Sign In</span>
-              </Link>
-              <Link
-                to="/register"
-                className="hidden sm:inline-flex items-center gap-1 rounded-full bg-neon-cyan/15 hover:bg-neon-cyan border border-neon-cyan/40 px-3 py-1 text-[11px] font-mono font-bold uppercase tracking-wider text-neon-cyan hover:text-black transition-all shadow-[0_0_12px_rgba(0,242,254,0.2)] shrink-0"
-                title="Create a New Customer or Seller Account"
-              >
-                <span>Register</span>
+                <User className="h-3.5 w-3.5 text-neon-cyan" />
+                <span>Sign In</span>
               </Link>
             </div>
           )}
@@ -364,23 +357,14 @@ export function Navbar() {
                   Sign Out ({currentUser.firstName || currentUser.email})
                 </button>
               ) : (
-                <div className="grid grid-cols-2 gap-2">
-                  <Link
-                    to="/login"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="w-full rounded-xl bg-card border border-glass-border px-4 py-2.5 text-center text-sm font-medium text-muted-foreground hover:bg-foreground/5 hover:text-foreground transition-all flex items-center justify-center gap-2"
-                  >
-                    <User className="h-4 w-4" />
-                    Sign In
-                  </Link>
-                  <Link
-                    to="/register"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="w-full rounded-xl bg-neon-cyan text-black px-4 py-2.5 text-center text-xs font-mono font-bold uppercase tracking-wider shadow-[0_0_15px_rgba(0,242,254,0.3)] hover:opacity-95 transition-all flex items-center justify-center gap-2"
-                  >
-                    Register
-                  </Link>
-                </div>
+                <Link
+                  to="/login"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="w-full rounded-xl bg-card border border-glass-border hover:border-neon-cyan/50 px-4 py-2.5 text-center text-sm font-mono font-medium text-muted-foreground hover:bg-neon-cyan/10 hover:text-neon-cyan transition-all flex items-center justify-center gap-2"
+                >
+                  <User className="h-4 w-4 text-neon-cyan" />
+                  Sign In
+                </Link>
               )}
             </li>
           </ul>

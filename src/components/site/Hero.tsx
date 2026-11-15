@@ -112,33 +112,33 @@ export function Hero() {
         </div>
 
         {/* Hero Smart Search Bar */}
-        <div className="mx-auto mt-10 max-w-2xl w-full animate-fade-up [animation-delay:0.35s]">
+        <div className="mx-auto mt-6 max-w-lg w-full animate-fade-up [animation-delay:0.35s]">
           <div
             onClick={() => openSearch()}
-            className="group relative flex items-center justify-between gap-3 rounded-2xl border border-neon-cyan/40 bg-card/85 p-2 sm:p-2.5 backdrop-blur-xl shadow-[0_0_30px_oklch(0.78_0.18_200/0.15)] transition-all duration-300 hover:border-neon-cyan hover:shadow-[0_0_40px_oklch(0.78_0.18_200/0.3)] hover:scale-[1.01] cursor-pointer"
+            className="group relative flex items-center justify-between gap-2.5 rounded-full border border-neon-cyan/40 bg-card/85 p-1 sm:p-1.5 pl-3 sm:pl-3.5 backdrop-blur-xl shadow-[0_0_20px_oklch(0.78_0.18_200/0.15)] transition-all duration-300 hover:border-neon-cyan hover:shadow-[0_0_30px_oklch(0.78_0.18_200/0.25)] hover:scale-[1.01] cursor-pointer"
           >
-            <div className="flex items-center gap-3 pl-2 sm:pl-3 flex-1 min-w-0">
-              <Search className="h-5 w-5 text-neon-cyan shrink-0 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-6" />
-              <span className="text-xs sm:text-sm text-muted-foreground group-hover:text-foreground/90 truncate">
-                Search by GPU, processor, or model (e.g. &ldquo;RTX 4090&rdquo;, &ldquo;MacBook M3 Max&rdquo;)...
+            <div className="flex items-center gap-2.5 pl-1 flex-1 min-w-0">
+              <Search className="h-4 w-4 text-neon-cyan shrink-0 transition-transform duration-300 group-hover:scale-110" />
+              <span className="text-xs text-muted-foreground group-hover:text-foreground/90 truncate">
+                Search GPU, processor, or model (e.g. RTX 4090)...
               </span>
             </div>
 
             <div className="flex items-center gap-2 shrink-0">
               <button
                 type="button"
-                className="rounded-xl bg-gradient-to-r from-neon-cyan to-neon-blue px-3.5 sm:px-4 py-2 text-xs font-mono font-bold text-black shadow-neon-cyan transition-transform group-hover:scale-105 flex items-center gap-1.5"
+                className="rounded-full bg-gradient-to-r from-neon-cyan to-neon-blue px-3 py-1 sm:py-1.5 text-[11px] font-mono font-bold text-black shadow-neon-cyan transition-transform group-hover:scale-105 flex items-center gap-1.5"
               >
                 <span>Search</span>
-                <ArrowRight className="h-3.5 w-3.5" />
+                <ArrowRight className="h-3 w-3" />
               </button>
             </div>
           </div>
 
           {/* Quick Trending spec pills */}
-          <div className="mt-3 flex flex-wrap items-center justify-center gap-2 text-xs text-muted-foreground">
-            <span className="font-mono text-[11px] text-neon-cyan/90 flex items-center gap-1">
-              <Sparkles className="h-3 w-3" />
+          <div className="mt-2.5 flex flex-wrap items-center justify-center gap-1.5 text-[11px] text-muted-foreground">
+            <span className="font-mono text-[10px] text-neon-cyan/90 flex items-center gap-1">
+              <Sparkles className="h-2.5 w-2.5" />
               Trending:
             </span>
             {["RTX 4090", "MacBook Pro M3", "OLED 240Hz", "Intel Core Ultra 9", "Dual Screen", "Workstation"].map((tag) => (
@@ -146,7 +146,7 @@ export function Hero() {
                 key={tag}
                 type="button"
                 onClick={() => openSearch(tag)}
-                className="rounded-full border border-glass-border bg-foreground/5 px-2.5 py-0.5 text-[11px] font-mono text-muted-foreground transition-all hover:border-neon-cyan/40 hover:bg-neon-cyan/10 hover:text-neon-cyan hover:scale-105 cursor-pointer"
+                className="rounded-full border border-glass-border bg-foreground/5 px-2 py-0.5 text-[10px] font-mono text-muted-foreground transition-all hover:border-neon-cyan/40 hover:bg-neon-cyan/10 hover:text-neon-cyan hover:scale-105 cursor-pointer"
               >
                 {tag}
               </button>
@@ -155,7 +155,7 @@ export function Hero() {
         </div>
 
         {/* Scrolling metrics ticker */}
-        <div className="relative mt-14 overflow-hidden border-y border-glass-border py-4 [mask-image:linear-gradient(90deg,transparent,black_10%,black_90%,transparent)]">
+        <div className="relative mt-10 overflow-hidden border-y border-glass-border py-4 [mask-image:linear-gradient(90deg,transparent,black_10%,black_90%,transparent)]">
           <div className="flex w-max animate-marquee gap-12">
             {[...metrics, ...metrics].map((m, i) => (
               <div key={i} className="flex items-center gap-3">

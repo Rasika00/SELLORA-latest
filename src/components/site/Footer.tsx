@@ -27,7 +27,6 @@ export function Footer() {
       links: [
         { label: "Sell on SELLORA", href: "/seller-register" },
         { label: "Vendor Hub Console", href: "/seller" },
-        { label: "Admin Console", href: "/admin" },
         { label: "Escrow & Payout Policy", href: "/#warranty" },
       ],
     },

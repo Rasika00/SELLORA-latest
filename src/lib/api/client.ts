@@ -56,6 +56,49 @@ export async function getAdminStats(): Promise<{
   return null;
 }
 
+export interface SalesAnalyticsResponse {
+  totalRevenue: number;
+  completedRevenue: number;
+  platformCommission: number;
+  totalOrders: number;
+  totalUnits: number;
+  avgOrderValue: number;
+  timeline: Array<{
+    date: string;
+    displayDate: string;
+    revenue: number;
+    orders: number;
+    units: number;
+  }>;
+  topProducts: Array<{
+    id: string;
+    name: string;
+    category: string;
+    img: string;
+    units: number;
+    revenue: number;
+  }>;
+  categoryData: Array<{
+    name: string;
+    revenue: number;
+    units: number;
+  }>;
+  statusMap: Record<string, number>;
+  recentSales: any[];
+}
+
+export async function getSalesAnalytics(): Promise<SalesAnalyticsResponse | null> {
+  try {
+    const res = await fetch(`${API_BASE}/admin/sales-analytics`);
+    if (res.ok) {
+      return await res.json();
+    }
+  } catch (err) {
+    console.warn("Failed to fetch sales analytics from backend:", err);
+  }
+  return null;
+}
+
 export async function getProducts(options?: {
   category?: string;
   processor?: string;
@@ -146,6 +189,19 @@ export async function updateProductStatus(id: string, status: "APPROVED" | "PEND
   const data = await res.json();
   if (!res.ok) {
     throw new Error(data.error || "Failed to update product status");
+  }
+  return data.product;
+}
+
+export async function updateProductStock(id: string, params: { stock?: number; delta?: number }) {
+  const res = await fetch(`${API_BASE}/products/${id}/stock`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(params),
+  });
+  const data = await res.json();
+  if (!res.ok) {
+    throw new Error(data.error || "Failed to update product stock");
   }
   return data.product;
 }
@@ -1032,6 +1088,17 @@ export async function updateCustomerReview(
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
+    });
+    return await res.json();
+  } catch (err: any) {
+    return { success: false, error: err.message };
+  }
+}
+
+export async function deleteCustomerReview(reviewId: string): Promise<{ success: boolean; error?: string }> {
+  try {
+    const res = await fetch(`${API_BASE}/reviews/${reviewId}`, {
+      method: "DELETE",
     });
     return await res.json();
   } catch (err: any) {

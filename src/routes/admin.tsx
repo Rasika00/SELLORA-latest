@@ -23,9 +23,22 @@ import {
   type SellerRecord,
   getPlatformSettings,
   updatePlatformSettings,
-  clearSystemCache,
   type PlatformSettings,
+  getSalesAnalytics,
+  type SalesAnalyticsResponse,
 } from "@/lib/api/client";
+import {
+  AreaChart,
+  Area,
+  PieChart,
+  Pie,
+  Cell,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
 import {
   Activity,
   Box,
@@ -399,10 +412,6 @@ function TabDashboard({
         <div>
           <h2 className="text-2xl font-display font-bold text-white flex items-center gap-3">
             <span>Executive Command Center</span>
-            <span className="text-xs px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-mono border border-emerald-500/40 flex items-center gap-1.5">
-              <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
-              Live PostgreSQL Feed
-            </span>
           </h2>
           <p className="text-xs text-muted-foreground mt-1">
             Real-time platform metrics, revenue tracking, and hardware fleet telemetry.
@@ -412,10 +421,10 @@ function TabDashboard({
         <button
           onClick={fetchStats}
           disabled={isLoading}
-          className="px-3.5 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-xs font-mono text-muted-foreground hover:text-white flex items-center gap-2 transition-colors self-start sm:self-auto"
+          className="px-3.5 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-xs font-mono text-muted-foreground hover:text-white flex items-center gap-2 transition-colors self-start sm:self-auto cursor-pointer"
         >
           <RefreshCw className={`h-3.5 w-3.5 ${isLoading ? "animate-spin text-neon-cyan" : ""}`} />
-          <span>Refresh Telemetry</span>
+          <span>Refresh</span>
         </button>
       </div>
 
@@ -500,77 +509,21 @@ function TabDashboard({
         </div>
       </div>
 
-      {/* Middle Grid: System Nodes & Telemetry */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Real PostgreSQL Cluster Node */}
-        <div className="rounded-2xl border border-white/10 bg-black/40 backdrop-blur-xl p-6 space-y-4">
-          <div className="flex items-center justify-between border-b border-white/10 pb-3">
-            <h3 className="text-base font-display font-bold flex items-center gap-2">
-              <Server className="h-4 w-4 text-neon-cyan" />
-              <span>Database & Cluster Infrastructure</span>
-            </h3>
-            <span className="text-[11px] font-mono text-emerald-400 flex items-center gap-1.5">
-              <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
-              Cluster Active
-            </span>
-          </div>
-
-          <div className="space-y-3">
-            <div className="flex items-center justify-between p-3.5 bg-white/[0.03] rounded-xl border border-white/5">
-              <div className="flex items-center gap-3">
-                <div className="h-2.5 w-2.5 rounded-full bg-neon-cyan animate-pulse" />
-                <div>
-                  <div className="font-semibold text-xs text-white">PostgreSQL Primary Cluster</div>
-                  <div className="text-[10px] text-muted-foreground font-mono">localhost:5432 &bull; selloradb</div>
-                </div>
-              </div>
-              <div className="text-right">
-                <span className="text-xs font-mono font-bold text-neon-cyan">
-                  {stats?.dbStatus?.latencyMs ?? 1} ms
-                </span>
-                <span className="text-[10px] text-muted-foreground block font-mono">Latency</span>
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between p-3.5 bg-white/[0.03] rounded-xl border border-white/5">
-              <div className="flex items-center gap-3">
-                <div className="h-2.5 w-2.5 rounded-full bg-neon-purple animate-pulse" />
-                <div>
-                  <div className="font-semibold text-xs text-white">Prisma Client ORM Engine</div>
-                  <div className="text-[10px] text-muted-foreground font-mono">Version 6.19 &bull; Connection Pool Active</div>
-                </div>
-              </div>
-              <span className="text-xs font-mono text-neon-purple font-bold">Synchronized</span>
-            </div>
-
-            <div className="flex items-center justify-between p-3.5 bg-white/[0.03] rounded-xl border border-white/5">
-              <div className="flex items-center gap-3">
-                <div className="h-2.5 w-2.5 rounded-full bg-emerald-400 animate-pulse" />
-                <div>
-                  <div className="font-semibold text-xs text-white">Express API Core Gateway</div>
-                  <div className="text-[10px] text-muted-foreground font-mono">Port 3001 &bull; REST & Auth Endpoints</div>
-                </div>
-              </div>
-              <span className="text-xs font-mono text-emerald-400 font-bold">100% Online</span>
-            </div>
-          </div>
+      {/* Quick Recent Transactions Feed */}
+      <div className="rounded-2xl border border-white/10 bg-black/40 backdrop-blur-xl p-6 space-y-4">
+        <div className="flex items-center justify-between border-b border-white/10 pb-3">
+          <h3 className="text-base font-display font-bold flex items-center gap-2">
+            <Zap className="h-4 w-4 text-amber-400" />
+            <span>Recent Transactions</span>
+          </h3>
+          <button
+            onClick={() => setActiveTab("orders")}
+            className="text-xs text-neon-cyan hover:underline flex items-center gap-1 font-mono cursor-pointer"
+          >
+            <span>View All</span>
+            <ArrowRight className="h-3 w-3" />
+          </button>
         </div>
-
-        {/* Quick Recent Transactions Feed */}
-        <div className="rounded-2xl border border-white/10 bg-black/40 backdrop-blur-xl p-6 space-y-4">
-          <div className="flex items-center justify-between border-b border-white/10 pb-3">
-            <h3 className="text-base font-display font-bold flex items-center gap-2">
-              <Zap className="h-4 w-4 text-amber-400" />
-              <span>Recent Transactions (PostgreSQL Feed)</span>
-            </h3>
-            <button
-              onClick={() => setActiveTab("orders")}
-              className="text-xs text-neon-cyan hover:underline flex items-center gap-1 font-mono"
-            >
-              <span>View All</span>
-              <ArrowRight className="h-3 w-3" />
-            </button>
-          </div>
 
           <div className="divide-y divide-white/5">
             {recentOrders.map((order: any) => (
@@ -615,7 +568,6 @@ function TabDashboard({
             )}
           </div>
         </div>
-      </div>
     </div>
   );
 }
@@ -1460,7 +1412,7 @@ function TabOrders({
               </span>
             </div>
             <p className="text-xs text-muted-foreground mt-1">
-              Live customer orders from PostgreSQL. Update dispatch statuses and issue tax invoices.
+              Live customer orders. Update dispatch statuses and issue tax invoices.
             </p>
           </div>
 
@@ -2180,7 +2132,7 @@ function TabSellers() {
             <span>Seller Applications &amp; Sanctions</span>
           </h2>
           <p className="text-xs text-muted-foreground font-mono mt-1">
-            Review vendor onboarding applications (A3.1), verify partner credentials &amp; manage store sanctions (A3.2).
+            Review vendor onboarding applications, verify partner credentials &amp; manage store sanctions.
           </p>
         </div>
 
@@ -2697,21 +2649,443 @@ function TabSellers() {
 }
 
 // ==============================================================================
-// TAB: SALES
+// TAB: SALES (Marketplace Revenue, Trajectory & Analytics Engine)
 // ==============================================================================
 function TabSales() {
-  return (
-    <div className="flex flex-col items-center justify-center h-[60vh] text-center">
-      <div className="h-24 w-24 rounded-full bg-neon-purple/10 flex items-center justify-center mb-6 shadow-[0_0_30px_rgba(123,44,191,0.2)]">
-        <Activity className="h-10 w-10 text-neon-purple" />
+  const [analytics, setAnalytics] = useState<SalesAnalyticsResponse | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const loadData = async () => {
+    setIsLoading(true);
+    try {
+      const data = await getSalesAnalytics();
+      setAnalytics(data);
+    } catch (err) {
+      console.error("Failed to load sales analytics:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center h-[50vh] text-center space-y-4">
+        <RefreshCw className="h-8 w-8 text-neon-cyan animate-spin" />
+        <p className="text-xs font-mono text-muted-foreground">Aggregating Sales &amp; Revenue Telemetry...</p>
       </div>
-      <h2 className="text-2xl font-display font-bold text-white mb-2">Sales Analytics Engine</h2>
-      <p className="text-muted-foreground max-w-md mb-8">
-        No sales data has been recorded yet. The analytics engine requires at least 1 processed transaction to build the visualization models.
-      </p>
-      <div className="px-4 py-2 bg-white/5 border border-white/10 rounded-full text-xs font-mono text-muted-foreground flex items-center gap-2">
-        <div className="h-2 w-2 rounded-full bg-yellow-400 animate-pulse" />
-        Listening for incoming transactions...
+    );
+  }
+
+  const categoryColors: Record<string, string> = {
+    Gaming: "#00F2FE", // cyan
+    Ultrabook: "#7B2CBF", // purple
+    Workstation: "#3B82F6", // blue
+    Other: "#10B981", // emerald
+  };
+
+  const pieData =
+    analytics?.categoryData?.map((cat) => ({
+      name: cat.name,
+      value: cat.revenue,
+      units: cat.units,
+      color: categoryColors[cat.name] || "#00F2FE",
+    })) || [];
+
+  return (
+    <div className="space-y-8 animate-fade-up">
+      {/* Top Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h2 className="text-2xl font-display font-bold text-white flex items-center gap-2.5">
+            <Activity className="h-6 w-6 text-neon-cyan" />
+            <span>Sales Analytics &amp; Revenue Velocity</span>
+          </h2>
+          <p className="text-xs text-muted-foreground mt-1">
+            Real-time marketplace revenue performance, commission earnings, category distribution, and top hardware models.
+          </p>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <button
+            onClick={loadData}
+            disabled={isLoading}
+            className="px-3.5 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-xs font-mono text-muted-foreground hover:text-white flex items-center gap-2 transition-colors cursor-pointer"
+          >
+            <RefreshCw className={`h-3.5 w-3.5 ${isLoading ? "animate-spin text-neon-cyan" : ""}`} />
+            <span>Refresh</span>
+          </button>
+        </div>
+      </div>
+
+      {/* 4 Financial KPI Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        {/* Gross Revenue */}
+        <div className="rounded-2xl bg-gradient-to-br from-neon-cyan/10 via-white/[0.02] to-transparent border border-neon-cyan/30 p-6 relative overflow-hidden group hover:-translate-y-1 transition-all shadow-[0_10px_30px_rgba(0,242,254,0.1)]">
+          <div className="absolute top-0 right-0 p-4 opacity-15 group-hover:opacity-30 transition-opacity group-hover:scale-110 duration-500 text-neon-cyan">
+            <TrendingUp className="h-24 w-24 -mr-6 -mt-6" />
+          </div>
+          <div className="relative z-10">
+            <p className="text-xs font-mono text-muted-foreground uppercase tracking-wider">Gross Sales Revenue</p>
+            <h3 className="text-3xl font-display font-black text-white mt-1">
+              Rs {(analytics?.totalRevenue || 0).toLocaleString()}
+            </h3>
+            <div className="mt-4 flex items-center gap-2 text-[11px] font-mono text-emerald-400 bg-emerald-500/15 w-fit px-2.5 py-1 rounded-full border border-emerald-500/30">
+              <CheckCircle2 className="h-3 w-3" />
+              <span>Rs {(analytics?.completedRevenue || 0).toLocaleString()} Cleared</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Platform Commission */}
+        <div className="rounded-2xl bg-gradient-to-br from-neon-purple/10 via-white/[0.02] to-transparent border border-neon-purple/30 p-6 relative overflow-hidden group hover:-translate-y-1 transition-all shadow-[0_10px_30px_rgba(123,44,191,0.1)]">
+          <div className="absolute top-0 right-0 p-4 opacity-15 group-hover:opacity-30 transition-opacity group-hover:scale-110 duration-500 text-neon-purple">
+            <Shield className="h-24 w-24 -mr-6 -mt-6" />
+          </div>
+          <div className="relative z-10">
+            <p className="text-xs font-mono text-muted-foreground uppercase tracking-wider">Platform Take (5%)</p>
+            <h3 className="text-3xl font-display font-black text-white mt-1">
+              Rs {(analytics?.platformCommission || 0).toLocaleString()}
+            </h3>
+            <div className="mt-4 flex items-center gap-2 text-[11px] font-mono text-neon-purple bg-neon-purple/15 w-fit px-2.5 py-1 rounded-full border border-neon-purple/30">
+              <span>Marketplace Take</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Total Hardware Units */}
+        <div className="rounded-2xl bg-gradient-to-br from-blue-500/10 via-white/[0.02] to-transparent border border-blue-500/30 p-6 relative overflow-hidden group hover:-translate-y-1 transition-all shadow-[0_10px_30px_rgba(59,130,246,0.1)]">
+          <div className="absolute top-0 right-0 p-4 opacity-15 group-hover:opacity-30 transition-opacity group-hover:scale-110 duration-500 text-blue-400">
+            <Package className="h-24 w-24 -mr-6 -mt-6" />
+          </div>
+          <div className="relative z-10">
+            <p className="text-xs font-mono text-muted-foreground uppercase tracking-wider">Hardware Units Sold</p>
+            <h3 className="text-3xl font-display font-black text-white mt-1">
+              {analytics?.totalUnits || 0} Units
+            </h3>
+            <div className="mt-4 flex items-center gap-2 text-[11px] font-mono text-blue-300 bg-blue-500/15 w-fit px-2.5 py-1 rounded-full border border-blue-500/30">
+              <span>{analytics?.totalOrders || 0} Total Orders</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Average Order Value (AOV) */}
+        <div className="rounded-2xl bg-gradient-to-br from-amber-500/10 via-white/[0.02] to-transparent border border-amber-500/30 p-6 relative overflow-hidden group hover:-translate-y-1 transition-all shadow-[0_10px_30px_rgba(245,158,11,0.1)]">
+          <div className="absolute top-0 right-0 p-4 opacity-15 group-hover:opacity-30 transition-opacity group-hover:scale-110 duration-500 text-amber-400">
+            <Zap className="h-24 w-24 -mr-6 -mt-6" />
+          </div>
+          <div className="relative z-10">
+            <p className="text-xs font-mono text-muted-foreground uppercase tracking-wider">Avg Order Value (AOV)</p>
+            <h3 className="text-3xl font-display font-black text-white mt-1">
+              Rs {(analytics?.avgOrderValue || 0).toLocaleString()}
+            </h3>
+            <div className="mt-4 flex items-center gap-2 text-[11px] font-mono text-amber-300 bg-amber-500/15 w-fit px-2.5 py-1 rounded-full border border-amber-500/30">
+              <span>Per Transaction</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Visual Charts: Timeline Velocity & Category Share */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Revenue Velocity Timeline Chart (2 cols) */}
+        <div className="lg:col-span-2 rounded-2xl border border-white/10 bg-black/40 backdrop-blur-xl p-6 space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/10 pb-3">
+            <div>
+              <h3 className="text-base font-display font-bold text-white flex items-center gap-2">
+                <TrendingUp className="h-4 w-4 text-neon-cyan" />
+                <span>Revenue &amp; Order Velocity Timeline</span>
+              </h3>
+              <p className="text-[11px] font-mono text-muted-foreground mt-0.5">
+                Daily sales gross volume trajectory
+              </p>
+            </div>
+            <span className="text-[10px] font-mono px-2.5 py-0.5 rounded-full bg-neon-cyan/10 border border-neon-cyan/30 text-neon-cyan">
+              Daily Sales Trend
+            </span>
+          </div>
+
+          <div className="h-72 w-full pt-4">
+            {analytics?.timeline && analytics.timeline.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={analytics.timeline} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="salesGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#00F2FE" stopOpacity={0.4} />
+                      <stop offset="95%" stopColor="#00F2FE" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" />
+                  <XAxis dataKey="displayDate" stroke="#888888" fontSize={11} tickLine={false} />
+                  <YAxis
+                    stroke="#888888"
+                    fontSize={11}
+                    tickLine={false}
+                    tickFormatter={(val) => `Rs ${(val / 1000).toFixed(0)}k`}
+                  />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: "#0a0a0f",
+                      borderColor: "#ffffff20",
+                      borderRadius: "12px",
+                      fontSize: "12px",
+                    }}
+                    formatter={(value: any) => [`Rs ${Number(value).toLocaleString()}`, "Gross Revenue"]}
+                    labelFormatter={(label) => `Date: ${label}`}
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="revenue"
+                    stroke="#00F2FE"
+                    strokeWidth={2.5}
+                    fillOpacity={1}
+                    fill="url(#salesGrad)"
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="h-full flex items-center justify-center text-xs text-muted-foreground font-mono">
+                No chronological sales entries available
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Category Share Donut / Distribution */}
+        <div className="rounded-2xl border border-white/10 bg-black/40 backdrop-blur-xl p-6 space-y-4">
+          <div className="border-b border-white/10 pb-3">
+            <h3 className="text-base font-display font-bold text-white flex items-center gap-2">
+              <Box className="h-4 w-4 text-neon-purple" />
+              <span>Category Share</span>
+            </h3>
+            <p className="text-[11px] font-mono text-muted-foreground mt-0.5">
+              Revenue distribution by laptop class
+            </p>
+          </div>
+
+          <div className="h-52 w-full">
+            {pieData.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={pieData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={55}
+                    outerRadius={80}
+                    paddingAngle={4}
+                    dataKey="value"
+                  >
+                    {pieData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: "#0a0a0f",
+                      borderColor: "#ffffff20",
+                      borderRadius: "12px",
+                      fontSize: "12px",
+                    }}
+                    formatter={(val: any) => [`Rs ${Number(val).toLocaleString()}`, "Sales"]}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="h-full flex items-center justify-center text-xs text-muted-foreground font-mono">
+                No category data
+              </div>
+            )}
+          </div>
+
+          {/* Legend Items */}
+          <div className="space-y-2 pt-2 border-t border-white/5">
+            {pieData.map((cat) => {
+              const total = analytics?.totalRevenue || 1;
+              const pct = Math.round((cat.value / total) * 100);
+              return (
+                <div key={cat.name} className="flex items-center justify-between text-xs">
+                  <div className="flex items-center gap-2">
+                    <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: cat.color }} />
+                    <span className="text-white font-medium">{cat.name}</span>
+                    <span className="text-[10px] text-muted-foreground font-mono">({cat.units} units)</span>
+                  </div>
+                  <div className="text-right">
+                    <span className="font-mono text-white font-bold">{pct}%</span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
+      {/* Top Performing Hardware Models (Best-Sellers) */}
+      <div className="rounded-2xl border border-white/10 bg-black/40 backdrop-blur-xl p-6 space-y-4">
+        <div className="flex items-center justify-between border-b border-white/10 pb-3">
+          <div>
+            <h3 className="text-base font-display font-bold text-white flex items-center gap-2">
+              <Zap className="h-4 w-4 text-amber-400" />
+              <span>Top Performing Laptop Models (Best Sellers)</span>
+            </h3>
+            <p className="text-[11px] font-mono text-muted-foreground mt-0.5">
+              Ranked by total revenue generated across verified client orders
+            </p>
+          </div>
+          <span className="text-xs px-2.5 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 font-mono">
+            {analytics?.topProducts?.length || 0} Models
+          </span>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="border-b border-white/10 text-[11px] font-mono uppercase tracking-wider text-muted-foreground">
+                <th className="py-3 px-4">Rank &amp; Machine Model</th>
+                <th className="py-3 px-4">Category</th>
+                <th className="py-3 px-4 text-center">Units Sold</th>
+                <th className="py-3 px-4 text-right">Gross Sales Volume</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-white/5 text-xs">
+              {analytics?.topProducts?.map((prod, idx) => (
+                <tr key={prod.id} className="hover:bg-white/[0.02] transition-colors">
+                  <td className="py-3 px-4">
+                    <div className="flex items-center gap-3">
+                      <span className="h-6 w-6 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center font-mono font-bold text-neon-cyan text-xs">
+                        #{idx + 1}
+                      </span>
+                      <img
+                        src={prod.img}
+                        alt={prod.name}
+                        className="h-10 w-12 rounded-lg object-cover border border-white/10 bg-black/50"
+                      />
+                      <div>
+                        <div className="font-display font-bold text-white">{prod.name}</div>
+                        <div className="text-[10px] text-muted-foreground font-mono">ID: {prod.id}</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="py-3 px-4">
+                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-semibold bg-white/5 border border-white/10 text-white">
+                      {prod.category}
+                    </span>
+                  </td>
+                  <td className="py-3 px-4 text-center font-mono font-bold text-white text-sm">
+                    {prod.units}
+                  </td>
+                  <td className="py-3 px-4 text-right">
+                    <span className="font-mono font-bold text-neon-cyan text-sm">
+                      Rs {prod.revenue.toLocaleString()}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+              {(!analytics?.topProducts || analytics.topProducts.length === 0) && (
+                <tr>
+                  <td colSpan={4} className="py-8 text-center text-muted-foreground font-mono text-xs">
+                    No product sales registered yet.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Real-Time Sales Ledger Feed */}
+      <div className="rounded-2xl border border-white/10 bg-black/40 backdrop-blur-xl p-6 space-y-4">
+        <div className="flex items-center justify-between border-b border-white/10 pb-3">
+          <div>
+            <h3 className="text-base font-display font-bold text-white flex items-center gap-2">
+              <ShoppingBag className="h-4 w-4 text-emerald-400" />
+              <span>Verified Sales Ledger</span>
+            </h3>
+            <p className="text-[11px] font-mono text-muted-foreground mt-0.5">
+              Live transaction records and order fulfillment progress
+            </p>
+          </div>
+          <span className="text-xs px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 font-mono">
+            {analytics?.recentSales?.length || 0} Transactions
+          </span>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="border-b border-white/10 text-[11px] font-mono uppercase tracking-wider text-muted-foreground">
+                <th className="py-3 px-4">Order Reference</th>
+                <th className="py-3 px-4">Customer Details</th>
+                <th className="py-3 px-4">Hardware Unit(s)</th>
+                <th className="py-3 px-4">Status</th>
+                <th className="py-3 px-4 text-right">Order Value</th>
+                <th className="py-3 px-4 text-right">Platform Fee (5%)</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-white/5 text-xs">
+              {analytics?.recentSales?.map((sale: any) => {
+                const commission = Math.round(Number(sale.totalAmount) * 0.05);
+                return (
+                  <tr key={sale.id} className="hover:bg-white/[0.02] transition-colors">
+                    <td className="py-3 px-4">
+                      <div className="font-mono font-bold text-neon-cyan">{sale.orderNumber}</div>
+                      <div className="text-[10px] text-muted-foreground font-mono">
+                        {new Date(sale.createdAt).toLocaleDateString()}
+                      </div>
+                    </td>
+                    <td className="py-3 px-4">
+                      <div className="font-semibold text-white">{sale.customerName}</div>
+                      <div className="text-[10px] text-muted-foreground font-mono">{sale.city || sale.customerEmail}</div>
+                    </td>
+                    <td className="py-3 px-4">
+                      <div className="space-y-0.5 max-w-xs">
+                        {sale.items?.map((it: any, i: number) => (
+                          <div key={i} className="text-white text-xs truncate">
+                            {it.product?.name || "Machine Unit"}{" "}
+                            <span className="text-[10px] text-muted-foreground font-mono">x{it.quantity || 1}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </td>
+                    <td className="py-3 px-4">
+                      <span
+                        className={`text-[9px] font-mono px-2 py-0.5 rounded-full font-bold uppercase tracking-wider ${
+                          sale.status === "DELIVERED"
+                            ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
+                            : sale.status === "SHIPPED"
+                            ? "bg-purple-500/20 text-purple-300 border border-purple-500/30"
+                            : sale.status === "PROCESSING"
+                            ? "bg-blue-500/20 text-blue-300 border border-blue-500/30"
+                            : sale.status === "CANCELLED"
+                            ? "bg-rose-500/20 text-rose-300 border border-rose-500/30"
+                            : "bg-amber-500/20 text-amber-300 border border-amber-500/30"
+                        }`}
+                      >
+                        {sale.status}
+                      </span>
+                    </td>
+                    <td className="py-3 px-4 text-right font-mono font-bold text-white">
+                      Rs {Number(sale.totalAmount).toLocaleString()}
+                    </td>
+                    <td className="py-3 px-4 text-right font-mono text-neon-purple font-semibold">
+                      Rs {commission.toLocaleString()}
+                    </td>
+                  </tr>
+                );
+              })}
+              {(!analytics?.recentSales || analytics.recentSales.length === 0) && (
+                <tr>
+                  <td colSpan={6} className="py-8 text-center text-muted-foreground font-mono text-xs">
+                    No transactions recorded yet.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );
@@ -3460,7 +3834,6 @@ function TabSettings() {
 
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
-  const [isClearingCache, setIsClearingCache] = useState(false);
   const [actionMessage, setActionMessage] = useState<{ text: string; type: "success" | "error" } | null>(null);
 
   const fetchSettings = async () => {
@@ -3502,45 +3875,6 @@ function TabSettings() {
     } finally {
       setIsSaving(false);
     }
-  };
-
-  const handleClearCache = async () => {
-    setIsClearingCache(true);
-    try {
-      const res = await clearSystemCache();
-      if (res.success) {
-        showNotification(res.message || "System cache flushed successfully!");
-      } else {
-        showNotification("Failed to flush cache", "error");
-      }
-    } catch (err: any) {
-      showNotification(err.message || "Cache flush error", "error");
-    } finally {
-      setIsClearingCache(false);
-    }
-  };
-
-  const handleResetDefaults = () => {
-    if (!window.confirm("Reset all platform settings to factory defaults?")) return;
-    setSettings({
-      storeName: "SELLORA",
-      tagline: "Next-Gen Computing. Unleashed.",
-      supportEmail: "support@sellora.dev",
-      supportPhone: "+94 11 234 5678",
-      address: "No. 45 Galle Road, Colombo 03, Sri Lanka",
-      currency: "LKR",
-      freeShippingThreshold: 500000,
-      taxRatePercent: 0,
-      maintenanceMode: false,
-      maintenanceMessage:
-        "SELLORA is currently undergoing scheduled infrastructure upgrades. Storefront access will resume shortly.",
-      autoApproveProducts: false,
-      autoApproveSellers: false,
-      requireEmailVerification: true,
-      orderNotifications: true,
-      security2FA: false,
-    });
-    showNotification("Settings reset to defaults. Click 'Save Platform Changes' to persist.");
   };
 
   return (
@@ -3732,91 +4066,7 @@ function TabSettings() {
           </div>
         </div>
 
-        {/* Section 3: Multi-Vendor Policy & Automation */}
-        <div className="rounded-2xl border border-white/10 bg-black/40 backdrop-blur-xl p-6 space-y-4">
-          <h3 className="text-base font-bold text-white flex items-center gap-2 pb-2 border-b border-white/10">
-            <Store className="h-4 w-4 text-neon-cyan" />
-            <span>Multi-Vendor Policies &amp; Automation</span>
-          </h3>
-
-          <div className="space-y-3">
-            <div className="flex items-center justify-between p-3.5 bg-white/5 rounded-xl border border-white/10">
-              <div>
-                <span className="text-xs font-semibold text-white block">Auto-Approve Seller Applications</span>
-                <span className="text-[11px] text-muted-foreground font-mono">
-                  Bypass administrative review and automatically grant seller status upon registration.
-                </span>
-              </div>
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={settings.autoApproveSellers}
-                  onChange={(e) => setSettings({ ...settings, autoApproveSellers: e.target.checked })}
-                  className="sr-only peer"
-                />
-                <div className="w-11 h-6 bg-white/20 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-neon-cyan"></div>
-              </label>
-            </div>
-
-            <div className="flex items-center justify-between p-3.5 bg-white/5 rounded-xl border border-white/10">
-              <div>
-                <span className="text-xs font-semibold text-white block">Auto-Approve Seller Hardware Products</span>
-                <span className="text-[11px] text-muted-foreground font-mono">
-                  Publish laptop listings directly to the public catalog without requiring manual admin approval.
-                </span>
-              </div>
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={settings.autoApproveProducts}
-                  onChange={(e) => setSettings({ ...settings, autoApproveProducts: e.target.checked })}
-                  className="sr-only peer"
-                />
-                <div className="w-11 h-6 bg-white/20 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-neon-cyan"></div>
-              </label>
-            </div>
-
-            <div className="flex items-center justify-between p-3.5 bg-white/5 rounded-xl border border-white/10">
-              <div>
-                <span className="text-xs font-semibold text-white block">Require OTP Verification on Registration</span>
-                <span className="text-[11px] text-muted-foreground font-mono">
-                  Enforce email verification codes via EmailJS before account credentials activate.
-                </span>
-              </div>
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={settings.requireEmailVerification}
-                  onChange={(e) =>
-                    setSettings({ ...settings, requireEmailVerification: e.target.checked })
-                  }
-                  className="sr-only peer"
-                />
-                <div className="w-11 h-6 bg-white/20 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-neon-cyan"></div>
-              </label>
-            </div>
-
-            <div className="flex items-center justify-between p-3.5 bg-white/5 rounded-xl border border-white/10">
-              <div>
-                <span className="text-xs font-semibold text-white block">Instant Order Notifications</span>
-                <span className="text-[11px] text-muted-foreground font-mono">
-                  Trigger automated dispatch confirmations when orders are placed.
-                </span>
-              </div>
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={settings.orderNotifications}
-                  onChange={(e) => setSettings({ ...settings, orderNotifications: e.target.checked })}
-                  className="sr-only peer"
-                />
-                <div className="w-11 h-6 bg-white/20 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-neon-cyan"></div>
-              </label>
-            </div>
-          </div>
-        </div>
-
-        {/* Section 4: Security, Access & Maintenance Gate */}
+        {/* Section: Security Controls & Storefront Access Barrier */}
         <div className="rounded-2xl border border-white/10 bg-black/40 backdrop-blur-xl p-6 space-y-4">
           <h3 className="text-base font-bold text-white flex items-center gap-2 pb-2 border-b border-white/10">
             <Shield className="h-4 w-4 text-neon-purple" />
@@ -3824,24 +4074,6 @@ function TabSettings() {
           </h3>
 
           <div className="space-y-4">
-            <div className="flex items-center justify-between p-3.5 bg-white/5 rounded-xl border border-white/10">
-              <div>
-                <span className="text-xs font-semibold text-white block">Require Two Factor Authentication (2FA)</span>
-                <span className="text-[11px] text-muted-foreground font-mono">
-                  Force all administrator roles to authenticate with hardware or biometric second factor.
-                </span>
-              </div>
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={settings.security2FA}
-                  onChange={(e) => setSettings({ ...settings, security2FA: e.target.checked })}
-                  className="sr-only peer"
-                />
-                <div className="w-11 h-6 bg-white/20 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-neon-purple"></div>
-              </label>
-            </div>
-
             {/* Maintenance Mode Toggle */}
             <div
               className={`p-4 rounded-xl border transition-all ${
@@ -3892,53 +4124,12 @@ function TabSettings() {
           </div>
         </div>
 
-        {/* Section 5: Cluster Health & Cache Management */}
-        <div className="rounded-2xl border border-white/10 bg-black/40 backdrop-blur-xl p-6 space-y-4">
-          <h3 className="text-base font-bold text-white flex items-center gap-2 pb-2 border-b border-white/10">
-            <Server className="h-4 w-4 text-neon-cyan" />
-            <span>Infrastructure Health &amp; Cache Flush</span>
-          </h3>
-
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-xl bg-white/[0.03] border border-white/10">
-            <div>
-              <div className="font-semibold text-xs text-white flex items-center gap-2">
-                <span className="h-2 w-2 rounded-full bg-neon-cyan animate-pulse" />
-                <span>PostgreSQL 18 Cluster Node</span>
-                <span className="text-[10px] font-mono text-neon-cyan px-2 py-0.5 rounded bg-neon-cyan/10 border border-neon-cyan/20">
-                  Connected &bull; Active Schema
-                </span>
-              </div>
-              <p className="text-[11px] text-muted-foreground font-mono mt-1">
-                Database storage engine running locally with active foreign keys and indexes.
-              </p>
-            </div>
-
-            <button
-              type="button"
-              disabled={isClearingCache}
-              onClick={handleClearCache}
-              className="px-4 py-2 bg-white/5 hover:bg-white/10 text-white border border-white/10 rounded-xl text-xs font-mono transition-all flex items-center gap-2 shrink-0 disabled:opacity-50"
-            >
-              <RefreshCw className={`h-3.5 w-3.5 text-neon-purple ${isClearingCache ? "animate-spin" : ""}`} />
-              Flush System Cache
-            </button>
-          </div>
-        </div>
-
         {/* Action Toolbar */}
-        <div className="flex items-center justify-between pt-4 border-t border-white/10">
-          <button
-            type="button"
-            onClick={handleResetDefaults}
-            className="px-4 py-2.5 bg-white/5 hover:bg-white/10 text-muted-foreground hover:text-white rounded-xl text-xs font-mono transition-colors border border-white/10"
-          >
-            Reset Defaults
-          </button>
-
+        <div className="flex items-center justify-end pt-4 border-t border-white/10">
           <button
             type="submit"
             disabled={isSaving}
-            className="px-6 py-2.5 bg-gradient-to-r from-neon-cyan to-neon-purple hover:from-neon-cyan/90 hover:to-neon-purple/90 text-black font-bold rounded-xl text-xs transition-all shadow-[0_0_20px_rgba(0,242,254,0.4)] disabled:opacity-50 flex items-center gap-2"
+            className="px-6 py-2.5 bg-gradient-to-r from-neon-cyan to-neon-purple hover:from-neon-cyan/90 hover:to-neon-purple/90 text-black font-bold rounded-xl text-xs transition-all shadow-[0_0_20px_rgba(0,242,254,0.4)] disabled:opacity-50 flex items-center gap-2 cursor-pointer"
           >
             {isSaving ? <RefreshCw className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
             <span>Save Platform Settings</span>

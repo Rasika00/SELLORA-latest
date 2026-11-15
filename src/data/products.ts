@@ -20,6 +20,7 @@ export type Product = {
   display?: string;
   batteryWeight?: string;
   specialHighlight?: string;
+  stock?: number;
   img: string;
   status?: "APPROVED" | "PENDING_APPROVAL" | "REJECTED" | string;
   sellerId?: string | null;

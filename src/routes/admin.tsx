@@ -1233,7 +1233,7 @@ function TabInventory({
                 </div>
               </div>
 
-              {/* Live 10,000-Point Benchmark Preview */}
+              {/* Live Benchmark Preview */}
               {(() => {
                 const liveBench = calculateBenchmark({
                   name: newProductForm.name,
@@ -1244,27 +1244,13 @@ function TabInventory({
                   ram: newProductForm.ram,
                 });
                 return (
-                  <div className="rounded-xl border border-neon-purple/30 bg-neon-purple/5 p-3">
-                    <div className="flex items-center justify-between mb-1.5">
-                      <span className="text-neon-purple font-mono text-xs font-bold uppercase">
-                        Synthetic Benchmark Score Preview
-                      </span>
-                      <span className="rounded-full bg-neon-purple text-background px-2 py-0.5 text-[9px] font-mono font-black uppercase">
-                        {liveBench.tier}
-                      </span>
-                    </div>
-                    <div className="flex items-baseline gap-2">
-                      <span className="text-xl font-black font-display text-white">
-                        {liveBench.totalScore.toLocaleString()}
-                      </span>
-                      <span className="text-xs font-mono text-muted-foreground">/ 10,000 pts</span>
-                    </div>
-                    <div className="grid grid-cols-4 gap-2 mt-2 pt-2 border-t border-white/10 text-[10px] font-mono">
-                      <div><span className="text-muted-foreground block">GPU (45%)</span><span className="text-neon-cyan font-bold">{liveBench.gpuScore}</span></div>
-                      <div><span className="text-muted-foreground block">CPU (35%)</span><span className="text-neon-purple font-bold">{liveBench.cpuScore}</span></div>
-                      <div><span className="text-muted-foreground block">RAM (12%)</span><span className="text-neon-blue font-bold">{liveBench.ramScore}</span></div>
-                      <div><span className="text-muted-foreground block">Cooling (8%)</span><span className="text-emerald-400 font-bold">{liveBench.coolingScore}</span></div>
-                    </div>
+                  <div className="rounded-xl border border-neon-purple/30 bg-neon-purple/5 p-3 flex items-center justify-between">
+                    <span className="text-neon-purple font-mono text-xs font-bold uppercase">
+                      Calculated Benchmark Score
+                    </span>
+                    <span className="text-lg font-black font-display text-white">
+                      {liveBench.totalScore.toLocaleString()} pts
+                    </span>
                   </div>
                 );
               })()}

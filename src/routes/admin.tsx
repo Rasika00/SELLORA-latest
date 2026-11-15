@@ -23,7 +23,6 @@ import {
   type SellerRecord,
   getPlatformSettings,
   updatePlatformSettings,
-  clearSystemCache,
   type PlatformSettings,
 } from "@/lib/api/client";
 import {
@@ -1399,7 +1398,7 @@ function TabOrders({
               </span>
             </div>
             <p className="text-xs text-muted-foreground mt-1">
-              Live customer orders from PostgreSQL. Update dispatch statuses and issue tax invoices.
+              Live customer orders. Update dispatch statuses and issue tax invoices.
             </p>
           </div>
 
@@ -2119,7 +2118,7 @@ function TabSellers() {
             <span>Seller Applications &amp; Sanctions</span>
           </h2>
           <p className="text-xs text-muted-foreground font-mono mt-1">
-            Review vendor onboarding applications (A3.1), verify partner credentials &amp; manage store sanctions (A3.2).
+            Review vendor onboarding applications, verify partner credentials &amp; manage store sanctions.
           </p>
         </div>
 
@@ -3399,7 +3398,6 @@ function TabSettings() {
 
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
-  const [isClearingCache, setIsClearingCache] = useState(false);
   const [actionMessage, setActionMessage] = useState<{ text: string; type: "success" | "error" } | null>(null);
 
   const fetchSettings = async () => {
@@ -3441,45 +3439,6 @@ function TabSettings() {
     } finally {
       setIsSaving(false);
     }
-  };
-
-  const handleClearCache = async () => {
-    setIsClearingCache(true);
-    try {
-      const res = await clearSystemCache();
-      if (res.success) {
-        showNotification(res.message || "System cache flushed successfully!");
-      } else {
-        showNotification("Failed to flush cache", "error");
-      }
-    } catch (err: any) {
-      showNotification(err.message || "Cache flush error", "error");
-    } finally {
-      setIsClearingCache(false);
-    }
-  };
-
-  const handleResetDefaults = () => {
-    if (!window.confirm("Reset all platform settings to factory defaults?")) return;
-    setSettings({
-      storeName: "SELLORA",
-      tagline: "Next-Gen Computing. Unleashed.",
-      supportEmail: "support@sellora.dev",
-      supportPhone: "+94 11 234 5678",
-      address: "No. 45 Galle Road, Colombo 03, Sri Lanka",
-      currency: "LKR",
-      freeShippingThreshold: 500000,
-      taxRatePercent: 0,
-      maintenanceMode: false,
-      maintenanceMessage:
-        "SELLORA is currently undergoing scheduled infrastructure upgrades. Storefront access will resume shortly.",
-      autoApproveProducts: false,
-      autoApproveSellers: false,
-      requireEmailVerification: true,
-      orderNotifications: true,
-      security2FA: false,
-    });
-    showNotification("Settings reset to defaults. Click 'Save Platform Changes' to persist.");
   };
 
   return (
@@ -3671,91 +3630,7 @@ function TabSettings() {
           </div>
         </div>
 
-        {/* Section 3: Multi-Vendor Policy & Automation */}
-        <div className="rounded-2xl border border-white/10 bg-black/40 backdrop-blur-xl p-6 space-y-4">
-          <h3 className="text-base font-bold text-white flex items-center gap-2 pb-2 border-b border-white/10">
-            <Store className="h-4 w-4 text-neon-cyan" />
-            <span>Multi-Vendor Policies &amp; Automation</span>
-          </h3>
-
-          <div className="space-y-3">
-            <div className="flex items-center justify-between p-3.5 bg-white/5 rounded-xl border border-white/10">
-              <div>
-                <span className="text-xs font-semibold text-white block">Auto-Approve Seller Applications</span>
-                <span className="text-[11px] text-muted-foreground font-mono">
-                  Bypass administrative review and automatically grant seller status upon registration.
-                </span>
-              </div>
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={settings.autoApproveSellers}
-                  onChange={(e) => setSettings({ ...settings, autoApproveSellers: e.target.checked })}
-                  className="sr-only peer"
-                />
-                <div className="w-11 h-6 bg-white/20 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-neon-cyan"></div>
-              </label>
-            </div>
-
-            <div className="flex items-center justify-between p-3.5 bg-white/5 rounded-xl border border-white/10">
-              <div>
-                <span className="text-xs font-semibold text-white block">Auto-Approve Seller Hardware Products</span>
-                <span className="text-[11px] text-muted-foreground font-mono">
-                  Publish laptop listings directly to the public catalog without requiring manual admin approval.
-                </span>
-              </div>
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={settings.autoApproveProducts}
-                  onChange={(e) => setSettings({ ...settings, autoApproveProducts: e.target.checked })}
-                  className="sr-only peer"
-                />
-                <div className="w-11 h-6 bg-white/20 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-neon-cyan"></div>
-              </label>
-            </div>
-
-            <div className="flex items-center justify-between p-3.5 bg-white/5 rounded-xl border border-white/10">
-              <div>
-                <span className="text-xs font-semibold text-white block">Require OTP Verification on Registration</span>
-                <span className="text-[11px] text-muted-foreground font-mono">
-                  Enforce email verification codes via EmailJS before account credentials activate.
-                </span>
-              </div>
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={settings.requireEmailVerification}
-                  onChange={(e) =>
-                    setSettings({ ...settings, requireEmailVerification: e.target.checked })
-                  }
-                  className="sr-only peer"
-                />
-                <div className="w-11 h-6 bg-white/20 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-neon-cyan"></div>
-              </label>
-            </div>
-
-            <div className="flex items-center justify-between p-3.5 bg-white/5 rounded-xl border border-white/10">
-              <div>
-                <span className="text-xs font-semibold text-white block">Instant Order Notifications</span>
-                <span className="text-[11px] text-muted-foreground font-mono">
-                  Trigger automated dispatch confirmations when orders are placed.
-                </span>
-              </div>
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={settings.orderNotifications}
-                  onChange={(e) => setSettings({ ...settings, orderNotifications: e.target.checked })}
-                  className="sr-only peer"
-                />
-                <div className="w-11 h-6 bg-white/20 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-neon-cyan"></div>
-              </label>
-            </div>
-          </div>
-        </div>
-
-        {/* Section 4: Security, Access & Maintenance Gate */}
+        {/* Section: Security Controls & Storefront Access Barrier */}
         <div className="rounded-2xl border border-white/10 bg-black/40 backdrop-blur-xl p-6 space-y-4">
           <h3 className="text-base font-bold text-white flex items-center gap-2 pb-2 border-b border-white/10">
             <Shield className="h-4 w-4 text-neon-purple" />
@@ -3763,24 +3638,6 @@ function TabSettings() {
           </h3>
 
           <div className="space-y-4">
-            <div className="flex items-center justify-between p-3.5 bg-white/5 rounded-xl border border-white/10">
-              <div>
-                <span className="text-xs font-semibold text-white block">Require Two Factor Authentication (2FA)</span>
-                <span className="text-[11px] text-muted-foreground font-mono">
-                  Force all administrator roles to authenticate with hardware or biometric second factor.
-                </span>
-              </div>
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={settings.security2FA}
-                  onChange={(e) => setSettings({ ...settings, security2FA: e.target.checked })}
-                  className="sr-only peer"
-                />
-                <div className="w-11 h-6 bg-white/20 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-neon-purple"></div>
-              </label>
-            </div>
-
             {/* Maintenance Mode Toggle */}
             <div
               className={`p-4 rounded-xl border transition-all ${
@@ -3831,53 +3688,12 @@ function TabSettings() {
           </div>
         </div>
 
-        {/* Section 5: Cluster Health & Cache Management */}
-        <div className="rounded-2xl border border-white/10 bg-black/40 backdrop-blur-xl p-6 space-y-4">
-          <h3 className="text-base font-bold text-white flex items-center gap-2 pb-2 border-b border-white/10">
-            <Server className="h-4 w-4 text-neon-cyan" />
-            <span>Infrastructure Health &amp; Cache Flush</span>
-          </h3>
-
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-xl bg-white/[0.03] border border-white/10">
-            <div>
-              <div className="font-semibold text-xs text-white flex items-center gap-2">
-                <span className="h-2 w-2 rounded-full bg-neon-cyan animate-pulse" />
-                <span>PostgreSQL 18 Cluster Node</span>
-                <span className="text-[10px] font-mono text-neon-cyan px-2 py-0.5 rounded bg-neon-cyan/10 border border-neon-cyan/20">
-                  Connected &bull; Active Schema
-                </span>
-              </div>
-              <p className="text-[11px] text-muted-foreground font-mono mt-1">
-                Database storage engine running locally with active foreign keys and indexes.
-              </p>
-            </div>
-
-            <button
-              type="button"
-              disabled={isClearingCache}
-              onClick={handleClearCache}
-              className="px-4 py-2 bg-white/5 hover:bg-white/10 text-white border border-white/10 rounded-xl text-xs font-mono transition-all flex items-center gap-2 shrink-0 disabled:opacity-50"
-            >
-              <RefreshCw className={`h-3.5 w-3.5 text-neon-purple ${isClearingCache ? "animate-spin" : ""}`} />
-              Flush System Cache
-            </button>
-          </div>
-        </div>
-
         {/* Action Toolbar */}
-        <div className="flex items-center justify-between pt-4 border-t border-white/10">
-          <button
-            type="button"
-            onClick={handleResetDefaults}
-            className="px-4 py-2.5 bg-white/5 hover:bg-white/10 text-muted-foreground hover:text-white rounded-xl text-xs font-mono transition-colors border border-white/10"
-          >
-            Reset Defaults
-          </button>
-
+        <div className="flex items-center justify-end pt-4 border-t border-white/10">
           <button
             type="submit"
             disabled={isSaving}
-            className="px-6 py-2.5 bg-gradient-to-r from-neon-cyan to-neon-purple hover:from-neon-cyan/90 hover:to-neon-purple/90 text-black font-bold rounded-xl text-xs transition-all shadow-[0_0_20px_rgba(0,242,254,0.4)] disabled:opacity-50 flex items-center gap-2"
+            className="px-6 py-2.5 bg-gradient-to-r from-neon-cyan to-neon-purple hover:from-neon-cyan/90 hover:to-neon-purple/90 text-black font-bold rounded-xl text-xs transition-all shadow-[0_0_20px_rgba(0,242,254,0.4)] disabled:opacity-50 flex items-center gap-2 cursor-pointer"
           >
             {isSaving ? <RefreshCw className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
             <span>Save Platform Settings</span>

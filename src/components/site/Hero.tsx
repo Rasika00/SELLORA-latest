@@ -1,5 +1,16 @@
-import { Play, ArrowRight, Plus, Search, Sparkles } from "lucide-react";
-import heroLaptop from "@/assets/hero-laptop-editorial.png";
+import { Link } from "@tanstack/react-router";
+import { 
+  Laptop, 
+  Scale, 
+  ArrowRight, 
+  Zap, 
+  ShieldCheck, 
+  Headphones, 
+  Search, 
+  Sparkles,
+  Play
+} from "lucide-react";
+import heroLaptop from "@/assets/hero-laptop.png";
 import { useSearch } from "@/context/SearchContext";
 
 const metrics = [
@@ -17,102 +28,125 @@ const metrics = [
 
 export function Hero() {
   const { openSearch } = useSearch();
+
   return (
-    <section className="relative isolate overflow-hidden pt-28 md:pt-32">
-      {/* Backdrops */}
+    <section className="relative isolate overflow-hidden pt-24 sm:pt-28 pb-8">
+      {/* Background ambient lighting */}
       <div className="absolute inset-0 -z-20 bg-gradient-hero" />
-      <div className="absolute inset-0 -z-20 bg-grid opacity-30 [mask-image:radial-gradient(ellipse_at_center,black_30%,transparent_80%)]" />
+      <div className="pointer-events-none absolute left-[15%] top-1/4 -z-10 h-72 w-72 rounded-full bg-primary/15 blur-3xl" />
+      <div className="pointer-events-none absolute right-[15%] top-1/3 -z-10 h-80 w-80 rounded-full bg-accent/15 blur-3xl" />
 
-      {/* Ambient orbs - subtle, refined */}
-      <div className="pointer-events-none absolute left-[10%] top-1/3 -z-10 h-72 w-72 rounded-full bg-primary/10 dark:bg-primary/15 blur-3xl animate-glow-pulse" />
-      <div className="pointer-events-none absolute right-[10%] top-1/4 -z-10 h-80 w-80 rounded-full bg-accent/10 dark:bg-accent/15 blur-3xl animate-glow-pulse [animation-delay:1.5s]" />
+      <div className="mx-auto w-full max-w-full px-3 sm:px-6 md:px-10 lg:px-12">
+        {/* Main Hero Showcase Banner */}
+        <div className="relative rounded-3xl border border-border/80 bg-gradient-to-r from-[#050B16] via-[#071224] to-[#100922] p-6 sm:p-10 md:p-12 lg:p-14 text-white shadow-elevated overflow-hidden">
+          {/* Subtle background tech grid */}
+          <div className="pointer-events-none absolute inset-0 bg-grid opacity-15 [mask-image:radial-gradient(ellipse_at_center,black_30%,transparent_80%)]" />
 
-      {/* Editorial stage */}
-      <div className="relative mx-auto w-full max-w-full px-4 sm:px-8 md:px-12">
-        {/* Eyebrow tag */}
-        <div className="mx-auto mb-6 flex w-fit items-center gap-2 rounded-full border border-border bg-card/60 backdrop-blur-md px-3.5 py-1 animate-fade-up">
-          <span className="h-1.5 w-1.5 rounded-full bg-primary" />
-          <span className="font-mono text-[10px] tracking-[0.25em] text-muted-foreground uppercase font-semibold">
-            INTRODUCING · SELLORA SERIES 09
-          </span>
-        </div>
+          {/* Angled cyber rays behind the laptop */}
+          <div className="pointer-events-none absolute -right-20 top-0 h-full w-2/3 bg-gradient-to-bl from-accent/20 via-primary/15 to-transparent blur-2xl" />
 
-        {/* Stage with overlapping type + 3D subject */}
-        <div className="relative">
-          {/* Massive overlapping headline behind subject */}
-          <h1
-            aria-label="Global hub for performance computing in 3D"
-            className="font-display pointer-events-none select-none flex flex-col items-center justify-center w-full mx-auto text-center font-black uppercase leading-[0.82] tracking-[-0.02em] animate-fade-up [animation-delay:0.1s]"
-          >
-            <span className="block text-3xl sm:text-5xl md:text-7xl lg:text-8xl xl:text-[7.5rem] text-foreground">
-              GLOBAL HUB
-            </span>
-            <span className="block text-3xl sm:text-5xl md:text-7xl lg:text-8xl xl:text-[7.5rem] text-foreground">
-              FOR <span className="text-gradient">PERFORMANCE</span>
-            </span>
-            <span className="block text-3xl sm:text-5xl md:text-7xl lg:text-8xl xl:text-[7.5rem] text-foreground">
-              COMPUTING
-            </span>
-          </h1>
+          <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-6 items-center">
+            {/* Left Content Column */}
+            <div className="lg:col-span-7 flex flex-col items-start justify-center">
+              {/* Eyebrow with cyan underline indicator */}
+              <div className="flex flex-col items-start gap-1.5 mb-5 animate-fade-up">
+                <span className="font-mono text-[11px] sm:text-xs font-bold tracking-[0.25em] text-slate-300 uppercase">
+                  FIND YOUR PERFECT LAPTOP
+                </span>
+                <span className="h-0.5 w-11 bg-primary rounded-full shadow-[0_0_8px_oklch(0.74_0.14_205/0.8)]" />
+              </div>
 
-          {/* Floating 3D laptop centered over headline */}
-          <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-            {/* Light flare */}
-            <div className="absolute h-[70%] w-[55%] rounded-full bg-gradient-glow blur-2xl" />
-            <div className="absolute top-[58%] h-24 w-[45%] rounded-[100%] bg-accent/20 blur-2xl animate-glow-pulse" />
+              {/* Main Headline */}
+              <h1 className="font-display text-3xl sm:text-4xl md:text-5xl lg:text-[3.25rem] xl:text-[3.75rem] font-black tracking-tight text-white leading-[1.08] animate-fade-up [animation-delay:0.08s]">
+                The right laptop for <br />
+                the way <span className="text-primary font-black">you work.</span>
+              </h1>
 
-            <div className="relative animate-float">
-              <img
-                src={heroLaptop}
-                alt="SELLORA flagship laptop floating with cinematic purple and cyan rim light"
-                width={1080}
-                height={1920}
-                className="h-[55vh] sm:h-[65vh] md:h-[88vh] w-auto max-h-[900px] drop-shadow-[0_40px_60px_rgba(0,0,0,0.5)] dark:drop-shadow-[0_50px_70px_rgba(0,0,0,0.7)] scale-[1.15] sm:scale-[1.35] md:scale-[1.7]"
-              />
+              {/* Subtitle */}
+              <p className="mt-4 text-sm sm:text-base md:text-lg text-slate-300/90 max-w-xl leading-relaxed animate-fade-up [animation-delay:0.15s]">
+                Explore laptops, compare specifications, and choose with confidence.
+              </p>
+
+              {/* Action Buttons */}
+              <div className="mt-7 flex flex-wrap items-center gap-3 sm:gap-4 animate-fade-up [animation-delay:0.2s]">
+                {/* Primary Button */}
+                <a
+                  href="#products"
+                  className="group inline-flex items-center justify-center gap-2.5 rounded-xl bg-primary hover:bg-primary/95 text-primary-foreground font-display text-sm font-bold px-6 py-3.5 shadow-sm hover:shadow-neon-cyan transition-all duration-200 hover:scale-[1.02]"
+                >
+                  <Laptop className="h-4 w-4 shrink-0" />
+                  <span>Browse Laptops</span>
+                  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                </a>
+
+                {/* Secondary Button */}
+                <Link
+                  to="/compare"
+                  className="group inline-flex items-center justify-center gap-2.5 rounded-xl border border-white/20 bg-white/[0.06] hover:bg-white/12 text-white font-display text-sm font-semibold px-6 py-3.5 backdrop-blur-md transition-all duration-200 hover:border-white/40 hover:scale-[1.02]"
+                >
+                  <Scale className="h-4 w-4 shrink-0 text-primary" />
+                  <span>Compare Laptops</span>
+                </Link>
+
+                {/* Watch film modal link */}
+                <a
+                  href="https://res.cloudinary.com/ybzqvcg1/video/upload/v1790518577/Sellora.mp4"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 text-xs font-mono font-medium text-slate-400 hover:text-white transition-colors px-2 py-2"
+                >
+                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary/20 text-primary">
+                    <Play className="h-2.5 w-2.5 fill-primary text-primary" />
+                  </span>
+                  <span>Film</span>
+                </a>
+              </div>
+
+              {/* Value Props / Trust Indicators */}
+              <div className="mt-8 pt-6 border-t border-white/10 flex flex-wrap items-center gap-3 sm:gap-4 text-xs sm:text-sm text-slate-300 animate-fade-up [animation-delay:0.25s]">
+                <div className="flex items-center gap-2 font-medium">
+                  <Zap className="h-4 w-4 text-primary shrink-0" />
+                  <span>Transparent Benchmark</span>
+                </div>
+
+                <span className="text-white/20 hidden sm:inline select-none">|</span>
+
+                <div className="flex items-center gap-2 font-medium">
+                  <ShieldCheck className="h-4 w-4 text-primary shrink-0" />
+                  <span>Verified Specifications</span>
+                </div>
+
+                <span className="text-white/20 hidden sm:inline select-none">|</span>
+
+                <div className="flex items-center gap-2 font-medium">
+                  <Headphones className="h-4 w-4 text-primary shrink-0" />
+                  <span>Expert Guidance</span>
+                </div>
+              </div>
             </div>
-          </div>
 
-          {/* Bottom wordmark plate */}
-          <div className="relative mt-2 md:mt-[-3rem] pb-8 flex flex-col items-center justify-center w-full mx-auto text-center overflow-visible animate-fade-up [animation-delay:0.3s]">
-            <div className="w-full flex justify-center items-center mx-auto text-center font-display text-5xl sm:text-[6rem] md:text-[8rem] lg:text-[11rem] xl:text-[13rem] 2xl:text-[14.5rem] font-black leading-none tracking-tight text-foreground select-none overflow-visible">
-              <span className="inline-block whitespace-nowrap">SELLORA</span>
+            {/* Right Laptop Image Column */}
+            <div className="lg:col-span-5 relative flex items-center justify-center lg:justify-end animate-fade-up [animation-delay:0.18s]">
+              {/* Backlight glow */}
+              <div className="pointer-events-none absolute -left-8 top-1/4 h-52 w-52 rounded-full bg-primary/25 blur-3xl" />
+              <div className="pointer-events-none absolute -right-6 top-1/3 h-56 w-56 rounded-full bg-accent/30 blur-3xl" />
+
+              <div className="relative w-full max-w-[580px] lg:max-w-none">
+                <img
+                  src={heroLaptop}
+                  alt="SELLORA Performance Laptop"
+                  width={1108}
+                  height={474}
+                  className="w-full h-auto object-contain drop-shadow-[0_25px_50px_rgba(0,0,0,0.65)] transition-transform duration-500 hover:scale-[1.02]"
+                  loading="eager"
+                />
+              </div>
             </div>
-            <p className="mt-4 font-mono text-xs tracking-[0.4em] text-muted-foreground md:text-sm uppercase">
-              FROM SILICON TO SHIPPED
-            </p>
-          </div>
-        </div>
-
-        {/* Sub copy + CTAs */}
-        <div className="mx-auto mt-8 flex flex-col md:flex-row w-full max-w-full justify-between gap-6 md:gap-8 md:items-end">
-          <p className="max-w-md text-sm leading-relaxed text-muted-foreground md:text-base">
-            A new platform for high performance laptops  engineered, rendered,
-            and shipped in 3D. Cinematic OLED, desktop class silicon, aerospace grade chassis.
-          </p>
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
-            <a
-              href="#products"
-              className="group relative inline-flex items-center justify-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow-sm hover:shadow transition-all duration-200 hover:scale-[1.02] w-full sm:w-auto"
-            >
-              Explore Series
-              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-            </a>
-            <a
-              href="https://res.cloudinary.com/ybzqvcg1/video/upload/v1790518577/Sellora.mp4"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="group inline-flex items-center justify-center gap-2 rounded-full border border-border bg-card/60 hover:bg-card px-6 py-3 text-sm font-semibold text-foreground transition-all duration-200 hover:scale-[1.02] w-full sm:w-auto shadow-sm"
-            >
-              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary/15 text-primary">
-                <Play className="h-2.5 w-2.5 fill-primary text-primary" />
-              </span>
-              Watch the Film
-            </a>
           </div>
         </div>
 
         {/* Hero Smart Search Bar */}
-        <div className="mx-auto mt-5 max-w-md w-full animate-fade-up [animation-delay:0.35s]">
+        <div className="mx-auto mt-6 max-w-md w-full animate-fade-up [animation-delay:0.3s]">
           <div
             onClick={() => openSearch()}
             className="group relative flex items-center justify-between gap-2 rounded-full border border-border hover:border-primary/40 bg-card/90 p-1 pl-3 backdrop-blur-xl shadow-card transition-all duration-200 hover:shadow-elevated hover:scale-[1.01] cursor-pointer"
@@ -155,7 +189,7 @@ export function Hero() {
         </div>
 
         {/* Scrolling metrics ticker */}
-        <div className="relative mt-10 overflow-hidden border-y border-border py-3 bg-card/30 backdrop-blur-sm [mask-image:linear-gradient(90deg,transparent,black_10%,black_90%,transparent)]">
+        <div className="relative mt-8 overflow-hidden border-y border-border py-3 bg-card/30 backdrop-blur-sm [mask-image:linear-gradient(90deg,transparent,black_10%,black_90%,transparent)]">
           <div className="flex w-max animate-marquee gap-12">
             {[...metrics, ...metrics].map((m, i) => (
               <div key={i} className="flex items-center gap-3">
@@ -169,15 +203,5 @@ export function Hero() {
         </div>
       </div>
     </section>
-  );
-}
-
-function Annotation({ className = "", children }: { className?: string; children: React.ReactNode }) {
-  return (
-    <div
-      className={`pointer-events-none absolute flex items-center gap-1 font-display text-[10px] tracking-[0.25em] text-neon-cyan/80 ${className}`}
-    >
-      {children}
-    </div>
   );
 }

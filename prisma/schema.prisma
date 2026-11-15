@@ -24,6 +24,7 @@ model Product {
   specialHighlight String?
   img              String
   detailedSpecs    Json?
+  stock            Int         @default(15)
   status           String      @default("APPROVED")
   seller           User?       @relation("SellerProducts", fields: [sellerId], references: [id])
   sellerId         String?

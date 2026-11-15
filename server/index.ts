@@ -321,6 +321,7 @@ app.post("/api/products", async (req, res) => {
         specialHighlight: specialHighlight ? String(specialHighlight).trim() : null,
         img: img ? String(img).trim() : "https://images.unsplash.com/photo-1593642632823-8f785ba67e45?auto=format&fit=crop&w=600&q=80",
         detailedSpecs: detailedSpecs || {},
+        stock: req.body.stock !== undefined ? Math.max(0, parseInt(req.body.stock, 10)) : 15,
         status: finalStatus,
         sellerId: sellerId || null,
       },
@@ -386,6 +387,7 @@ app.put("/api/products/:id", async (req, res) => {
         ...(specialHighlight !== undefined && { specialHighlight }),
         ...(img !== undefined && { img }),
         ...(detailedSpecs !== undefined && { detailedSpecs }),
+        ...(req.body.stock !== undefined && { stock: Math.max(0, parseInt(req.body.stock, 10)) }),
         ...(status !== undefined && { status }),
         ...(sellerId !== undefined && { sellerId: sellerId ? String(sellerId).trim() : null }),
       },
@@ -408,6 +410,44 @@ app.put("/api/products/:id", async (req, res) => {
   } catch (error: any) {
     console.error("Failed to update product:", error);
     res.status(500).json({ error: "Failed to update product in database", details: error.message });
+  }
+});
+
+// Products: Quick Stock Update (Seller/Admin Inventory Management)
+app.patch("/api/products/:id/stock", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { stock, delta } = req.body;
+
+    const existing = await prisma.product.findUnique({ where: { id } });
+    if (!existing) {
+      return res.status(404).json({ error: "Product not found" });
+    }
+
+    let newStock = typeof existing.stock === "number" ? existing.stock : 15;
+    if (stock !== undefined) {
+      newStock = Math.max(0, parseInt(stock, 10));
+    } else if (delta !== undefined) {
+      newStock = Math.max(0, newStock + parseInt(delta, 10));
+    }
+
+    const updated = await prisma.product.update({
+      where: { id },
+      data: { stock: newStock },
+      include: {
+        seller: {
+          select: {
+            id: true,
+            storeName: true,
+          },
+        },
+      },
+    });
+
+    res.json({ success: true, product: updated, stock: updated.stock });
+  } catch (error: any) {
+    console.error("Failed to update stock:", error);
+    res.status(500).json({ error: "Failed to update stock", details: error.message });
   }
 });
 
@@ -506,6 +546,29 @@ app.post("/api/orders", async (req, res) => {
         },
       },
     });
+
+    // Automatically decrement product stock for purchased laptops
+    for (const item of items) {
+      if (item.productId) {
+        const qty = Number(item.quantity) || 1;
+        try {
+          const prod = await prisma.product.findUnique({
+            where: { id: item.productId },
+            select: { id: true, stock: true },
+          });
+          if (prod) {
+            const currentStock = typeof prod.stock === "number" ? prod.stock : 15;
+            const updatedStock = Math.max(0, currentStock - qty);
+            await prisma.product.update({
+              where: { id: item.productId },
+              data: { stock: updatedStock },
+            });
+          }
+        } catch (stockErr) {
+          console.warn(`Stock decrement skipped for ${item.productId}:`, stockErr);
+        }
+      }
+    }
 
     res.status(201).json({
       success: true,

@@ -10,6 +10,7 @@ import {
   updateSellerProfile,
   createProduct,
   updateProduct,
+  updateProductStock,
   type SellerStatsResponse,
   type SellerOrderRecord,
   type SellerEarningsRecord,
@@ -121,6 +122,7 @@ export function SellerHubView() {
     processor: "Intel i7" as any,
     price: "",
     priceUsd: "",
+    stock: "15",
     cpu: "",
     ram: "16GB DDR5",
     gpu: "",
@@ -192,6 +194,7 @@ export function SellerHubView() {
       processor: "Intel i7",
       price: "",
       priceUsd: "",
+      stock: "15",
       cpu: "",
       ram: "16GB DDR5",
       gpu: "",
@@ -216,6 +219,7 @@ export function SellerHubView() {
       processor: (prod.processor as any) || "Intel i7",
       price: String(prod.price || ""),
       priceUsd: prod.priceUsd || "",
+      stock: String(prod.stock !== undefined ? prod.stock : 15),
       cpu: prod.cpu || "",
       ram: prod.ram || "16GB DDR5",
       gpu: prod.gpu || "",
@@ -227,6 +231,30 @@ export function SellerHubView() {
     setModalError("");
     setModalSuccess("");
     setIsModalOpen(true);
+  };
+
+  // Quick Inline Stock increment / decrement
+  const [updatingStockId, setUpdatingStockId] = useState<string | null>(null);
+  const handleQuickStockChange = async (productId: string, delta: number) => {
+    setUpdatingStockId(productId);
+    try {
+      // Optimistic update
+      setProducts((prev) =>
+        prev.map((p) => {
+          if (p.id === productId) {
+            const cur = typeof p.stock === "number" ? p.stock : 15;
+            return { ...p, stock: Math.max(0, cur + delta) };
+          }
+          return p;
+        })
+      );
+      await updateProductStock(productId, { delta });
+    } catch (err) {
+      console.error("Failed to update stock:", err);
+      if (user?.id) loadSellerData(user.id);
+    } finally {
+      setUpdatingStockId(null);
+    }
   };
 
   // Submit product creation or update (S2.2)
@@ -244,6 +272,9 @@ export function SellerHubView() {
       return;
     }
 
+    const numericStock = parseInt(formData.stock, 10);
+    const validStock = isNaN(numericStock) ? 15 : Math.max(0, numericStock);
+
     setIsSubmitting(true);
     setModalError("");
     setModalSuccess("");
@@ -258,6 +289,7 @@ export function SellerHubView() {
           processor: formData.processor,
           price: numericPrice,
           priceUsd: formData.priceUsd.trim() || `$${Math.round(numericPrice / 300)}`,
+          stock: validStock,
           cpu: formData.cpu.trim() || "High-Performance CPU",
           ram: formData.ram.trim(),
           gpu: formData.gpu.trim() || "Dedicated Graphics",
@@ -267,7 +299,7 @@ export function SellerHubView() {
           img: formData.img.trim() || undefined,
         });
 
-        setModalSuccess("Listing specifications updated successfully!");
+        setModalSuccess("Listing specifications and stock updated successfully!");
       } else {
         await createProduct({
           name: formData.name.trim(),
@@ -277,6 +309,7 @@ export function SellerHubView() {
           processor: formData.processor,
           price: numericPrice,
           priceUsd: formData.priceUsd.trim() || `$${Math.round(numericPrice / 300)}`,
+          stock: validStock,
           cpu: formData.cpu.trim() || "High-Performance CPU",
           ram: formData.ram.trim(),
           gpu: formData.gpu.trim() || "Dedicated Graphics",
@@ -979,6 +1012,7 @@ export function SellerHubView() {
                             <th className="py-3.5 px-4">Category</th>
                             <th className="py-3.5 px-4">Core Hardware</th>
                             <th className="py-3.5 px-4">Unit Price</th>
+                            <th className="py-3.5 px-4">Stock Units</th>
                             <th className="py-3.5 px-4">Listing Status</th>
                             <th className="py-3.5 px-4 text-right">Actions</th>
                           </tr>
@@ -1030,6 +1064,64 @@ export function SellerHubView() {
                                 </div>
                                 <div className="text-[10px] font-mono text-muted-foreground">
                                   {prod.priceUsd || `$${Math.round(prod.price / 300)}`}
+                                </div>
+                              </td>
+
+                              <td className="py-4 px-4">
+                                <div className="space-y-1.5">
+                                  <div className="flex items-center gap-1.5">
+                                    <span
+                                      className={`px-2 py-0.5 rounded-full text-[10px] font-mono font-bold tracking-wider inline-flex items-center gap-1 ${
+                                        (prod.stock ?? 15) > 5
+                                          ? "bg-emerald-500/15 text-emerald-300 border border-emerald-500/30"
+                                          : (prod.stock ?? 15) > 0
+                                          ? "bg-amber-500/15 text-amber-300 border border-amber-500/30"
+                                          : "bg-rose-500/15 text-rose-300 border border-rose-500/30"
+                                      }`}
+                                    >
+                                      {(prod.stock ?? 15) > 5 ? (
+                                        <>
+                                          <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                                          <span>{prod.stock ?? 15} Available</span>
+                                        </>
+                                      ) : (prod.stock ?? 15) > 0 ? (
+                                        <>
+                                          <span className="h-1.5 w-1.5 rounded-full bg-amber-400 animate-pulse" />
+                                          <span>{prod.stock ?? 15} Low Stock</span>
+                                        </>
+                                      ) : (
+                                        <>
+                                          <span className="h-1.5 w-1.5 rounded-full bg-rose-400" />
+                                          <span>Out of Stock</span>
+                                        </>
+                                      )}
+                                    </span>
+                                  </div>
+
+                                  {/* Inline Quick +/- Adjusters */}
+                                  <div className="flex items-center gap-1">
+                                    <button
+                                      type="button"
+                                      disabled={updatingStockId === prod.id || (prod.stock ?? 15) <= 0}
+                                      onClick={() => handleQuickStockChange(prod.id, -1)}
+                                      className="h-6 w-6 rounded bg-white/5 hover:bg-rose-500/20 text-muted-foreground hover:text-rose-300 border border-white/10 flex items-center justify-center font-mono text-xs transition-colors disabled:opacity-40 cursor-pointer"
+                                      title="Decrease stock by 1"
+                                    >
+                                      -
+                                    </button>
+                                    <span className="font-mono font-bold text-xs text-white min-w-[22px] text-center">
+                                      {prod.stock ?? 15}
+                                    </span>
+                                    <button
+                                      type="button"
+                                      disabled={updatingStockId === prod.id}
+                                      onClick={() => handleQuickStockChange(prod.id, 1)}
+                                      className="h-6 w-6 rounded bg-white/5 hover:bg-emerald-500/20 text-muted-foreground hover:text-emerald-300 border border-white/10 flex items-center justify-center font-mono text-xs transition-colors disabled:opacity-40 cursor-pointer"
+                                      title="Increase stock by 1"
+                                    >
+                                      +
+                                    </button>
+                                  </div>
                                 </div>
                               </td>
 
@@ -1919,8 +2011,8 @@ export function SellerHubView() {
                 </div>
               </div>
 
-              {/* Price & Price USD */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {/* Price, USD & Stock Units */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-muted-foreground font-mono uppercase text-[10px] mb-1.5">
                     Unit Price (LKR) *
@@ -1949,6 +2041,21 @@ export function SellerHubView() {
                     placeholder="e.g. $1,733"
                     value={formData.priceUsd}
                     onChange={(e) => setFormData({ ...formData, priceUsd: e.target.value })}
+                    className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-2.5 text-white placeholder-muted-foreground focus:outline-none focus:border-neon-cyan transition-colors"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-muted-foreground font-mono uppercase text-[10px] mb-1.5">
+                    Stock (Units Available) *
+                  </label>
+                  <input
+                    type="number"
+                    required
+                    min="0"
+                    placeholder="e.g. 15"
+                    value={formData.stock}
+                    onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
                     className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-2.5 text-white placeholder-muted-foreground focus:outline-none focus:border-neon-cyan transition-colors"
                   />
                 </div>

@@ -346,7 +346,11 @@ export function ProductReviewsSection({ productId, productName }: ProductReviews
                         </span>
                       </div>
                       <div className="text-[10px] font-mono text-muted-foreground mt-0.5">
-                        Order #{rev.order?.orderNumber || "ORD-REC"}
+                        {rev.user?.firstName
+                          ? `${rev.user.firstName} ${rev.user.lastName || ""}`.trim()
+                          : rev.user?.email
+                          ? rev.user.email.split("@")[0]
+                          : "Verified Customer"}
                       </div>
                     </div>
                   </div>

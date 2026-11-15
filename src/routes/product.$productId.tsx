@@ -77,6 +77,8 @@ function ProductDetails() {
       product.badgeColor === "purple" ? "border-neon-purple/40" :
         "border-neon-blue/40";
 
+  const stockCount = typeof product.stock === "number" ? product.stock : 12;
+
   return (
     <main className="min-h-screen bg-background text-foreground overflow-x-hidden selection:bg-neon-cyan/30">
       <Navbar />
@@ -135,6 +137,26 @@ function ProductDetails() {
               <p className="mt-4 text-base sm:text-lg md:text-xl text-muted-foreground animate-fade-up break-words [animation-delay:0.2s]">
                 Engineered with {product.processor}. Built for unprecedented performance.
               </p>
+
+              {/* Live Inventory Stock Badge */}
+              <div className="mt-4 flex items-center gap-2 animate-fade-up [animation-delay:0.22s]">
+                {stockCount > 5 ? (
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono font-semibold bg-emerald-500/15 border border-emerald-500/30 text-emerald-300">
+                    <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+                    <span>In Stock: {stockCount} units ready for express dispatch</span>
+                  </span>
+                ) : stockCount > 0 ? (
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono font-semibold bg-amber-500/15 border border-amber-500/30 text-amber-300">
+                    <span className="h-2 w-2 rounded-full bg-amber-400 animate-ping" />
+                    <span>Low Stock: Only {stockCount} units remaining in inventory!</span>
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono font-semibold bg-rose-500/15 border border-rose-500/30 text-rose-300">
+                    <span className="h-2 w-2 rounded-full bg-rose-400" />
+                    <span>Out of Stock (Currently replenishing)</span>
+                  </span>
+                )}
+              </div>
 
               <div className="mt-5 flex flex-wrap gap-2.5 animate-fade-up [animation-delay:0.25s]">
                 <a
@@ -315,7 +337,18 @@ function ProductDetails() {
       <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-glass-border bg-background/90 backdrop-blur-xl px-4 sm:px-8 md:px-12 py-3 sm:py-4 animate-fade-up">
         <div className="mx-auto flex w-full max-w-full flex-wrap items-center justify-between gap-3 sm:gap-4">
           <div className="flex flex-col min-w-0">
-            <span className="text-[10px] uppercase tracking-widest text-muted-foreground">Configure from</span>
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] uppercase tracking-widest text-muted-foreground">Configure from</span>
+              {stockCount > 0 ? (
+                <span className="text-[9px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-bold">
+                  {stockCount} in stock
+                </span>
+              ) : (
+                <span className="text-[9px] font-mono px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/30 font-bold">
+                  Sold out
+                </span>
+              )}
+            </div>
             <span className="font-display text-lg sm:text-xl md:text-2xl font-bold text-foreground truncate">
               Rs {product.price.toLocaleString()}
             </span>
@@ -323,17 +356,27 @@ function ProductDetails() {
           <div className="flex flex-wrap sm:flex-nowrap w-full sm:w-auto gap-2.5 sm:gap-3">
             <button
               onClick={() => addToCart(product)}
-              className="flex-1 sm:flex-none rounded-full glass-strong px-4 sm:px-6 py-3 sm:py-3.5 text-xs sm:text-sm font-bold transition-all hover:bg-neon-cyan/20 hover:text-neon-cyan border border-transparent hover:border-neon-cyan/50 text-center whitespace-normal sm:whitespace-nowrap flex items-center justify-center gap-2"
+              disabled={stockCount <= 0}
+              className="flex-1 sm:flex-none rounded-full glass-strong px-4 sm:px-6 py-3 sm:py-3.5 text-xs sm:text-sm font-bold transition-all hover:bg-neon-cyan/20 hover:text-neon-cyan border border-transparent hover:border-neon-cyan/50 text-center whitespace-normal sm:whitespace-nowrap flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
             >
               <ShoppingCart className="w-4 h-4" />
-              Add to Cart
+              {stockCount > 0 ? "Add to Cart" : "Out of Stock"}
             </button>
-            <Link
-              to={`/checkout/${product.id}`}
-              className="flex-1 sm:flex-none rounded-full bg-gradient-primary px-6 sm:px-8 py-3 sm:py-3.5 text-xs sm:text-sm font-bold text-primary-foreground shadow-[0_0_30px_oklch(0.78_0.18_200/0.3)] transition-transform hover:scale-105 text-center whitespace-normal sm:whitespace-nowrap flex items-center justify-center"
-            >
-              Configure & Buy
-            </Link>
+            {stockCount > 0 ? (
+              <Link
+                to={`/checkout/${product.id}`}
+                className="flex-1 sm:flex-none rounded-full bg-gradient-primary px-6 sm:px-8 py-3 sm:py-3.5 text-xs sm:text-sm font-bold text-primary-foreground shadow-[0_0_30px_oklch(0.78_0.18_200/0.3)] transition-transform hover:scale-105 text-center whitespace-normal sm:whitespace-nowrap flex items-center justify-center"
+              >
+                Configure & Buy
+              </Link>
+            ) : (
+              <button
+                disabled
+                className="flex-1 sm:flex-none rounded-full bg-white/10 px-6 sm:px-8 py-3 sm:py-3.5 text-xs sm:text-sm font-bold text-muted-foreground cursor-not-allowed"
+              >
+                Unavailable
+              </button>
+            )}
           </div>
         </div>
       </div>

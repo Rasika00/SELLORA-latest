@@ -150,6 +150,19 @@ export async function updateProductStatus(id: string, status: "APPROVED" | "PEND
   return data.product;
 }
 
+export async function updateProductStock(id: string, params: { stock?: number; delta?: number }) {
+  const res = await fetch(`${API_BASE}/products/${id}/stock`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(params),
+  });
+  const data = await res.json();
+  if (!res.ok) {
+    throw new Error(data.error || "Failed to update product stock");
+  }
+  return data.product;
+}
+
 export async function deleteProduct(id: string) {
   const res = await fetch(`${API_BASE}/products/${id}`, {
     method: "DELETE",

@@ -15,8 +15,8 @@ export function Hero() {
     <section className="relative isolate overflow-hidden pt-24 sm:pt-28 pb-10">
       {/* Background ambient lighting */}
       <div className="absolute inset-0 -z-20 bg-gradient-hero" />
-      <div className="pointer-events-none absolute left-[15%] top-1/4 -z-10 h-72 w-72 rounded-full bg-primary/15 blur-3xl" />
-      <div className="pointer-events-none absolute right-[15%] top-1/3 -z-10 h-80 w-80 rounded-full bg-accent/15 blur-3xl" />
+      <div className="pointer-events-none absolute left-[15%] top-1/4 -z-10 h-80 w-80 rounded-full bg-primary/15 blur-3xl" />
+      <div className="pointer-events-none absolute right-[15%] top-1/3 -z-10 h-96 w-96 rounded-full bg-accent/15 blur-3xl" />
 
       <div className="mx-auto w-full max-w-full px-3 sm:px-6 md:px-10 lg:px-12">
         {/* Main Hero Showcase Banner */}
@@ -27,9 +27,9 @@ export function Hero() {
           {/* Angled cyber rays behind the laptop */}
           <div className="pointer-events-none absolute -right-20 top-0 h-full w-2/3 bg-gradient-to-bl from-accent/20 via-primary/15 to-transparent blur-2xl" />
 
-          <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-6 items-center">
+          <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-8 items-center">
             {/* Left Content Column */}
-            <div className="lg:col-span-7 flex flex-col items-start justify-center">
+            <div className="lg:col-span-6 xl:col-span-6 flex flex-col items-start justify-center">
               {/* Eyebrow with cyan underline indicator */}
               <div className="flex flex-col items-start gap-1.5 mb-5 animate-fade-up">
                 <span className="font-mono text-[11px] sm:text-xs font-bold tracking-[0.25em] text-slate-300 uppercase">
@@ -107,19 +107,19 @@ export function Hero() {
               </div>
             </div>
 
-            {/* Right Laptop Image Column */}
-            <div className="lg:col-span-5 relative flex items-center justify-center lg:justify-end animate-fade-up [animation-delay:0.18s]">
+            {/* Right Laptop Image Column - Home Screen Size */}
+            <div className="lg:col-span-6 xl:col-span-6 relative flex items-center justify-center lg:justify-end animate-fade-up [animation-delay:0.18s]">
               {/* Backlight glow */}
-              <div className="pointer-events-none absolute -left-8 top-1/4 h-52 w-52 rounded-full bg-primary/25 blur-3xl" />
-              <div className="pointer-events-none absolute -right-6 top-1/3 h-56 w-56 rounded-full bg-accent/30 blur-3xl" />
+              <div className="pointer-events-none absolute -left-8 top-1/4 h-64 w-64 rounded-full bg-primary/25 blur-3xl" />
+              <div className="pointer-events-none absolute -right-6 top-1/3 h-64 w-64 rounded-full bg-accent/30 blur-3xl" />
 
-              <div className="relative w-full max-w-[580px] lg:max-w-none">
+              <div className="relative w-full max-w-[640px] xl:max-w-[700px] flex items-center justify-center">
                 <img
                   src={heroLaptop}
                   alt="SELLORA Performance Laptop"
-                  width={1108}
-                  height={474}
-                  className="w-full h-auto object-contain drop-shadow-[0_25px_50px_rgba(0,0,0,0.65)] transition-transform duration-500 hover:scale-[1.02]"
+                  width={1376}
+                  height={768}
+                  className="w-full h-auto max-h-[460px] object-contain drop-shadow-[0_30px_60px_rgba(0,0,0,0.7)] transition-transform duration-500 hover:scale-[1.02]"
                   loading="eager"
                 />
               </div>

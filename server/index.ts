@@ -117,6 +117,126 @@ app.get("/api/admin/stats", async (_req, res) => {
   }
 });
 
+// Admin: Comprehensive Sales Analytics & Marketplace Performance
+app.get("/api/admin/sales-analytics", async (_req, res) => {
+  try {
+    const orders = await prisma.order.findMany({
+      include: {
+        user: {
+          select: { id: true, firstName: true, lastName: true, email: true },
+        },
+        items: {
+          include: {
+            product: {
+              select: { id: true, name: true, category: true, img: true, price: true, badge: true },
+            },
+          },
+        },
+      },
+      orderBy: { createdAt: "desc" },
+    });
+
+    let totalRevenue = 0;
+    let completedRevenue = 0;
+    let totalUnits = 0;
+    const categoryBreakdown: Record<string, { revenue: number; units: number }> = {};
+    const productSales: Record<string, { id: string; name: string; category: string; img: string; units: number; revenue: number }> = {};
+    const timelineMap: Record<string, { date: string; displayDate: string; revenue: number; orders: number; units: number }> = {};
+    const statusMap: Record<string, number> = {
+      DELIVERED: 0,
+      SHIPPED: 0,
+      PROCESSING: 0,
+      PENDING: 0,
+      CANCELLED: 0,
+    };
+
+    for (const order of orders) {
+      const amt = Number(order.totalAmount) || 0;
+      if (order.status !== "CANCELLED") {
+        totalRevenue += amt;
+      }
+      if (order.status === "DELIVERED") {
+        completedRevenue += amt;
+      }
+      statusMap[order.status] = (statusMap[order.status] || 0) + 1;
+
+      const dateObj = new Date(order.createdAt);
+      const dateKey = dateObj.toISOString().split("T")[0];
+      const displayDate = dateObj.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+
+      if (!timelineMap[dateKey]) {
+        timelineMap[dateKey] = { date: dateKey, displayDate, revenue: 0, orders: 0, units: 0 };
+      }
+      if (order.status !== "CANCELLED") {
+        timelineMap[dateKey].revenue += amt;
+        timelineMap[dateKey].orders += 1;
+      }
+
+      for (const item of order.items) {
+        const qty = Number(item.quantity) || 1;
+        const price = Number(item.price) || 0;
+        const itemRev = price * qty;
+        totalUnits += qty;
+        timelineMap[dateKey].units += qty;
+
+        const cat = item.product?.category || "Other";
+        if (!categoryBreakdown[cat]) {
+          categoryBreakdown[cat] = { revenue: 0, units: 0 };
+        }
+        categoryBreakdown[cat].revenue += itemRev;
+        categoryBreakdown[cat].units += qty;
+
+        if (item.product) {
+          const pId = item.product.id;
+          if (!productSales[pId]) {
+            productSales[pId] = {
+              id: pId,
+              name: item.product.name,
+              category: cat,
+              img: item.product.img,
+              units: 0,
+              revenue: 0,
+            };
+          }
+          productSales[pId].units += qty;
+          productSales[pId].revenue += itemRev;
+        }
+      }
+    }
+
+    const timeline = Object.values(timelineMap).sort((a, b) => a.date.localeCompare(b.date));
+    const topProducts = Object.values(productSales)
+      .sort((a, b) => b.revenue - a.revenue)
+      .slice(0, 5);
+
+    const categoryData = Object.entries(categoryBreakdown).map(([name, val]) => ({
+      name,
+      revenue: val.revenue,
+      units: val.units,
+    }));
+
+    const platformCommission = Math.round(totalRevenue * 0.05); // 5% marketplace commission
+    const avgOrderValue = orders.length > 0 ? Math.round(totalRevenue / orders.length) : 0;
+
+    res.json({
+      totalRevenue,
+      completedRevenue,
+      platformCommission,
+      totalOrders: orders.length,
+      totalUnits,
+      avgOrderValue,
+      timeline,
+      topProducts,
+      categoryData,
+      statusMap,
+      recentSales: orders.slice(0, 10),
+    });
+  } catch (error: any) {
+    console.error("Sales analytics failed:", error);
+    res.status(500).json({ error: "Failed to generate sales analytics", details: error.message });
+  }
+});
+
 // Products: Get all products
 app.get("/api/products", async (req, res) => {
   try {

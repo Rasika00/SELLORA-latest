@@ -56,6 +56,49 @@ export async function getAdminStats(): Promise<{
   return null;
 }
 
+export interface SalesAnalyticsResponse {
+  totalRevenue: number;
+  completedRevenue: number;
+  platformCommission: number;
+  totalOrders: number;
+  totalUnits: number;
+  avgOrderValue: number;
+  timeline: Array<{
+    date: string;
+    displayDate: string;
+    revenue: number;
+    orders: number;
+    units: number;
+  }>;
+  topProducts: Array<{
+    id: string;
+    name: string;
+    category: string;
+    img: string;
+    units: number;
+    revenue: number;
+  }>;
+  categoryData: Array<{
+    name: string;
+    revenue: number;
+    units: number;
+  }>;
+  statusMap: Record<string, number>;
+  recentSales: any[];
+}
+
+export async function getSalesAnalytics(): Promise<SalesAnalyticsResponse | null> {
+  try {
+    const res = await fetch(`${API_BASE}/admin/sales-analytics`);
+    if (res.ok) {
+      return await res.json();
+    }
+  } catch (err) {
+    console.warn("Failed to fetch sales analytics from backend:", err);
+  }
+  return null;
+}
+
 export async function getProducts(options?: {
   category?: string;
   processor?: string;

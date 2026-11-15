@@ -24,7 +24,21 @@ import {
   getPlatformSettings,
   updatePlatformSettings,
   type PlatformSettings,
+  getSalesAnalytics,
+  type SalesAnalyticsResponse,
 } from "@/lib/api/client";
+import {
+  AreaChart,
+  Area,
+  PieChart,
+  Pie,
+  Cell,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
 import {
   Activity,
   Box,
@@ -2635,21 +2649,443 @@ function TabSellers() {
 }
 
 // ==============================================================================
-// TAB: SALES
+// TAB: SALES (Marketplace Revenue, Trajectory & Analytics Engine)
 // ==============================================================================
 function TabSales() {
-  return (
-    <div className="flex flex-col items-center justify-center h-[60vh] text-center">
-      <div className="h-24 w-24 rounded-full bg-neon-purple/10 flex items-center justify-center mb-6 shadow-[0_0_30px_rgba(123,44,191,0.2)]">
-        <Activity className="h-10 w-10 text-neon-purple" />
+  const [analytics, setAnalytics] = useState<SalesAnalyticsResponse | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const loadData = async () => {
+    setIsLoading(true);
+    try {
+      const data = await getSalesAnalytics();
+      setAnalytics(data);
+    } catch (err) {
+      console.error("Failed to load sales analytics:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center h-[50vh] text-center space-y-4">
+        <RefreshCw className="h-8 w-8 text-neon-cyan animate-spin" />
+        <p className="text-xs font-mono text-muted-foreground">Aggregating Sales &amp; Revenue Telemetry...</p>
       </div>
-      <h2 className="text-2xl font-display font-bold text-white mb-2">Sales Analytics Engine</h2>
-      <p className="text-muted-foreground max-w-md mb-8">
-        No sales data has been recorded yet. The analytics engine requires at least 1 processed transaction to build the visualization models.
-      </p>
-      <div className="px-4 py-2 bg-white/5 border border-white/10 rounded-full text-xs font-mono text-muted-foreground flex items-center gap-2">
-        <div className="h-2 w-2 rounded-full bg-yellow-400 animate-pulse" />
-        Listening for incoming transactions...
+    );
+  }
+
+  const categoryColors: Record<string, string> = {
+    Gaming: "#00F2FE", // cyan
+    Ultrabook: "#7B2CBF", // purple
+    Workstation: "#3B82F6", // blue
+    Other: "#10B981", // emerald
+  };
+
+  const pieData =
+    analytics?.categoryData?.map((cat) => ({
+      name: cat.name,
+      value: cat.revenue,
+      units: cat.units,
+      color: categoryColors[cat.name] || "#00F2FE",
+    })) || [];
+
+  return (
+    <div className="space-y-8 animate-fade-up">
+      {/* Top Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h2 className="text-2xl font-display font-bold text-white flex items-center gap-2.5">
+            <Activity className="h-6 w-6 text-neon-cyan" />
+            <span>Sales Analytics &amp; Revenue Velocity</span>
+          </h2>
+          <p className="text-xs text-muted-foreground mt-1">
+            Real-time marketplace revenue performance, commission earnings, category distribution, and top hardware models.
+          </p>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <button
+            onClick={loadData}
+            disabled={isLoading}
+            className="px-3.5 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-xs font-mono text-muted-foreground hover:text-white flex items-center gap-2 transition-colors cursor-pointer"
+          >
+            <RefreshCw className={`h-3.5 w-3.5 ${isLoading ? "animate-spin text-neon-cyan" : ""}`} />
+            <span>Refresh</span>
+          </button>
+        </div>
+      </div>
+
+      {/* 4 Financial KPI Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        {/* Gross Revenue */}
+        <div className="rounded-2xl bg-gradient-to-br from-neon-cyan/10 via-white/[0.02] to-transparent border border-neon-cyan/30 p-6 relative overflow-hidden group hover:-translate-y-1 transition-all shadow-[0_10px_30px_rgba(0,242,254,0.1)]">
+          <div className="absolute top-0 right-0 p-4 opacity-15 group-hover:opacity-30 transition-opacity group-hover:scale-110 duration-500 text-neon-cyan">
+            <TrendingUp className="h-24 w-24 -mr-6 -mt-6" />
+          </div>
+          <div className="relative z-10">
+            <p className="text-xs font-mono text-muted-foreground uppercase tracking-wider">Gross Sales Revenue</p>
+            <h3 className="text-3xl font-display font-black text-white mt-1">
+              Rs {(analytics?.totalRevenue || 0).toLocaleString()}
+            </h3>
+            <div className="mt-4 flex items-center gap-2 text-[11px] font-mono text-emerald-400 bg-emerald-500/15 w-fit px-2.5 py-1 rounded-full border border-emerald-500/30">
+              <CheckCircle2 className="h-3 w-3" />
+              <span>Rs {(analytics?.completedRevenue || 0).toLocaleString()} Cleared</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Platform Commission */}
+        <div className="rounded-2xl bg-gradient-to-br from-neon-purple/10 via-white/[0.02] to-transparent border border-neon-purple/30 p-6 relative overflow-hidden group hover:-translate-y-1 transition-all shadow-[0_10px_30px_rgba(123,44,191,0.1)]">
+          <div className="absolute top-0 right-0 p-4 opacity-15 group-hover:opacity-30 transition-opacity group-hover:scale-110 duration-500 text-neon-purple">
+            <Shield className="h-24 w-24 -mr-6 -mt-6" />
+          </div>
+          <div className="relative z-10">
+            <p className="text-xs font-mono text-muted-foreground uppercase tracking-wider">Platform Take (5%)</p>
+            <h3 className="text-3xl font-display font-black text-white mt-1">
+              Rs {(analytics?.platformCommission || 0).toLocaleString()}
+            </h3>
+            <div className="mt-4 flex items-center gap-2 text-[11px] font-mono text-neon-purple bg-neon-purple/15 w-fit px-2.5 py-1 rounded-full border border-neon-purple/30">
+              <span>Marketplace Take</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Total Hardware Units */}
+        <div className="rounded-2xl bg-gradient-to-br from-blue-500/10 via-white/[0.02] to-transparent border border-blue-500/30 p-6 relative overflow-hidden group hover:-translate-y-1 transition-all shadow-[0_10px_30px_rgba(59,130,246,0.1)]">
+          <div className="absolute top-0 right-0 p-4 opacity-15 group-hover:opacity-30 transition-opacity group-hover:scale-110 duration-500 text-blue-400">
+            <Package className="h-24 w-24 -mr-6 -mt-6" />
+          </div>
+          <div className="relative z-10">
+            <p className="text-xs font-mono text-muted-foreground uppercase tracking-wider">Hardware Units Sold</p>
+            <h3 className="text-3xl font-display font-black text-white mt-1">
+              {analytics?.totalUnits || 0} Units
+            </h3>
+            <div className="mt-4 flex items-center gap-2 text-[11px] font-mono text-blue-300 bg-blue-500/15 w-fit px-2.5 py-1 rounded-full border border-blue-500/30">
+              <span>{analytics?.totalOrders || 0} Total Orders</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Average Order Value (AOV) */}
+        <div className="rounded-2xl bg-gradient-to-br from-amber-500/10 via-white/[0.02] to-transparent border border-amber-500/30 p-6 relative overflow-hidden group hover:-translate-y-1 transition-all shadow-[0_10px_30px_rgba(245,158,11,0.1)]">
+          <div className="absolute top-0 right-0 p-4 opacity-15 group-hover:opacity-30 transition-opacity group-hover:scale-110 duration-500 text-amber-400">
+            <Zap className="h-24 w-24 -mr-6 -mt-6" />
+          </div>
+          <div className="relative z-10">
+            <p className="text-xs font-mono text-muted-foreground uppercase tracking-wider">Avg Order Value (AOV)</p>
+            <h3 className="text-3xl font-display font-black text-white mt-1">
+              Rs {(analytics?.avgOrderValue || 0).toLocaleString()}
+            </h3>
+            <div className="mt-4 flex items-center gap-2 text-[11px] font-mono text-amber-300 bg-amber-500/15 w-fit px-2.5 py-1 rounded-full border border-amber-500/30">
+              <span>Per Transaction</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Visual Charts: Timeline Velocity & Category Share */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Revenue Velocity Timeline Chart (2 cols) */}
+        <div className="lg:col-span-2 rounded-2xl border border-white/10 bg-black/40 backdrop-blur-xl p-6 space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/10 pb-3">
+            <div>
+              <h3 className="text-base font-display font-bold text-white flex items-center gap-2">
+                <TrendingUp className="h-4 w-4 text-neon-cyan" />
+                <span>Revenue &amp; Order Velocity Timeline</span>
+              </h3>
+              <p className="text-[11px] font-mono text-muted-foreground mt-0.5">
+                Daily sales gross volume trajectory
+              </p>
+            </div>
+            <span className="text-[10px] font-mono px-2.5 py-0.5 rounded-full bg-neon-cyan/10 border border-neon-cyan/30 text-neon-cyan">
+              Daily Sales Trend
+            </span>
+          </div>
+
+          <div className="h-72 w-full pt-4">
+            {analytics?.timeline && analytics.timeline.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={analytics.timeline} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="salesGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#00F2FE" stopOpacity={0.4} />
+                      <stop offset="95%" stopColor="#00F2FE" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" />
+                  <XAxis dataKey="displayDate" stroke="#888888" fontSize={11} tickLine={false} />
+                  <YAxis
+                    stroke="#888888"
+                    fontSize={11}
+                    tickLine={false}
+                    tickFormatter={(val) => `Rs ${(val / 1000).toFixed(0)}k`}
+                  />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: "#0a0a0f",
+                      borderColor: "#ffffff20",
+                      borderRadius: "12px",
+                      fontSize: "12px",
+                    }}
+                    formatter={(value: any) => [`Rs ${Number(value).toLocaleString()}`, "Gross Revenue"]}
+                    labelFormatter={(label) => `Date: ${label}`}
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="revenue"
+                    stroke="#00F2FE"
+                    strokeWidth={2.5}
+                    fillOpacity={1}
+                    fill="url(#salesGrad)"
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="h-full flex items-center justify-center text-xs text-muted-foreground font-mono">
+                No chronological sales entries available
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Category Share Donut / Distribution */}
+        <div className="rounded-2xl border border-white/10 bg-black/40 backdrop-blur-xl p-6 space-y-4">
+          <div className="border-b border-white/10 pb-3">
+            <h3 className="text-base font-display font-bold text-white flex items-center gap-2">
+              <Box className="h-4 w-4 text-neon-purple" />
+              <span>Category Share</span>
+            </h3>
+            <p className="text-[11px] font-mono text-muted-foreground mt-0.5">
+              Revenue distribution by laptop class
+            </p>
+          </div>
+
+          <div className="h-52 w-full">
+            {pieData.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={pieData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={55}
+                    outerRadius={80}
+                    paddingAngle={4}
+                    dataKey="value"
+                  >
+                    {pieData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: "#0a0a0f",
+                      borderColor: "#ffffff20",
+                      borderRadius: "12px",
+                      fontSize: "12px",
+                    }}
+                    formatter={(val: any) => [`Rs ${Number(val).toLocaleString()}`, "Sales"]}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="h-full flex items-center justify-center text-xs text-muted-foreground font-mono">
+                No category data
+              </div>
+            )}
+          </div>
+
+          {/* Legend Items */}
+          <div className="space-y-2 pt-2 border-t border-white/5">
+            {pieData.map((cat) => {
+              const total = analytics?.totalRevenue || 1;
+              const pct = Math.round((cat.value / total) * 100);
+              return (
+                <div key={cat.name} className="flex items-center justify-between text-xs">
+                  <div className="flex items-center gap-2">
+                    <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: cat.color }} />
+                    <span className="text-white font-medium">{cat.name}</span>
+                    <span className="text-[10px] text-muted-foreground font-mono">({cat.units} units)</span>
+                  </div>
+                  <div className="text-right">
+                    <span className="font-mono text-white font-bold">{pct}%</span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
+      {/* Top Performing Hardware Models (Best-Sellers) */}
+      <div className="rounded-2xl border border-white/10 bg-black/40 backdrop-blur-xl p-6 space-y-4">
+        <div className="flex items-center justify-between border-b border-white/10 pb-3">
+          <div>
+            <h3 className="text-base font-display font-bold text-white flex items-center gap-2">
+              <Zap className="h-4 w-4 text-amber-400" />
+              <span>Top Performing Laptop Models (Best Sellers)</span>
+            </h3>
+            <p className="text-[11px] font-mono text-muted-foreground mt-0.5">
+              Ranked by total revenue generated across verified client orders
+            </p>
+          </div>
+          <span className="text-xs px-2.5 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 font-mono">
+            {analytics?.topProducts?.length || 0} Models
+          </span>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="border-b border-white/10 text-[11px] font-mono uppercase tracking-wider text-muted-foreground">
+                <th className="py-3 px-4">Rank &amp; Machine Model</th>
+                <th className="py-3 px-4">Category</th>
+                <th className="py-3 px-4 text-center">Units Sold</th>
+                <th className="py-3 px-4 text-right">Gross Sales Volume</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-white/5 text-xs">
+              {analytics?.topProducts?.map((prod, idx) => (
+                <tr key={prod.id} className="hover:bg-white/[0.02] transition-colors">
+                  <td className="py-3 px-4">
+                    <div className="flex items-center gap-3">
+                      <span className="h-6 w-6 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center font-mono font-bold text-neon-cyan text-xs">
+                        #{idx + 1}
+                      </span>
+                      <img
+                        src={prod.img}
+                        alt={prod.name}
+                        className="h-10 w-12 rounded-lg object-cover border border-white/10 bg-black/50"
+                      />
+                      <div>
+                        <div className="font-display font-bold text-white">{prod.name}</div>
+                        <div className="text-[10px] text-muted-foreground font-mono">ID: {prod.id}</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="py-3 px-4">
+                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-semibold bg-white/5 border border-white/10 text-white">
+                      {prod.category}
+                    </span>
+                  </td>
+                  <td className="py-3 px-4 text-center font-mono font-bold text-white text-sm">
+                    {prod.units}
+                  </td>
+                  <td className="py-3 px-4 text-right">
+                    <span className="font-mono font-bold text-neon-cyan text-sm">
+                      Rs {prod.revenue.toLocaleString()}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+              {(!analytics?.topProducts || analytics.topProducts.length === 0) && (
+                <tr>
+                  <td colSpan={4} className="py-8 text-center text-muted-foreground font-mono text-xs">
+                    No product sales registered yet.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Real-Time Sales Ledger Feed */}
+      <div className="rounded-2xl border border-white/10 bg-black/40 backdrop-blur-xl p-6 space-y-4">
+        <div className="flex items-center justify-between border-b border-white/10 pb-3">
+          <div>
+            <h3 className="text-base font-display font-bold text-white flex items-center gap-2">
+              <ShoppingBag className="h-4 w-4 text-emerald-400" />
+              <span>Verified Sales Ledger</span>
+            </h3>
+            <p className="text-[11px] font-mono text-muted-foreground mt-0.5">
+              Live transaction records and order fulfillment progress
+            </p>
+          </div>
+          <span className="text-xs px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 font-mono">
+            {analytics?.recentSales?.length || 0} Transactions
+          </span>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="border-b border-white/10 text-[11px] font-mono uppercase tracking-wider text-muted-foreground">
+                <th className="py-3 px-4">Order Reference</th>
+                <th className="py-3 px-4">Customer Details</th>
+                <th className="py-3 px-4">Hardware Unit(s)</th>
+                <th className="py-3 px-4">Status</th>
+                <th className="py-3 px-4 text-right">Order Value</th>
+                <th className="py-3 px-4 text-right">Platform Fee (5%)</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-white/5 text-xs">
+              {analytics?.recentSales?.map((sale: any) => {
+                const commission = Math.round(Number(sale.totalAmount) * 0.05);
+                return (
+                  <tr key={sale.id} className="hover:bg-white/[0.02] transition-colors">
+                    <td className="py-3 px-4">
+                      <div className="font-mono font-bold text-neon-cyan">{sale.orderNumber}</div>
+                      <div className="text-[10px] text-muted-foreground font-mono">
+                        {new Date(sale.createdAt).toLocaleDateString()}
+                      </div>
+                    </td>
+                    <td className="py-3 px-4">
+                      <div className="font-semibold text-white">{sale.customerName}</div>
+                      <div className="text-[10px] text-muted-foreground font-mono">{sale.city || sale.customerEmail}</div>
+                    </td>
+                    <td className="py-3 px-4">
+                      <div className="space-y-0.5 max-w-xs">
+                        {sale.items?.map((it: any, i: number) => (
+                          <div key={i} className="text-white text-xs truncate">
+                            {it.product?.name || "Machine Unit"}{" "}
+                            <span className="text-[10px] text-muted-foreground font-mono">x{it.quantity || 1}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </td>
+                    <td className="py-3 px-4">
+                      <span
+                        className={`text-[9px] font-mono px-2 py-0.5 rounded-full font-bold uppercase tracking-wider ${
+                          sale.status === "DELIVERED"
+                            ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
+                            : sale.status === "SHIPPED"
+                            ? "bg-purple-500/20 text-purple-300 border border-purple-500/30"
+                            : sale.status === "PROCESSING"
+                            ? "bg-blue-500/20 text-blue-300 border border-blue-500/30"
+                            : sale.status === "CANCELLED"
+                            ? "bg-rose-500/20 text-rose-300 border border-rose-500/30"
+                            : "bg-amber-500/20 text-amber-300 border border-amber-500/30"
+                        }`}
+                      >
+                        {sale.status}
+                      </span>
+                    </td>
+                    <td className="py-3 px-4 text-right font-mono font-bold text-white">
+                      Rs {Number(sale.totalAmount).toLocaleString()}
+                    </td>
+                    <td className="py-3 px-4 text-right font-mono text-neon-purple font-semibold">
+                      Rs {commission.toLocaleString()}
+                    </td>
+                  </tr>
+                );
+              })}
+              {(!analytics?.recentSales || analytics.recentSales.length === 0) && (
+                <tr>
+                  <td colSpan={6} className="py-8 text-center text-muted-foreground font-mono text-xs">
+                    No transactions recorded yet.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );

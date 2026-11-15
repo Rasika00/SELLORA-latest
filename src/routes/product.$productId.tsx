@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
   ArrowLeft,
@@ -16,6 +16,8 @@ import {
   CheckCircle2,
   Truck,
   MapPin,
+  Sparkles,
+  BarChart3,
 } from "lucide-react";
 import { products, type Product } from "@/data/products";
 import { Navbar } from "@/components/site/Navbar";
@@ -25,6 +27,7 @@ import { ProductReviewsSection } from "@/components/site/ProductReviewsSection";
 import { useCart } from "@/context/CartContext";
 import { getProductById } from "@/lib/api/client";
 import { useUIMode } from "@/context/UIModeContext";
+import { calculateBenchmark } from "@/lib/benchmarkEngine";
 
 export const Route = createFileRoute("/product/$productId")({
   component: ProductDetails,
@@ -37,6 +40,11 @@ function ProductDetails() {
   );
   const { addToCart } = useCart();
   const { isSimple } = useUIMode();
+
+  const benchmark = useMemo(() => {
+    if (!product) return null;
+    return calculateBenchmark(product);
+  }, [product]);
 
   useEffect(() => {
     let mounted = true;
@@ -206,6 +214,45 @@ function ProductDetails() {
             </div>
           </div>
 
+          {/* Simple Mode Benchmark Card */}
+          {benchmark && (
+            <div className="mt-8 rounded-2xl border border-glass-border bg-card p-5">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <Sparkles className="h-5 w-5 text-neon-cyan" />
+                  <h3 className="font-bold text-base text-foreground">Performance Score</h3>
+                </div>
+                <span className="rounded-full bg-neon-cyan/15 text-neon-cyan px-2.5 py-0.5 text-xs font-bold uppercase">
+                  {benchmark.tier}
+                </span>
+              </div>
+              <p className="text-2xl font-bold text-foreground mb-1">
+                {benchmark.totalScore.toLocaleString()} <span className="text-sm font-normal text-muted-foreground">out of 10,000 points</span>
+              </p>
+              <p className="text-xs text-muted-foreground mb-4">
+                Calculated across graphics, processor speed, memory, and cooling.
+              </p>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs font-mono">
+                <div className="rounded-xl bg-white/5 p-2.5">
+                  <span className="text-muted-foreground block text-[11px]">Graphics (45%)</span>
+                  <span className="font-bold text-foreground">{benchmark.gpuScore.toLocaleString()} / 4,500</span>
+                </div>
+                <div className="rounded-xl bg-white/5 p-2.5">
+                  <span className="text-muted-foreground block text-[11px]">Speed (35%)</span>
+                  <span className="font-bold text-foreground">{benchmark.cpuScore.toLocaleString()} / 3,500</span>
+                </div>
+                <div className="rounded-xl bg-white/5 p-2.5">
+                  <span className="text-muted-foreground block text-[11px]">Memory (12%)</span>
+                  <span className="font-bold text-foreground">{benchmark.ramScore.toLocaleString()} / 1,200</span>
+                </div>
+                <div className="rounded-xl bg-white/5 p-2.5">
+                  <span className="text-muted-foreground block text-[11px]">Cooling (8%)</span>
+                  <span className="font-bold text-foreground">{benchmark.coolingScore.toLocaleString()} / 800</span>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Performance Check in Simple Mode */}
           <div className="mt-16">
             <h2 className="font-display text-xl font-bold mb-6">Will it handle your tasks?</h2>
@@ -348,6 +395,25 @@ function ProductDetails() {
                 )}
               </div>
 
+              {/* Benchmark Quick Badge */}
+              {benchmark && (
+                <div className="mt-3 flex items-center gap-2.5 flex-wrap animate-fade-up [animation-delay:0.23s]">
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#00E5FF]/10 border border-[#00E5FF]/30 text-xs font-mono text-[#00E5FF]">
+                    <Sparkles className="h-3.5 w-3.5" />
+                    <span>Benchmark Score: <strong className="text-white font-bold">{benchmark.totalScore.toLocaleString()} pts</strong></span>
+                  </div>
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-white/10 border border-white/10 text-[10px] font-mono font-bold text-white uppercase tracking-wider">
+                    {benchmark.tier}
+                  </span>
+                  <a
+                    href="#benchmark-engine-section"
+                    className="text-[11px] font-mono text-[#00E5FF] hover:underline"
+                  >
+                    10,000-pt Rubric ↓
+                  </a>
+                </div>
+              )}
+
               <div className="mt-5 flex flex-wrap gap-2.5 animate-fade-up [animation-delay:0.25s]">
                 <a
                   href="#product-estimator"
@@ -488,6 +554,186 @@ function ProductDetails() {
           </div>
         </div>
       </section>
+
+      {/* 10,000-Point Synthetic Compute Benchmark Engine Section */}
+      {benchmark && (
+        <section id="benchmark-engine-section" className="relative py-24 bg-[#080d1a] border-b border-white/[0.08]">
+          <div className="mx-auto w-full max-w-[1360px] px-4 sm:px-6 md:px-8">
+            <div className="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-white/[0.08] pb-6">
+              <div>
+                <div className="flex items-center gap-2 text-[#00E5FF] font-mono text-xs font-bold uppercase tracking-widest mb-1.5">
+                  <BarChart3 className="h-4 w-4" />
+                  <span>SELLORA HARDWARE BENCHMARK ENGINE</span>
+                </div>
+                <h3 className="font-display text-2xl sm:text-3xl md:text-4xl font-black uppercase tracking-tight text-white">
+                  The 10,000-Point Synthetic Compute Benchmark
+                </h3>
+                <p className="mt-2 text-sm text-[#94A3B8] max-w-2xl leading-relaxed">
+                  A transparent, component-based model for comparing total laptop capability. Combines GPU architecture, CPU instruction throughput, memory bus bandwidth, and sustained chassis cooling into one deterministic score.
+                </p>
+              </div>
+
+              {/* Master Total Benchmark Score Callout */}
+              <div className="rounded-2xl border border-[#00E5FF]/40 bg-gradient-to-br from-[#00E5FF]/20 to-[#0F172A] p-5 text-right shrink-0 shadow-[0_0_35px_rgba(0,229,255,0.25)]">
+                <span className="text-[10px] font-mono uppercase tracking-widest text-[#00E5FF] block font-bold">
+                  TOTAL BENCHMARK SCORE
+                </span>
+                <div className="font-display text-3xl sm:text-4xl font-black text-white mt-0.5">
+                  {benchmark.totalScore.toLocaleString()}
+                  <span className="text-sm font-normal text-[#94A3B8] ml-1">/ 10,000 pts</span>
+                </div>
+                <div className="mt-1 flex items-center justify-end gap-2">
+                  <span className="inline-flex rounded-full bg-[#00E5FF] text-[#060911] px-2.5 py-0.5 text-[10px] font-mono font-black uppercase">
+                    {benchmark.tier}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Slide 8 Worked Example Formula Bar */}
+            <div className="mb-10 rounded-2xl border border-white/10 bg-white/[0.02] p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs font-mono">
+              <div className="flex items-center gap-2 text-[#94A3B8]">
+                <span className="text-[#00E5FF] font-bold">Model Formula:</span>
+                <span>Benchmark Score = GPU + CPU + RAM + Cooling</span>
+              </div>
+              <div className="text-white font-bold text-[11px] sm:text-xs">
+                {benchmark.gpuScore.toLocaleString()} (GPU) + {benchmark.cpuScore.toLocaleString()} (CPU) + {benchmark.ramScore.toLocaleString()} (RAM) + {benchmark.coolingScore.toLocaleString()} (Cooling) = <span className="text-[#00E5FF]">{benchmark.totalScore.toLocaleString()} pts</span>
+              </div>
+            </div>
+
+            {/* 4 Component Scoring Cards (GPU 4,500 | CPU 3,500 | RAM 1,200 | Cooling 800) */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {/* 1. GPU Card */}
+              <div className="rounded-2xl border border-[#00E5FF]/30 bg-[#0F172A]/80 p-6 flex flex-col justify-between shadow-[0_0_25px_rgba(0,229,255,0.1)]">
+                <div>
+                  <div className="flex items-center justify-between mb-4">
+                    <span className="font-mono text-[10px] uppercase tracking-wider text-[#00E5FF] font-bold">
+                      01 / GPU ARCHITECTURE
+                    </span>
+                    <span className="text-[10px] font-mono text-[#94A3B8] bg-white/5 px-2 py-0.5 rounded">
+                      45% Weight
+                    </span>
+                  </div>
+                  <div className="flex items-baseline gap-1.5">
+                    <span className="font-display text-3xl font-black text-white">
+                      {benchmark.gpuScore.toLocaleString()}
+                    </span>
+                    <span className="text-xs font-mono text-[#94A3B8]">/ 4,500 pts</span>
+                  </div>
+                  <div className="h-1.5 w-full rounded-full bg-white/10 overflow-hidden my-3">
+                    <div className="h-full bg-[#00E5FF] rounded-full" style={{ width: `${(benchmark.gpuScore / 4500) * 100}%` }} />
+                  </div>
+                  <p className="font-display text-sm font-bold text-white truncate mt-1">
+                    {product.gpu}
+                  </p>
+                  <p className="text-[11px] font-mono text-[#00E5FF] mt-0.5">
+                    {benchmark.gpuTierLabel}
+                  </p>
+                </div>
+                <p className="text-[11px] text-[#94A3B8] mt-4 pt-3 border-t border-white/[0.08] leading-relaxed">
+                  Evaluates GPU tier, compute resources, memory bus, and dedicated VRAM.
+                </p>
+              </div>
+
+              {/* 2. CPU Card */}
+              <div className="rounded-2xl border border-neon-purple/30 bg-[#0F172A]/80 p-6 flex flex-col justify-between shadow-[0_0_25px_oklch(0.62_0.24_295/0.1)]">
+                <div>
+                  <div className="flex items-center justify-between mb-4">
+                    <span className="font-mono text-[10px] uppercase tracking-wider text-neon-purple font-bold">
+                      02 / CPU ARCHITECTURE
+                    </span>
+                    <span className="text-[10px] font-mono text-[#94A3B8] bg-white/5 px-2 py-0.5 rounded">
+                      35% Weight
+                    </span>
+                  </div>
+                  <div className="flex items-baseline gap-1.5">
+                    <span className="font-display text-3xl font-black text-white">
+                      {benchmark.cpuScore.toLocaleString()}
+                    </span>
+                    <span className="text-xs font-mono text-[#94A3B8]">/ 3,500 pts</span>
+                  </div>
+                  <div className="h-1.5 w-full rounded-full bg-white/10 overflow-hidden my-3">
+                    <div className="h-full bg-neon-purple rounded-full" style={{ width: `${(benchmark.cpuScore / 3500) * 100}%` }} />
+                  </div>
+                  <p className="font-display text-sm font-bold text-white truncate mt-1">
+                    {product.cpu}
+                  </p>
+                  <p className="text-[11px] font-mono text-neon-purple mt-0.5">
+                    {benchmark.cpuTierLabel}
+                  </p>
+                </div>
+                <p className="text-[11px] text-[#94A3B8] mt-4 pt-3 border-t border-white/[0.08] leading-relaxed">
+                  Evaluates core count, instruction throughput, cache, and single/multi-thread scaling.
+                </p>
+              </div>
+
+              {/* 3. RAM Card */}
+              <div className="rounded-2xl border border-neon-blue/30 bg-[#0F172A]/80 p-6 flex flex-col justify-between shadow-[0_0_25px_oklch(0.7_0.22_260/0.1)]">
+                <div>
+                  <div className="flex items-center justify-between mb-4">
+                    <span className="font-mono text-[10px] uppercase tracking-wider text-neon-blue font-bold">
+                      03 / SYSTEM MEMORY
+                    </span>
+                    <span className="text-[10px] font-mono text-[#94A3B8] bg-white/5 px-2 py-0.5 rounded">
+                      12% Weight
+                    </span>
+                  </div>
+                  <div className="flex items-baseline gap-1.5">
+                    <span className="font-display text-3xl font-black text-white">
+                      {benchmark.ramScore.toLocaleString()}
+                    </span>
+                    <span className="text-xs font-mono text-[#94A3B8]">/ 1,200 pts</span>
+                  </div>
+                  <div className="h-1.5 w-full rounded-full bg-white/10 overflow-hidden my-3">
+                    <div className="h-full bg-neon-blue rounded-full" style={{ width: `${(benchmark.ramScore / 1200) * 100}%` }} />
+                  </div>
+                  <p className="font-display text-sm font-bold text-white truncate mt-1">
+                    {product.ram}
+                  </p>
+                  <p className="text-[11px] font-mono text-neon-blue mt-0.5">
+                    {benchmark.ramTierLabel}
+                  </p>
+                </div>
+                <p className="text-[11px] text-[#94A3B8] mt-4 pt-3 border-t border-white/[0.08] leading-relaxed">
+                  Reflects capacity, memory generation, channel configuration, and bus bandwidth.
+                </p>
+              </div>
+
+              {/* 4. Cooling Card */}
+              <div className="rounded-2xl border border-emerald-500/30 bg-[#0F172A]/80 p-6 flex flex-col justify-between shadow-[0_0_25px_rgba(16,185,129,0.1)]">
+                <div>
+                  <div className="flex items-center justify-between mb-4">
+                    <span className="font-mono text-[10px] uppercase tracking-wider text-emerald-400 font-bold">
+                      04 / COOLING &amp; TGP
+                    </span>
+                    <span className="text-[10px] font-mono text-[#94A3B8] bg-white/5 px-2 py-0.5 rounded">
+                      8% Weight
+                    </span>
+                  </div>
+                  <div className="flex items-baseline gap-1.5">
+                    <span className="font-display text-3xl font-black text-white">
+                      {benchmark.coolingScore.toLocaleString()}
+                    </span>
+                    <span className="text-xs font-mono text-[#94A3B8]">/ 800 pts</span>
+                  </div>
+                  <div className="h-1.5 w-full rounded-full bg-white/10 overflow-hidden my-3">
+                    <div className="h-full bg-emerald-400 rounded-full" style={{ width: `${(benchmark.coolingScore / 800) * 100}%` }} />
+                  </div>
+                  <p className="font-display text-sm font-bold text-white truncate mt-1">
+                    {product.detailedSpecs?.cooling || product.specialHighlight || "Advanced Cooling Architecture"}
+                  </p>
+                  <p className="text-[11px] font-mono text-emerald-400 mt-0.5">
+                    {benchmark.coolingTierLabel}
+                  </p>
+                </div>
+                <p className="text-[11px] text-[#94A3B8] mt-4 pt-3 border-t border-white/[0.08] leading-relaxed">
+                  Thermal architecture and sustained graphics power under long workloads.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Interactive Workload & Game Estimator Section */}
       <section id="product-estimator" className="relative py-20 border-b border-white/[0.08] scroll-mt-20 bg-[#060911]">

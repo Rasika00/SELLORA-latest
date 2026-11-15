@@ -17,6 +17,7 @@ import {
   type SellerEarningsRecord,
 } from "@/lib/api/client";
 import { type Product } from "@/data/products";
+import { calculateBenchmark } from "@/lib/benchmarkEngine";
 import {
   Store,
   Clock,
@@ -43,6 +44,7 @@ import {
   Cpu,
   Plus,
   Edit2,
+  Sparkles,
   X,
   Check,
   Printer,
@@ -282,6 +284,17 @@ export function SellerHubView() {
     setModalSuccess("");
 
     try {
+      const bench = calculateBenchmark({
+        name: formData.name.trim(),
+        category: formData.category,
+        processor: formData.processor,
+        cpu: formData.cpu.trim() || "High-Performance CPU",
+        ram: formData.ram.trim(),
+        gpu: formData.gpu.trim() || "Dedicated Graphics",
+        cooling: editingProduct?.detailedSpecs?.cooling,
+        chassis: editingProduct?.detailedSpecs?.chassis,
+      });
+
       if (editingProduct) {
         await updateProduct(editingProduct.id, {
           name: formData.name.trim(),
@@ -299,6 +312,11 @@ export function SellerHubView() {
           batteryWeight: formData.batteryWeight.trim() || undefined,
           specialHighlight: formData.specialHighlight.trim() || undefined,
           img: formData.img.trim() || undefined,
+          detailedSpecs: {
+            ...(editingProduct.detailedSpecs || {}),
+            benchmarkScore: bench.totalScore,
+            benchmarkBreakdown: bench,
+          },
         });
 
         setModalSuccess("Listing specifications and stock updated successfully!");
@@ -319,6 +337,10 @@ export function SellerHubView() {
           batteryWeight: formData.batteryWeight.trim() || undefined,
           specialHighlight: formData.specialHighlight.trim() || undefined,
           img: formData.img.trim() || undefined,
+          detailedSpecs: {
+            benchmarkScore: bench.totalScore,
+            benchmarkBreakdown: bench,
+          },
           sellerId: user.id,
           submittedByRole: user.role,
         });
@@ -2109,6 +2131,43 @@ export function SellerHubView() {
                   />
                 </div>
               </div>
+
+              {/* Live 10,000-Point Benchmark Score Preview */}
+              {(() => {
+                const liveBench = calculateBenchmark({
+                  name: formData.name,
+                  category: formData.category,
+                  processor: formData.processor,
+                  cpu: formData.cpu,
+                  gpu: formData.gpu,
+                  ram: formData.ram,
+                });
+                return (
+                  <div className="rounded-xl border border-neon-cyan/30 bg-neon-cyan/5 p-3.5">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-1.5 text-neon-cyan font-mono text-xs font-bold uppercase">
+                        <Sparkles className="h-3.5 w-3.5" />
+                        <span>Synthetic Benchmark Engine Preview</span>
+                      </div>
+                      <span className="rounded-full bg-neon-cyan text-background px-2 py-0.5 text-[9px] font-mono font-black uppercase">
+                        {liveBench.tier}
+                      </span>
+                    </div>
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-xl font-black font-display text-white">
+                        {liveBench.totalScore.toLocaleString()}
+                      </span>
+                      <span className="text-xs font-mono text-muted-foreground">/ 10,000 pts</span>
+                    </div>
+                    <div className="grid grid-cols-4 gap-2 mt-2 pt-2 border-t border-white/10 text-[10px] font-mono">
+                      <div><span className="text-muted-foreground block">GPU (45%)</span><span className="text-neon-cyan font-bold">{liveBench.gpuScore}</span></div>
+                      <div><span className="text-muted-foreground block">CPU (35%)</span><span className="text-neon-purple font-bold">{liveBench.cpuScore}</span></div>
+                      <div><span className="text-muted-foreground block">RAM (12%)</span><span className="text-neon-blue font-bold">{liveBench.ramScore}</span></div>
+                      <div><span className="text-muted-foreground block">Cooling (8%)</span><span className="text-emerald-400 font-bold">{liveBench.coolingScore}</span></div>
+                    </div>
+                  </div>
+                );
+              })()}
 
               {/* Display & Battery / Weight */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

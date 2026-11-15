@@ -13,12 +13,16 @@ import {
   ArrowLeft,
   CheckCircle2,
   Star,
+  Flame,
+  BarChart3,
+  ShieldCheck,
 } from "lucide-react";
 import { products as initialProducts, type Product } from "@/data/products";
 import { Navbar } from "@/components/site/Navbar";
 import { Footer } from "@/components/site/Footer";
 import { getProducts } from "@/lib/api/client";
 import { useUIMode } from "@/context/UIModeContext";
+import { calculateBenchmark, type BenchmarkBreakdown } from "@/lib/benchmarkEngine";
 
 interface CompareSearchParams {
   s1?: string;
@@ -94,7 +98,7 @@ function CompareShowdown() {
     { slotNum: 3, product: slot3, id: slot3Id, setId: setSlot3Id },
   ];
 
-  // Determine top showdown winner strictly within the selected 3 laptops
+  // Determine top showdown winner strictly within the selected 3 laptops using the 10,000-Point Benchmark Engine
   const showdownWinner = useMemo(() => {
     const candidates = [
       { slotNum: 1, product: slot1 },
@@ -102,15 +106,23 @@ function CompareShowdown() {
       { slotNum: 3, product: slot3 },
     ];
 
-    let winnerCandidate = candidates[0];
+    const candidatesWithBench = candidates.map((c) => {
+      const breakdown = calculateBenchmark(c.product);
+      return {
+        ...c,
+        breakdown,
+        score: breakdown.totalScore,
+      };
+    });
+
+    let winnerCandidate = candidatesWithBench[0];
     let highestScore = -Infinity;
 
-    candidates.forEach((c) => {
-      const score = c.product.detailedSpecs?.benchmarkScore || 0;
-      if (score > highestScore) {
-        highestScore = score;
+    candidatesWithBench.forEach((c) => {
+      if (c.score > highestScore) {
+        highestScore = c.score;
         winnerCandidate = c;
-      } else if (score === highestScore) {
+      } else if (c.score === highestScore) {
         // Break tie by price-to-performance (lower price)
         if (c.product.price < winnerCandidate.product.price) {
           winnerCandidate = c;
@@ -119,16 +131,21 @@ function CompareShowdown() {
     });
 
     const winner = winnerCandidate.product;
-    const rivals = candidates.filter((c) => c.slotNum !== winnerCandidate.slotNum);
+    const winnerBreakdown = winnerCandidate.breakdown;
+    const rivals = candidatesWithBench.filter((c) => c.slotNum !== winnerCandidate.slotNum);
     
     // Sort rivals by benchmark score descending to find runner-up
-    const sortedRivals = [...rivals].sort(
-      (a, b) => (b.product.detailedSpecs?.benchmarkScore || 0) - (a.product.detailedSpecs?.benchmarkScore || 0)
-    );
+    const sortedRivals = [...rivals].sort((a, b) => b.score - a.score);
     const runnerUp = sortedRivals[0];
-    const runnerUpScore = runnerUp?.product.detailedSpecs?.benchmarkScore || 0;
+    const runnerUpScore = runnerUp?.score || 0;
+    const runnerUpBreakdown = runnerUp?.breakdown || winnerBreakdown;
     const scoreDiff = highestScore - runnerUpScore;
     const pctDiff = runnerUpScore > 0 ? Math.round((scoreDiff / runnerUpScore) * 100) : 0;
+
+    const deltaScoreFormula = "Δ Score = Winner score − Runner-up score";
+    const showdownMessage = scoreDiff > 0
+      ? `${winner.name} wins by +${scoreDiff.toLocaleString()} points in the synthetic compute and gaming model.`
+      : `${winner.name} takes the crown with unmatched performance-per-rupee balance.`;
 
     let explanation = "";
     if (scoreDiff > 0) {
@@ -148,9 +165,13 @@ function CompareShowdown() {
       scoreDiff,
       pctDiff,
       explanation,
+      deltaScoreFormula,
+      showdownMessage,
+      winnerBreakdown,
+      runnerUpBreakdown,
       runnerUpProduct: runnerUp?.product,
       runnerUpSlotNum: runnerUp?.slotNum,
-      candidates,
+      candidates: candidatesWithBench,
     };
   }, [slot1, slot2, slot3]);
 
@@ -259,7 +280,12 @@ function CompareShowdown() {
                 <Trophy className="h-6 w-6 text-neon-cyan" />
                 <span className="font-bold text-lg text-foreground">Top Pick: {showdownWinner.product.name}</span>
               </div>
-              <p className="text-sm text-muted-foreground max-w-md mx-auto">{getSimpleWinnerExplanation()}</p>
+              <div className="inline-flex items-center gap-2 rounded-full bg-neon-cyan/20 border border-neon-cyan/40 px-3 py-1 text-xs font-mono font-bold text-neon-cyan mb-2">
+                <span>Score: {showdownWinner.benchmarkScore.toLocaleString()} / 10,000 pts</span>
+                <span>•</span>
+                <span>{showdownWinner.winnerBreakdown.tier}</span>
+              </div>
+              <p className="text-sm text-muted-foreground max-w-md mx-auto">{showdownWinner.showdownMessage}</p>
               <Link
                 to="/product/$productId"
                 params={{ productId: showdownWinner.product.id }}
@@ -435,6 +461,9 @@ function CompareShowdown() {
                     <span className="inline-flex items-center gap-1 rounded-full bg-neon-cyan px-2.5 py-0.5 text-[9px] font-black text-background">
                       <CheckCircle2 className="h-3 w-3" /> BEST OF YOUR 3 SELECTED LAPTOPS
                     </span>
+                    <span className="inline-flex items-center gap-1 rounded-full border border-neon-purple/50 bg-neon-purple/20 px-2.5 py-0.5 text-[9px] font-mono font-bold text-neon-purple uppercase">
+                      TIER: {showdownWinner.winnerBreakdown.tier}
+                    </span>
                   </p>
                   <h2 className="font-display mt-1 text-2xl sm:text-3xl md:text-4xl font-black uppercase tracking-tight text-foreground">
                     {showdownWinner.product.name}
@@ -442,6 +471,43 @@ function CompareShowdown() {
                   <p className="mt-1.5 text-xs sm:text-sm text-muted-foreground max-w-2xl leading-relaxed">
                     {showdownWinner.explanation}
                   </p>
+
+                  {/* Slide 10 Exact Showdown Message & Delta Score formula callout */}
+                  <div className="mt-3.5 flex flex-wrap items-center gap-3">
+                    <div className="inline-flex items-center gap-2 rounded-xl border border-neon-cyan/50 bg-neon-cyan/15 px-3 py-1.5 shadow-[0_0_20px_rgba(0,229,255,0.25)]">
+                      <div className="text-[10px] font-mono uppercase tracking-widest text-neon-cyan font-bold">SCORE DIFFERENCE</div>
+                      <div className="font-display text-sm font-black text-foreground">
+                        {showdownWinner.scoreDiff > 0 ? `+${showdownWinner.scoreDiff.toLocaleString()} pts` : "TIED"}
+                      </div>
+                    </div>
+                    <span className="text-[11px] font-mono text-muted-foreground border-l border-white/10 pl-3">
+                      {showdownWinner.deltaScoreFormula}
+                    </span>
+                  </div>
+
+                  {/* Component Breakdown Pills */}
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-4 pt-3.5 border-t border-white/10 text-xs font-mono">
+                    <div className="rounded-xl border border-white/5 bg-white/[0.03] p-2.5">
+                      <span className="text-muted-foreground block text-[10px] uppercase">GPU (45%)</span>
+                      <span className="font-bold text-neon-cyan text-sm">{showdownWinner.winnerBreakdown.gpuScore.toLocaleString()}</span>
+                      <span className="text-[10px] text-muted-foreground"> / 4,500</span>
+                    </div>
+                    <div className="rounded-xl border border-white/5 bg-white/[0.03] p-2.5">
+                      <span className="text-muted-foreground block text-[10px] uppercase">CPU (35%)</span>
+                      <span className="font-bold text-neon-purple text-sm">{showdownWinner.winnerBreakdown.cpuScore.toLocaleString()}</span>
+                      <span className="text-[10px] text-muted-foreground"> / 3,500</span>
+                    </div>
+                    <div className="rounded-xl border border-white/5 bg-white/[0.03] p-2.5">
+                      <span className="text-muted-foreground block text-[10px] uppercase">RAM (12%)</span>
+                      <span className="font-bold text-neon-blue text-sm">{showdownWinner.winnerBreakdown.ramScore.toLocaleString()}</span>
+                      <span className="text-[10px] text-muted-foreground"> / 1,200</span>
+                    </div>
+                    <div className="rounded-xl border border-white/5 bg-white/[0.03] p-2.5">
+                      <span className="text-muted-foreground block text-[10px] uppercase">Cooling (8%)</span>
+                      <span className="font-bold text-emerald-400 text-sm">{showdownWinner.winnerBreakdown.coolingScore.toLocaleString()}</span>
+                      <span className="text-[10px] text-muted-foreground"> / 800</span>
+                    </div>
+                  </div>
                 </div>
               </div>
             )}
@@ -477,7 +543,8 @@ function CompareShowdown() {
             const isBestPick = winnerCelebrated && product.id === showdownWinner.product.id;
             const isRunnerUp = winnerCelebrated && !isBestPick;
             const isDropdownOpen = activeDropdown === slotNum;
-            const benchScore = product.detailedSpecs?.benchmarkScore || 0;
+            const benchBreakdown = calculateBenchmark(product);
+            const benchScore = benchBreakdown.totalScore;
             const scoreDelta = benchScore - showdownWinner.benchmarkScore;
 
             return (
@@ -531,9 +598,19 @@ function CompareShowdown() {
 
                   {/* Title and Swap Dropdown Row */}
                   <div className="flex items-center justify-between gap-2 mt-4 relative z-20">
-                    <h3 className="font-display text-xl sm:text-2xl font-black uppercase tracking-tight text-foreground truncate">
-                      {product.name}
-                    </h3>
+                    <div className="min-w-0">
+                      <h3 className="font-display text-xl sm:text-2xl font-black uppercase tracking-tight text-foreground truncate">
+                        {product.name}
+                      </h3>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className="inline-flex items-center rounded-full border border-neon-cyan/40 bg-neon-cyan/10 px-2 py-0.5 text-[9px] font-mono font-bold text-neon-cyan uppercase">
+                          {benchBreakdown.tier}
+                        </span>
+                        <span className="text-[10px] font-mono text-muted-foreground">
+                          {benchBreakdown.totalScore.toLocaleString()} / 10,000 pts
+                        </span>
+                      </div>
+                    </div>
 
                     {/* Swap Dropdown Trigger */}
                     <div className="relative shrink-0">
@@ -585,23 +662,81 @@ function CompareShowdown() {
                   </div>
 
                   {/* Price */}
-                  <div className="mt-1 flex items-baseline gap-2">
+                  <div className="mt-2 flex items-baseline gap-2">
                     <span className="font-display text-2xl sm:text-3xl font-black text-neon-cyan">
                       Rs {product.price.toLocaleString()}
                     </span>
                   </div>
 
+                  {/* 10,000-Point Synthetic Compute Rubric Box */}
+                  <div className="mt-4 rounded-2xl border border-white/10 bg-white/[0.02] p-3.5">
+                    <div className="flex items-center justify-between text-[10px] font-mono uppercase tracking-wider text-muted-foreground mb-2">
+                      <span className="flex items-center gap-1.5 font-bold text-foreground">
+                        <Sparkles className="h-3 w-3 text-neon-cyan" />
+                        <span>10,000-pt Synthetic Rubric</span>
+                      </span>
+                      <span className="font-bold text-neon-cyan font-mono">{benchBreakdown.totalScore.toLocaleString()} pts</span>
+                    </div>
+
+                    {/* Total bar */}
+                    <div className="h-2 w-full rounded-full bg-white/10 overflow-hidden mb-3">
+                      <div
+                        className="h-full bg-gradient-to-r from-neon-cyan via-neon-blue to-neon-purple rounded-full transition-all duration-700"
+                        style={{ width: `${Math.min(100, (benchBreakdown.totalScore / 10000) * 100)}%` }}
+                      />
+                    </div>
+
+                    {/* 4 component bars */}
+                    <div className="space-y-2 text-[10px] font-mono">
+                      <div>
+                        <div className="flex justify-between text-muted-foreground">
+                          <span>GPU Architecture (45%)</span>
+                          <span className="text-foreground font-semibold">{benchBreakdown.gpuScore.toLocaleString()} <span className="text-muted-foreground/60">/ 4,500</span></span>
+                        </div>
+                        <div className="h-1 w-full rounded-full bg-white/5 overflow-hidden mt-0.5">
+                          <div className="h-full bg-neon-cyan/80 rounded-full" style={{ width: `${(benchBreakdown.gpuScore / 4500) * 100}%` }} />
+                        </div>
+                      </div>
+
+                      <div>
+                        <div className="flex justify-between text-muted-foreground">
+                          <span>CPU Architecture (35%)</span>
+                          <span className="text-foreground font-semibold">{benchBreakdown.cpuScore.toLocaleString()} <span className="text-muted-foreground/60">/ 3,500</span></span>
+                        </div>
+                        <div className="h-1 w-full rounded-full bg-white/5 overflow-hidden mt-0.5">
+                          <div className="h-full bg-neon-purple/80 rounded-full" style={{ width: `${(benchBreakdown.cpuScore / 3500) * 100}%` }} />
+                        </div>
+                      </div>
+
+                      <div>
+                        <div className="flex justify-between text-muted-foreground">
+                          <span>System Memory (12%)</span>
+                          <span className="text-foreground font-semibold">{benchBreakdown.ramScore.toLocaleString()} <span className="text-muted-foreground/60">/ 1,200</span></span>
+                        </div>
+                        <div className="h-1 w-full rounded-full bg-white/5 overflow-hidden mt-0.5">
+                          <div className="h-full bg-neon-blue/80 rounded-full" style={{ width: `${(benchBreakdown.ramScore / 1200) * 100}%` }} />
+                        </div>
+                      </div>
+
+                      <div>
+                        <div className="flex justify-between text-muted-foreground">
+                          <span>Cooling & Sustained TGP (8%)</span>
+                          <span className="text-foreground font-semibold">{benchBreakdown.coolingScore.toLocaleString()} <span className="text-muted-foreground/60">/ 800</span></span>
+                        </div>
+                        <div className="h-1 w-full rounded-full bg-white/5 overflow-hidden mt-0.5">
+                          <div className="h-full bg-emerald-400/80 rounded-full" style={{ width: `${(benchBreakdown.coolingScore / 800) * 100}%` }} />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
                   {/* Specs List with Icons */}
-                  <div className="mt-6 flex flex-col gap-2.5 border-t border-glass-border pt-5">
+                  <div className="mt-5 flex flex-col gap-2.5 border-t border-glass-border pt-4">
                     {/* Benchmark Score spec row */}
                     <SpecRow
                       icon={Sparkles}
                       label="Benchmark Score"
-                      value={
-                        product.detailedSpecs?.benchmarkScore
-                          ? `${product.detailedSpecs.benchmarkScore.toLocaleString()} pts`
-                          : "N/A"
-                      }
+                      value={`${benchBreakdown.totalScore.toLocaleString()} pts (${benchBreakdown.tier})`}
                       highlight={isBestPick}
                     />
                     <SpecRow
@@ -661,6 +796,122 @@ function CompareShowdown() {
               </div>
             );
           })}
+        </div>
+
+        {/* Slide 9: Model Comparison Matrix (10,000-Point Formula Rubric) */}
+        <div className="mb-16 rounded-3xl glass p-6 sm:p-8 border border-white/10 relative overflow-hidden animate-fade-up">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-4 border-b border-white/10">
+            <div>
+              <div className="flex items-center gap-2 text-neon-cyan font-mono text-[10px] sm:text-xs font-bold uppercase tracking-widest">
+                <BarChart3 className="h-4 w-4" />
+                <span>SELLORA HARDWARE BENCHMARK ENGINE · SCORING RUBRIC</span>
+              </div>
+              <h3 className="font-display text-xl sm:text-2xl font-black uppercase tracking-tight text-foreground mt-1">
+                The 10,000-Point Component Model Matrix
+              </h3>
+              <p className="text-xs text-muted-foreground mt-1 max-w-2xl">
+                Transparent synthetic compute benchmark combining GPU (45%), CPU (35%), RAM (12%), and thermal sustained cooling (8%). Maximum model score: 10,000 points.
+              </p>
+            </div>
+
+            <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-2 text-xs font-mono shrink-0">
+              <span className="text-muted-foreground block text-[10px]">Formula</span>
+              <span className="text-neon-cyan font-bold">GPU + CPU + RAM + Cooling</span>
+            </div>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="border-b border-white/10 text-[10px] font-mono uppercase tracking-wider text-muted-foreground">
+                  <th className="py-3 px-4">Laptop Model</th>
+                  <th className="py-3 px-4 text-center">GPU Architecture<br/><span className="text-[9px] text-neon-cyan font-normal">Max 4,500 pts (45%)</span></th>
+                  <th className="py-3 px-4 text-center">CPU Architecture<br/><span className="text-[9px] text-neon-purple font-normal">Max 3,500 pts (35%)</span></th>
+                  <th className="py-3 px-4 text-center">System Memory<br/><span className="text-[9px] text-neon-blue font-normal">Max 1,200 pts (12%)</span></th>
+                  <th className="py-3 px-4 text-center">Cooling & TGP<br/><span className="text-[9px] text-emerald-400 font-normal">Max 800 pts (8%)</span></th>
+                  <th className="py-3 px-4 text-center">Total Benchmark<br/><span className="text-[9px] text-foreground font-bold">Max 10,000 pts</span></th>
+                  <th className="py-3 px-4 text-center">System Tier</th>
+                  <th className="py-3 px-4 text-right">Delta vs Winner</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-white/5 text-xs font-mono">
+                {selectedSlots.map(({ slotNum, product }) => {
+                  const b = calculateBenchmark(product);
+                  const isWinner = winnerCelebrated && product.id === showdownWinner.product.id;
+                  const delta = b.totalScore - showdownWinner.benchmarkScore;
+
+                  return (
+                    <tr
+                      key={`matrix-${product.id}`}
+                      className={`transition-colors ${
+                        isWinner
+                          ? "bg-neon-cyan/10 font-bold"
+                          : "hover:bg-white/[0.03]"
+                      }`}
+                    >
+                      <td className="py-4 px-4">
+                        <div className="flex items-center gap-3">
+                          <span className="h-6 w-6 rounded-lg bg-white/10 flex items-center justify-center text-[10px] font-bold text-muted-foreground">
+                            #{slotNum}
+                          </span>
+                          <div>
+                            <div className="font-display font-bold text-foreground text-sm uppercase flex items-center gap-1.5">
+                              <span>{product.name}</span>
+                              {isWinner && (
+                                <span className="rounded bg-neon-cyan text-background text-[9px] font-black px-1.5 py-0.5">
+                                  WINNER
+                                </span>
+                              )}
+                            </div>
+                            <div className="text-[10px] text-muted-foreground">{product.category} · {product.processor}</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="py-4 px-4 text-center">
+                        <span className="font-bold text-neon-cyan">{b.gpuScore.toLocaleString()}</span>
+                        <span className="text-[10px] text-muted-foreground block truncate max-w-[140px] mx-auto">{b.gpuTierLabel}</span>
+                      </td>
+                      <td className="py-4 px-4 text-center">
+                        <span className="font-bold text-neon-purple">{b.cpuScore.toLocaleString()}</span>
+                        <span className="text-[10px] text-muted-foreground block truncate max-w-[140px] mx-auto">{b.cpuTierLabel}</span>
+                      </td>
+                      <td className="py-4 px-4 text-center">
+                        <span className="font-bold text-neon-blue">{b.ramScore.toLocaleString()}</span>
+                        <span className="text-[10px] text-muted-foreground block truncate max-w-[140px] mx-auto">{b.ramTierLabel}</span>
+                      </td>
+                      <td className="py-4 px-4 text-center">
+                        <span className="font-bold text-emerald-400">{b.coolingScore.toLocaleString()}</span>
+                        <span className="text-[10px] text-muted-foreground block truncate max-w-[140px] mx-auto">{b.coolingTierLabel}</span>
+                      </td>
+                      <td className="py-4 px-4 text-center">
+                        <span className={`text-sm font-black ${isWinner ? "text-neon-cyan" : "text-foreground"}`}>
+                          {b.totalScore.toLocaleString()}
+                        </span>
+                        <span className="text-[10px] text-muted-foreground block">/ 10,000</span>
+                      </td>
+                      <td className="py-4 px-4 text-center">
+                        <span className="inline-flex rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[10px] font-bold text-foreground uppercase tracking-wider">
+                          {b.tier}
+                        </span>
+                      </td>
+                      <td className="py-4 px-4 text-right">
+                        {delta === 0 ? (
+                          <span className="text-neon-cyan font-bold font-mono">0 pts (Leader)</span>
+                        ) : (
+                          <span className="text-rose-400 font-bold font-mono">{delta.toLocaleString()} pts</span>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+
+          <div className="mt-4 pt-3 border-t border-white/10 flex flex-wrap items-center justify-between gap-3 text-[11px] text-muted-foreground font-mono">
+            <span>• Rubric weights: GPU 45% · CPU 35% · RAM 12% · Cooling 8%</span>
+            <span>• Slide 10: Δ Score = Winner score − Runner-up score</span>
+          </div>
         </div>
       </div>
 

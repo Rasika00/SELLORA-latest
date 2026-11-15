@@ -7,6 +7,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { prisma } from "./db";
 import { products as fallbackProducts } from "../src/data/products";
+import { calculateBenchmark } from "../src/lib/benchmarkEngine";
 
 dotenv.config();
 
@@ -423,6 +424,24 @@ app.post("/api/products", async (req, res) => {
     }
 
     const id = `prod-${Date.now()}`;
+    const benchmark = calculateBenchmark({
+      name,
+      category,
+      processor,
+      cpu,
+      gpu,
+      ram,
+      cooling: detailedSpecs?.cooling,
+      chassis: detailedSpecs?.chassis,
+      detailedSpecs,
+    });
+
+    const finalDetailedSpecs = {
+      ...(detailedSpecs || {}),
+      benchmarkScore: typeof detailedSpecs?.benchmarkScore === "number" && detailedSpecs.benchmarkScore > 0 ? detailedSpecs.benchmarkScore : benchmark.totalScore,
+      benchmarkBreakdown: benchmark,
+    };
+
     const product = await prisma.product.create({
       data: {
         id,
@@ -440,7 +459,7 @@ app.post("/api/products", async (req, res) => {
         batteryWeight: batteryWeight ? String(batteryWeight).trim() : null,
         specialHighlight: specialHighlight ? String(specialHighlight).trim() : null,
         img: img ? String(img).trim() : "https://images.unsplash.com/photo-1593642632823-8f785ba67e45?auto=format&fit=crop&w=600&q=80",
-        detailedSpecs: detailedSpecs || {},
+        detailedSpecs: finalDetailedSpecs,
         stock: req.body.stock !== undefined ? Math.max(0, parseInt(req.body.stock, 10)) : 15,
         status: finalStatus,
         sellerId: sellerId || null,

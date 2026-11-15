@@ -24,6 +24,7 @@ export type Product = {
   img: string;
   status?: "APPROVED" | "PENDING_APPROVAL" | "REJECTED" | string;
   sellerId?: string | null;
+  submittedByRole?: string;
   seller?: {
     id: string;
     storeName?: string | null;
@@ -42,6 +43,14 @@ export type Product = {
     cooling: string;
     chassis: string;
     benchmarkScore: number;
+    benchmarkBreakdown?: {
+      gpuScore: number;
+      cpuScore: number;
+      ramScore: number;
+      coolingScore: number;
+      totalScore: number;
+      tier: string;
+    };
   };
 };
 

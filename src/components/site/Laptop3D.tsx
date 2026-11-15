@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
-import { Rotate3d, Sparkles, Loader2, RefreshCw } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import heroLaptopFallback from "@/assets/hero-laptop.png";
 
 interface Laptop3DProps {
@@ -197,13 +197,6 @@ export function Laptop3D({ className = "" }: Laptop3DProps) {
     };
   }, []);
 
-  const handleResetView = () => {
-    if (controlsRef.current) {
-      controlsRef.current.reset();
-      controlsRef.current.autoRotate = true;
-    }
-  };
-
   return (
     <div className={`relative w-full h-full min-h-[380px] sm:min-h-[440px] lg:min-h-[480px] flex items-center justify-center ${className}`}>
       {/* 3D Canvas Mount Point */}
@@ -232,33 +225,6 @@ export function Laptop3D({ className = "" }: Laptop3DProps) {
               </div>
             </div>
           )}
-        </div>
-      )}
-
-      {/* Interactive HUD Overlay Badges */}
-      {!isLoading && !hasError && (
-        <div className="pointer-events-none absolute inset-x-3 bottom-3 flex items-center justify-between text-[10px] font-mono z-20">
-          <div className="pointer-events-auto flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-card/85 backdrop-blur-md border border-border shadow-sm text-muted-foreground hover:text-foreground transition-colors">
-            <Rotate3d className="h-3.5 w-3.5 text-primary" />
-            <span>Interactive 3D · Drag to Rotate</span>
-          </div>
-
-          <button
-            onClick={handleResetView}
-            className="pointer-events-auto flex items-center gap-1 px-2.5 py-1.5 rounded-full bg-card/85 backdrop-blur-md border border-border shadow-sm text-muted-foreground hover:text-primary transition-colors cursor-pointer"
-            title="Reset 3D camera angle"
-          >
-            <RefreshCw className="h-3 w-3" />
-            <span>Reset</span>
-          </button>
-        </div>
-      )}
-
-      {/* Top right 3D Live Indicator */}
-      {!isLoading && !hasError && (
-        <div className="pointer-events-none absolute top-3 right-3 flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 backdrop-blur-md border border-primary/25 text-primary font-mono text-[10px] font-bold z-20">
-          <Sparkles className="h-3 w-3 animate-pulse" />
-          <span>REAL-TIME 3D</span>
         </div>
       )}
     </div>

@@ -61,21 +61,21 @@ export function Navbar() {
         </Link>
 
         {/* Desktop Nav Links */}
-        <ul className="hidden items-center gap-5 lg:gap-7 md:flex">
+        <ul className="hidden items-center gap-4 lg:gap-6 md:flex">
           {links.map((l) => (
             <li key={l.label}>
               {l.isRouterLink ? (
                 <Link
                   to={l.href as any}
-                  className="inline-flex items-center gap-1.5 rounded-full border border-neon-cyan/50 bg-neon-cyan/15 px-3.5 py-1.5 text-xs font-mono font-bold uppercase tracking-wider text-neon-cyan transition-all hover:bg-neon-cyan hover:text-background shadow-[0_0_15px_oklch(0.78_0.18_200/0.25)]"
+                  className="inline-flex items-center gap-1.5 rounded-full border border-neon-cyan/50 bg-neon-cyan/15 px-3 py-1 text-[11px] font-mono font-bold uppercase tracking-wider text-neon-cyan transition-all hover:bg-neon-cyan hover:text-background shadow-[0_0_15px_oklch(0.78_0.18_200/0.25)]"
                 >
-                  <Scale className="h-3.5 w-3.5 shrink-0 animate-pulse" />
+                  <Scale className="h-3 w-3 shrink-0 animate-pulse" />
                   <span>{l.label}</span>
                 </Link>
               ) : l.isHighlight ? (
                 <a
                   href={l.href}
-                  className="inline-flex items-center gap-1.5 rounded-full border border-neon-cyan/40 bg-neon-cyan/10 px-3 py-1 text-xs font-mono font-bold text-neon-cyan transition-all hover:bg-neon-cyan hover:text-background shadow-[0_0_15px_oklch(0.78_0.18_200/0.2)]"
+                  className="inline-flex items-center gap-1.5 rounded-full border border-neon-cyan/40 bg-neon-cyan/10 px-2.5 py-0.5 text-[11px] font-mono font-bold text-neon-cyan transition-all hover:bg-neon-cyan hover:text-background shadow-[0_0_15px_oklch(0.78_0.18_200/0.2)]"
                 >
                   <Gauge className="h-3 w-3 animate-pulse" />
                   <span>{l.label}</span>
@@ -83,7 +83,7 @@ export function Navbar() {
               ) : (
                 <a
                   href={l.href}
-                  className="text-sm font-medium text-muted-foreground transition-colors hover:text-neon-cyan"
+                  className="text-xs font-medium text-muted-foreground transition-colors hover:text-neon-cyan tracking-wide"
                 >
                   {l.label}
                 </a>
@@ -261,7 +261,7 @@ export function Navbar() {
                   <a
                     href={l.href}
                     onClick={() => setMobileMenuOpen(false)}
-                    className="block rounded-xl px-4 py-2.5 text-sm font-medium text-foreground hover:bg-foreground/5 hover:text-neon-cyan transition-all"
+                    className="block rounded-xl px-4 py-2 text-xs font-medium text-foreground hover:bg-foreground/5 hover:text-neon-cyan transition-all"
                   >
                     {l.label}
                   </a>

@@ -155,26 +155,26 @@ function CartCheckoutPage() {
   if (isSuccess) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
-        <div className="max-w-md w-full glass rounded-3xl p-8 text-center animate-fade-up border border-neon-cyan/30">
-          <CheckCircle2 className="w-20 h-20 text-neon-cyan mx-auto mb-6" />
-          <h2 className="text-3xl font-display font-bold text-white mb-4">Payment Successful!</h2>
+        <div className="max-w-md w-full bg-card rounded-2xl p-8 text-center animate-fade-up border border-border shadow-xl">
+          <CheckCircle2 className="w-20 h-20 text-primary mx-auto mb-6" />
+          <h2 className="text-3xl font-display font-bold text-foreground mb-4">Payment Successful!</h2>
           <p className="text-muted-foreground mb-8">
             Your order is now being prepared for orbital dispatch. You can track your real-time delivery pipeline from your Customer Hub.
           </p>
-          <div className="glass-strong rounded-xl p-4 mb-8 text-left border border-white/5 space-y-1">
-            <p className="text-xs text-muted-foreground">Order Reference: <span className="text-white font-mono font-bold">{orderNumber}</span></p>
-            <p className="text-xs text-muted-foreground">Delivery To: <span className="text-white">{formData.address}, {formData.city}</span></p>
+          <div className="bg-secondary/40 rounded-xl p-4 mb-8 text-left border border-border space-y-1">
+            <p className="text-xs text-muted-foreground">Order Reference: <span className="text-foreground font-mono font-bold">{orderNumber}</span></p>
+            <p className="text-xs text-muted-foreground">Delivery To: <span className="text-foreground">{formData.address}, {formData.city}</span></p>
           </div>
           <div className="flex flex-col gap-3">
             <Link 
               to="/account" 
-              className="block w-full rounded-full bg-neon-cyan text-black px-6 py-3 text-sm font-bold shadow-[0_0_20px_rgba(0,242,254,0.3)] hover:scale-102 transition-transform text-center"
+              className="block w-full rounded-xl bg-primary hover:bg-primary-hover text-primary-foreground px-6 py-3 text-sm font-semibold shadow-sm transition-all text-center"
             >
               View Order in Customer Hub
             </Link>
             <Link 
               to="/" 
-              className="block w-full rounded-full bg-white/10 hover:bg-white/20 px-6 py-2.5 text-xs font-bold text-white transition-colors border border-white/10 text-center"
+              className="block w-full rounded-xl bg-secondary hover:bg-secondary/80 px-6 py-2.5 text-xs font-semibold text-foreground transition-colors border border-border text-center"
             >
               Return to Store
             </Link>
@@ -188,7 +188,7 @@ function CartCheckoutPage() {
     <div className="min-h-screen bg-background text-foreground">
       <Navbar />
       <div className="py-24 px-4 sm:px-8 max-w-5xl mx-auto">
-        <Link to="/" className="inline-flex items-center gap-2 text-xs uppercase tracking-widest text-muted-foreground hover:text-white transition-colors mb-8">
+        <Link to="/" className="inline-flex items-center gap-2 text-xs uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors mb-8">
           <ArrowLeft className="w-4 h-4" /> Back to Store
         </Link>
         
@@ -198,16 +198,16 @@ function CartCheckoutPage() {
           {/* Checkout Form */}
           <div className="lg:col-span-7">
             <form onSubmit={handlePayment} className="space-y-8">
-              <div className="glass rounded-3xl p-6 sm:p-8 border border-white/5">
+              <div className="bg-card rounded-2xl p-6 sm:p-8 border border-border shadow-card">
                 <div className="flex items-center justify-between mb-6">
                   <h2 className="font-display text-xl font-bold flex items-center gap-2">
-                    <span className="flex items-center justify-center w-6 h-6 rounded-full bg-neon-cyan/20 text-neon-cyan text-xs">1</span>
+                    <span className="flex items-center justify-center w-6 h-6 rounded-full bg-primary/20 text-primary text-xs font-bold">1</span>
                     Shipping Destination
                   </h2>
                   {currentUser && (
                     <Link
                       to="/account"
-                      className="text-xs font-mono text-neon-cyan hover:underline flex items-center gap-1"
+                      className="text-xs font-mono text-primary hover:underline flex items-center gap-1"
                     >
                       <MapPin className="h-3 w-3" /> Address Book
                     </Link>
@@ -227,29 +227,29 @@ function CartCheckoutPage() {
                           <div
                             key={addr.id}
                             onClick={() => handleSelectAddress(addr)}
-                            className={`p-4 rounded-2xl border cursor-pointer transition-all relative ${
+                            className={`p-4 rounded-xl border cursor-pointer transition-all relative ${
                               isSelected
-                                ? "bg-neon-cyan/10 border-neon-cyan shadow-[0_0_15px_rgba(0,242,254,0.2)] ring-1 ring-neon-cyan"
-                                : "bg-black/40 border-white/10 hover:border-white/20"
+                                ? "bg-primary/10 border-primary shadow-sm ring-1 ring-primary"
+                                : "bg-secondary/40 border-border hover:border-border-hover"
                             }`}
                           >
                             <div className="flex items-center justify-between gap-2 mb-2">
-                              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-white/10 text-white font-bold">
+                              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-secondary text-foreground font-bold border border-border">
                                 {addr.label}
                               </span>
                               {addr.isDefault && (
-                                <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-neon-cyan/20 text-neon-cyan border border-neon-cyan/30">
+                                <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-primary/20 text-primary border border-primary/30">
                                   Default
                                 </span>
                               )}
                             </div>
-                            <div className="text-xs font-bold text-white truncate">{addr.recipientName}</div>
+                            <div className="text-xs font-bold text-foreground truncate">{addr.recipientName}</div>
                             <div className="text-[11px] text-muted-foreground mt-0.5">{addr.phone}</div>
-                            <div className="text-[11px] text-white/80 mt-1 line-clamp-2">
+                            <div className="text-[11px] text-muted-foreground mt-1 line-clamp-2">
                               {addr.streetAddress}, {addr.city}
                             </div>
                             {isSelected && (
-                              <div className="absolute top-3 right-3 h-5 w-5 rounded-full bg-neon-cyan text-black flex items-center justify-center">
+                              <div className="absolute top-3 right-3 h-5 w-5 rounded-full bg-primary text-primary-foreground flex items-center justify-center">
                                 <Check className="h-3 w-3 stroke-[3]" />
                               </div>
                             )}
@@ -260,14 +260,14 @@ function CartCheckoutPage() {
                       {/* Option to ship to a new manual address */}
                       <div
                         onClick={handleSelectManual}
-                        className={`p-4 rounded-2xl border border-dashed cursor-pointer transition-all flex flex-col items-center justify-center text-center ${
+                        className={`p-4 rounded-xl border border-dashed cursor-pointer transition-all flex flex-col items-center justify-center text-center ${
                           selectedAddressId === "manual"
-                            ? "bg-neon-cyan/10 border-neon-cyan ring-1 ring-neon-cyan"
-                            : "bg-black/20 border-white/20 hover:border-white/40 text-muted-foreground hover:text-white"
+                            ? "bg-primary/10 border-primary ring-1 ring-primary"
+                            : "bg-secondary/20 border-border hover:border-border-hover text-muted-foreground hover:text-foreground"
                         }`}
                       >
-                        <Plus className="h-5 w-5 mb-1 text-neon-cyan" />
-                        <span className="text-xs font-bold text-white">Deliver to New Address</span>
+                        <Plus className="h-5 w-5 mb-1 text-primary" />
+                        <span className="text-xs font-bold text-foreground">Deliver to New Address</span>
                         <span className="text-[10px] text-muted-foreground mt-0.5">Enter custom shipping info</span>
                       </div>
                     </div>
@@ -284,7 +284,7 @@ function CartCheckoutPage() {
                       name="name"
                       value={formData.name}
                       onChange={handleInputChange}
-                      className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-neon-cyan/50 focus:ring-1 focus:ring-neon-cyan/50 transition-all text-white placeholder-muted-foreground"
+                      className="w-full bg-secondary/30 border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all text-foreground placeholder:text-muted-foreground"
                       placeholder="John Doe"
                     />
                   </div>
@@ -297,7 +297,7 @@ function CartCheckoutPage() {
                       name="phone"
                       value={formData.phone}
                       onChange={handleInputChange}
-                      className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-neon-cyan/50 focus:ring-1 focus:ring-neon-cyan/50 transition-all text-white placeholder-muted-foreground"
+                      className="w-full bg-secondary/30 border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all text-foreground placeholder:text-muted-foreground"
                       placeholder="+94 77 123 4567"
                     />
                   </div>
@@ -310,7 +310,7 @@ function CartCheckoutPage() {
                       name="email"
                       value={formData.email}
                       onChange={handleInputChange}
-                      className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-neon-cyan/50 focus:ring-1 focus:ring-neon-cyan/50 transition-all text-white placeholder-muted-foreground"
+                      className="w-full bg-secondary/30 border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all text-foreground placeholder:text-muted-foreground"
                       placeholder="john@example.com"
                     />
                   </div>
@@ -323,7 +323,7 @@ function CartCheckoutPage() {
                       name="address"
                       value={formData.address}
                       onChange={handleInputChange}
-                      className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-neon-cyan/50 focus:ring-1 focus:ring-neon-cyan/50 transition-all text-white placeholder-muted-foreground"
+                      className="w-full bg-secondary/30 border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all text-foreground placeholder:text-muted-foreground"
                       placeholder="123 Orbital Way, Suite 4B"
                     />
                   </div>
@@ -336,7 +336,7 @@ function CartCheckoutPage() {
                       name="city"
                       value={formData.city}
                       onChange={handleInputChange}
-                      className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-neon-cyan/50 focus:ring-1 focus:ring-neon-cyan/50 transition-all text-white placeholder-muted-foreground"
+                      className="w-full bg-secondary/30 border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all text-foreground placeholder:text-muted-foreground"
                       placeholder="Colombo 03"
                     />
                   </div>
@@ -348,20 +348,20 @@ function CartCheckoutPage() {
                       name="zipCode"
                       value={formData.zipCode}
                       onChange={handleInputChange}
-                      className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-neon-cyan/50 focus:ring-1 focus:ring-neon-cyan/50 transition-all text-white placeholder-muted-foreground"
+                      className="w-full bg-secondary/30 border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all text-foreground placeholder:text-muted-foreground"
                       placeholder="00300"
                     />
                   </div>
 
                   {/* Option to save new address if entered manually */}
                   {currentUser && selectedAddressId === "manual" && (
-                    <div className="sm:col-span-2 pt-2 border-t border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                      <label className="flex items-center gap-2 cursor-pointer text-xs text-white">
+                    <div className="sm:col-span-2 pt-2 border-t border-border flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                      <label className="flex items-center gap-2 cursor-pointer text-xs text-foreground">
                         <input
                           type="checkbox"
                           checked={saveToAddressBook}
                           onChange={(e) => setSaveToAddressBook(e.target.checked)}
-                          className="h-4 w-4 rounded border-white/20 bg-black/50 text-neon-cyan"
+                          className="h-4 w-4 rounded border-border bg-secondary text-primary"
                         />
                         <span>Save this address to my Address Book for future orders</span>
                       </label>
@@ -374,7 +374,7 @@ function CartCheckoutPage() {
                             placeholder="Home, Work..."
                             value={newAddressLabel}
                             onChange={(e) => setNewAddressLabel(e.target.value)}
-                            className="bg-black/60 border border-white/15 rounded-lg px-2 py-1 text-xs text-white w-28 focus:outline-none focus:border-neon-cyan"
+                            className="bg-secondary/60 border border-border rounded-lg px-2 py-1 text-xs text-foreground w-28 focus:outline-none focus:border-primary"
                           />
                         </div>
                       )}
@@ -383,16 +383,16 @@ function CartCheckoutPage() {
                 </div>
               </div>
 
-              <div className="glass rounded-3xl p-6 sm:p-8 border border-white/5">
+              <div className="bg-card rounded-2xl p-6 sm:p-8 border border-border shadow-card">
                 <h2 className="font-display text-xl font-bold mb-6 flex items-center gap-2">
-                  <span className="flex items-center justify-center w-6 h-6 rounded-full bg-neon-cyan/20 text-neon-cyan text-xs">2</span>
+                  <span className="flex items-center justify-center w-6 h-6 rounded-full bg-primary/20 text-primary text-xs font-bold">2</span>
                   Payment Details
                 </h2>
                 <div className="space-y-4">
-                  <div className="p-4 rounded-xl border border-neon-cyan/30 bg-neon-cyan/5 flex items-start gap-4">
-                    <ShieldCheck className="w-6 h-6 text-neon-cyan shrink-0" />
+                  <div className="p-4 rounded-xl border border-border bg-secondary/30 flex items-start gap-4">
+                    <ShieldCheck className="w-6 h-6 text-primary shrink-0" />
                     <div>
-                      <h4 className="text-sm font-bold text-white mb-1">Secure Encrypted Payment</h4>
+                      <h4 className="text-sm font-bold text-foreground mb-1">Secure Encrypted Payment</h4>
                       <p className="text-xs text-muted-foreground">By clicking Pay Now, your order will be placed with encrypted verification. Hardware warranty and buyer protection are activated instantly.</p>
                     </div>
                   </div>
@@ -402,7 +402,7 @@ function CartCheckoutPage() {
               <button 
                 type="submit" 
                 disabled={isProcessing}
-                className="w-full rounded-full bg-gradient-primary px-8 py-4 text-sm font-bold text-primary-foreground shadow-[0_0_30px_oklch(0.78_0.18_200/0.4)] hover:scale-[1.02] transition-transform flex items-center justify-center gap-2 disabled:opacity-70 disabled:hover:scale-100 cursor-pointer"
+                className="w-full rounded-xl bg-primary hover:bg-primary-hover px-8 py-3.5 text-sm font-semibold uppercase tracking-wider text-primary-foreground shadow-sm transition-all hover:shadow-md flex items-center justify-center gap-2 disabled:opacity-70 cursor-pointer"
               >
                 {isProcessing ? (
                   <>
@@ -418,23 +418,23 @@ function CartCheckoutPage() {
 
           {/* Order Summary */}
           <div className="lg:col-span-5">
-            <div className="glass-strong rounded-3xl p-6 sm:p-8 sticky top-24 border border-white/5">
+            <div className="bg-card rounded-2xl p-6 sm:p-8 sticky top-24 border border-border shadow-card">
               <h3 className="font-display text-lg font-bold mb-6 uppercase tracking-widest">Order Summary</h3>
               
-              <div className="divide-y divide-white/5 mb-6 max-h-[360px] overflow-y-auto pr-1">
+              <div className="divide-y divide-border mb-6 max-h-[360px] overflow-y-auto pr-1">
                 {items.map((item) => (
                   <div key={item.product.id} className="py-4 flex gap-4 first:pt-0">
                     <img 
                       src={item.product.img} 
                       alt={item.product.name} 
-                      className="w-16 h-16 object-cover rounded-xl bg-black/40 border border-white/10 shrink-0"
+                      className="w-16 h-16 object-cover rounded-xl bg-secondary/40 border border-border shrink-0"
                     />
                     <div className="flex-1 min-w-0">
-                      <h4 className="text-sm font-bold text-white truncate">{item.product.name}</h4>
+                      <h4 className="text-sm font-bold text-foreground truncate">{item.product.name}</h4>
                       <p className="text-xs text-muted-foreground">{item.product.cpu} &bull; {item.product.gpu}</p>
                       <div className="flex justify-between items-center mt-2">
                         <span className="text-xs text-muted-foreground">Qty: {item.quantity}</span>
-                        <span className="text-xs font-mono font-bold text-neon-cyan">
+                        <span className="text-xs font-mono font-bold text-primary">
                           LKR {(item.product.price * item.quantity).toLocaleString()}
                         </span>
                       </div>
@@ -443,22 +443,22 @@ function CartCheckoutPage() {
                 ))}
               </div>
 
-              <div className="space-y-3 pt-4 border-t border-white/10 text-sm">
+              <div className="space-y-3 pt-4 border-t border-border text-sm">
                 <div className="flex justify-between text-muted-foreground">
                   <span>Subtotal</span>
-                  <span className="font-mono text-white">LKR {cartTotal.toLocaleString()}</span>
+                  <span className="font-mono text-foreground">LKR {cartTotal.toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between text-muted-foreground">
                   <span>Express Courier Dispatch</span>
-                  <span className="font-mono text-neon-cyan font-bold uppercase tracking-wider text-xs">FREE</span>
+                  <span className="font-mono text-primary font-bold uppercase tracking-wider text-xs">FREE</span>
                 </div>
                 <div className="flex justify-between text-muted-foreground">
                   <span>Precision Thermal QC</span>
-                  <span className="font-mono text-neon-cyan font-bold uppercase tracking-wider text-xs">INCLUDED</span>
+                  <span className="font-mono text-primary font-bold uppercase tracking-wider text-xs">INCLUDED</span>
                 </div>
-                <div className="pt-4 border-t border-white/10 flex justify-between font-display font-bold text-lg text-white">
+                <div className="pt-4 border-t border-border flex justify-between font-display font-bold text-lg text-foreground">
                   <span>Total</span>
-                  <span className="text-neon-cyan font-mono">LKR {cartTotal.toLocaleString()}</span>
+                  <span className="text-primary font-mono">LKR {cartTotal.toLocaleString()}</span>
                 </div>
               </div>
             </div>

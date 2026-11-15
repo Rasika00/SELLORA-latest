@@ -231,7 +231,7 @@ export function FeedbackSection() {
                           value={name}
                           onChange={(e) => setName(e.target.value)}
                           placeholder="e.g. Alex Mercer"
-                          className="w-full rounded-xl border border-glass-border bg-black/40 pl-9 pr-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/50 focus:border-neon-cyan focus:outline-none focus:ring-1 focus:ring-neon-cyan transition-all"
+                          className="w-full rounded-xl border border-border bg-secondary/50 pl-9 pr-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/60 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-all"
                         />
                       </div>
                     </div>
@@ -247,7 +247,7 @@ export function FeedbackSection() {
                           value={role}
                           onChange={(e) => setRole(e.target.value)}
                           placeholder="e.g. Lead 3D Artist, Pro Gamer"
-                          className="w-full rounded-xl border border-glass-border bg-black/40 pl-9 pr-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/50 focus:border-neon-cyan focus:outline-none focus:ring-1 focus:ring-neon-cyan transition-all"
+                          className="w-full rounded-xl border border-border bg-secondary/50 pl-9 pr-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/60 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-all"
                         />
                       </div>
                     </div>
@@ -265,7 +265,7 @@ export function FeedbackSection() {
                           value={rigModel}
                           onChange={(e) => setRigModel(e.target.value)}
                           placeholder="e.g. Razer Blade 18, MacBook Pro 16"
-                          className="w-full rounded-xl border border-glass-border bg-black/40 pl-9 pr-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/50 focus:border-neon-cyan focus:outline-none focus:ring-1 focus:ring-neon-cyan transition-all"
+                          className="w-full rounded-xl border border-border bg-secondary/50 pl-9 pr-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/60 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-all"
                         />
                       </div>
                     </div>
@@ -277,7 +277,7 @@ export function FeedbackSection() {
                       <select
                         value={category}
                         onChange={(e: any) => setCategory(e.target.value)}
-                        className="w-full rounded-xl border border-glass-border bg-black/40 px-3 py-2.5 text-sm text-foreground focus:border-neon-cyan focus:outline-none focus:ring-1 focus:ring-neon-cyan transition-all"
+                        className="w-full rounded-xl border border-border bg-secondary/50 px-3 py-2.5 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-all"
                       >
                         <option value="Gaming" className="bg-card text-foreground">Gaming</option>
                         <option value="Ultrabook" className="bg-card text-foreground">Ultrabook / Creative</option>
@@ -336,7 +336,7 @@ export function FeedbackSection() {
                       value={message}
                       onChange={(e) => setMessage(e.target.value)}
                       placeholder="Describe thermals, screen quality, battery, gaming benchmarks, or build impressions..."
-                      className="w-full rounded-xl border border-glass-border bg-black/40 p-3 text-sm text-foreground placeholder:text-muted-foreground/50 focus:border-neon-cyan focus:outline-none focus:ring-1 focus:ring-neon-cyan transition-all"
+                      className="w-full rounded-xl border border-border bg-secondary/50 p-3 text-sm text-foreground placeholder:text-muted-foreground/60 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-all"
                     />
                   </div>
 
@@ -344,7 +344,7 @@ export function FeedbackSection() {
                     <button
                       type="button"
                       onClick={() => setShowForm(false)}
-                      className="rounded-xl border border-glass-border px-4 py-2.5 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
+                      className="rounded-xl border border-border px-4 py-2.5 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
                     >
                       Cancel
                     </button>

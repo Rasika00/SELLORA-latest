@@ -272,19 +272,19 @@ function CompareShowdown() {
 
           {/* Winner Banner */}
           {winnerCelebrated && (
-            <div className="mb-8 rounded-2xl border-2 border-neon-cyan bg-neon-cyan/10 p-6 text-center">
+            <div className="mb-8 rounded-2xl border border-primary/40 bg-card p-6 text-center shadow-card">
               <div className="flex items-center justify-center gap-2 mb-2">
-                <Trophy className="h-6 w-6 text-neon-cyan" />
+                <Trophy className="h-6 w-6 text-primary" />
                 <span className="font-bold text-lg text-foreground">Top Pick: {showdownWinner.product.name}</span>
               </div>
-              <div className="inline-flex items-center gap-2 rounded-full bg-neon-cyan/20 border border-neon-cyan/40 px-3 py-1 text-xs font-mono font-bold text-neon-cyan mb-2">
+              <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 border border-primary/25 px-3 py-1 text-xs font-mono font-bold text-primary mb-2">
                 <span>Benchmark Score: {showdownWinner.benchmarkScore.toLocaleString()} pts</span>
               </div>
               <p className="text-sm text-muted-foreground max-w-md mx-auto">{getSimpleWinnerExplanation()}</p>
               <Link
                 to="/product/$productId"
                 params={{ productId: showdownWinner.product.id }}
-                className="mt-4 inline-flex items-center gap-2 rounded-full bg-neon-cyan px-6 py-2.5 text-sm font-bold text-background hover:scale-105 transition-all shadow-neon-cyan"
+                className="mt-4 inline-flex items-center gap-2 rounded-full bg-primary px-6 py-2.5 text-sm font-bold text-primary-foreground hover:bg-primary/90 transition-all shadow-sm"
               >
                 Buy Now — Rs {showdownWinner.product.price.toLocaleString()}
                 <ArrowRight className="h-4 w-4" />
@@ -296,7 +296,7 @@ function CompareShowdown() {
             <div className="mb-8 text-center">
               <button
                 onClick={handlePickWinner}
-                className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-neon-cyan via-neon-blue to-neon-purple px-6 py-3 font-bold text-sm text-background shadow-neon-cyan hover:scale-105 transition-all"
+                className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-2.5 font-bold text-sm text-primary-foreground shadow-sm hover:shadow hover:bg-primary/90 transition-all"
               >
                 <Trophy className="h-4 w-4" />
                 Which one should I pick?
@@ -314,14 +314,14 @@ function CompareShowdown() {
                   key={`slot-${slotNum}`}
                   className={`rounded-2xl border p-5 transition-all ${
                     isBestPick
-                      ? "border-2 border-neon-cyan bg-neon-cyan/5 shadow-[0_0_30px_oklch(0.78_0.18_200/0.2)]"
-                      : "border-glass-border bg-card"
+                      ? "border-primary/50 bg-card shadow-elevated"
+                      : "border-border bg-card shadow-card"
                   }`}
                 >
                   {isBestPick && (
                     <div className="flex items-center gap-1.5 mb-3">
-                      <Trophy className="h-4 w-4 text-neon-cyan" />
-                      <span className="text-xs font-bold text-neon-cyan uppercase tracking-wider">Top Pick</span>
+                      <Trophy className="h-4 w-4 text-primary" />
+                      <span className="text-xs font-bold text-primary uppercase tracking-wider font-mono">Top Pick</span>
                     </div>
                   )}
 
@@ -432,7 +432,7 @@ function CompareShowdown() {
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
             {!winnerCelebrated ? (
               <div className="flex items-center gap-4 sm:gap-5">
-                <div className="flex h-14 w-14 sm:h-16 sm:w-16 shrink-0 items-center justify-center rounded-2xl border bg-neon-cyan/20 border-neon-cyan/50 text-neon-cyan shadow-neon-cyan">
+                <div className="flex h-14 w-14 sm:h-16 sm:w-16 shrink-0 items-center justify-center rounded-2xl border bg-primary/10 border-primary/30 text-primary shadow-sm">
                   <Trophy className="h-7 w-7 sm:h-8 sm:w-8" />
                 </div>
                 <div>
@@ -446,14 +446,14 @@ function CompareShowdown() {
               </div>
             ) : (
               <div className="flex items-start sm:items-center gap-4 sm:gap-5">
-                <div className="flex h-14 w-14 sm:h-16 sm:w-16 shrink-0 items-center justify-center rounded-2xl border bg-neon-cyan text-background border-neon-cyan shadow-[0_0_35px_oklch(0.78_0.18_200)] animate-bounce">
+                <div className="flex h-14 w-14 sm:h-16 sm:w-16 shrink-0 items-center justify-center rounded-2xl border bg-primary text-primary-foreground border-primary shadow-sm">
                   <Trophy className="h-7 w-7 sm:h-8 sm:w-8" />
                 </div>
 
                 <div>
-                  <p className="font-display text-[10px] sm:text-xs font-bold tracking-[0.25em] text-neon-cyan uppercase flex flex-wrap items-center gap-2">
+                  <p className="font-mono text-[10px] sm:text-xs font-bold tracking-[0.2em] text-primary uppercase flex flex-wrap items-center gap-2">
                     <span>SHOWDOWN CHAMPION · SLOT #{showdownWinner.slotNum}</span>
-                    <span className="inline-flex items-center gap-1 rounded-full bg-neon-cyan px-2.5 py-0.5 text-[9px] font-black text-background">
+                    <span className="inline-flex items-center gap-1 rounded-full bg-primary px-2.5 py-0.5 text-[9px] font-bold text-primary-foreground">
                       <CheckCircle2 className="h-3 w-3" /> BEST OF YOUR 3 SELECTED LAPTOPS
                     </span>
                   </p>
@@ -466,8 +466,8 @@ function CompareShowdown() {
 
                   {/* Showdown Delta Score Difference Callout */}
                   <div className="mt-3.5 flex flex-wrap items-center gap-3">
-                    <div className="inline-flex items-center gap-2 rounded-xl border border-neon-cyan/50 bg-neon-cyan/15 px-3 py-1.5 shadow-[0_0_20px_rgba(0,229,255,0.25)]">
-                      <div className="text-[10px] font-mono uppercase tracking-widest text-neon-cyan font-bold">SCORE DIFFERENCE</div>
+                    <div className="inline-flex items-center gap-2 rounded-xl border border-primary/30 bg-primary/10 px-3 py-1.5 shadow-sm">
+                      <div className="text-[10px] font-mono uppercase tracking-widest text-primary font-bold">SCORE DIFFERENCE</div>
                       <div className="font-display text-sm font-black text-foreground">
                         {showdownWinner.scoreDiff > 0 ? `+${showdownWinner.scoreDiff.toLocaleString()} pts` : "TIED"}
                       </div>
@@ -480,7 +480,7 @@ function CompareShowdown() {
             {!winnerCelebrated ? (
               <button
                 onClick={handlePickWinner}
-                className="group/win shrink-0 inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-neon-cyan via-neon-blue to-neon-purple px-6 py-3.5 font-display text-xs sm:text-sm font-extrabold uppercase tracking-widest text-background shadow-neon-cyan hover:scale-105 transition-all"
+                className="group/win shrink-0 inline-flex items-center justify-center gap-2 rounded-full bg-primary px-6 py-3 font-mono text-xs sm:text-sm font-bold uppercase tracking-wider text-primary-foreground shadow-sm hover:shadow hover:bg-primary/90 transition-all"
               >
                 <span>PICK WINNER WITHIN SELECTION</span>
                 <ArrowRight className="h-4 w-4 transition-transform group-hover/win:translate-x-1" />
@@ -489,12 +489,12 @@ function CompareShowdown() {
               <div className="flex items-center gap-3 shrink-0">
                 <button
                   onClick={() => setWinnerCelebrated(false)}
-                  className="rounded-full border border-glass-border bg-white/5 px-4 py-2 text-xs font-display uppercase tracking-widest text-muted-foreground hover:bg-white/10 hover:text-foreground transition-all"
+                  className="rounded-full border border-border bg-secondary px-4 py-2 text-xs font-mono uppercase tracking-wider text-muted-foreground hover:bg-secondary/80 hover:text-foreground transition-all"
                 >
                   Reset Winner
                 </button>
-                <div className="rounded-2xl border border-neon-cyan/40 bg-neon-cyan/10 px-4 py-2 text-center">
-                  <div className="text-[10px] font-mono uppercase tracking-widest text-neon-cyan font-bold">Top Score</div>
+                <div className="rounded-xl border border-primary/30 bg-primary/10 px-4 py-2 text-center shadow-sm">
+                  <div className="text-[10px] font-mono uppercase tracking-widest text-primary font-bold">Top Score</div>
                   <div className="font-display text-lg font-black text-foreground">{showdownWinner.benchmarkScore.toLocaleString()} pts</div>
                 </div>
               </div>
@@ -516,12 +516,12 @@ function CompareShowdown() {
               <div
                 key={`slot-${slotNum}`}
                 id={`slot-card-${product.id}`}
-                className={`relative flex flex-col justify-between rounded-3xl glass p-5 sm:p-6 transition-all duration-500 animate-fade-up ${
+                className={`relative flex flex-col justify-between rounded-2xl border bg-card p-5 sm:p-6 transition-all duration-300 animate-fade-up ${
                   isBestPick
-                    ? "border-2 border-neon-cyan bg-gradient-to-b from-neon-cyan/15 via-white/[0.04] to-transparent shadow-[0_0_50px_oklch(0.78_0.18_200/0.35)] ring-2 ring-neon-cyan/50 lg:-translate-y-2"
+                    ? "border-2 border-primary shadow-elevated lg:-translate-y-2 ring-1 ring-primary/40"
                     : isRunnerUp
-                    ? "border border-glass-border opacity-90 hover:opacity-100"
-                    : "border border-glass-border hover:border-white/30"
+                    ? "border-border shadow-card opacity-90 hover:opacity-100"
+                    : "border-border shadow-card hover:border-primary/40"
                 }`}
                 style={{ animationDelay: `${0.15 + slotNum * 0.1}s` }}
               >
@@ -533,20 +533,20 @@ function CompareShowdown() {
                     </span>
 
                     {isBestPick ? (
-                      <span className="inline-flex items-center gap-1.5 rounded-full border border-neon-cyan/80 bg-neon-cyan/25 px-3 py-1 font-display text-[10px] font-extrabold tracking-widest text-neon-cyan shadow-[0_0_25px_oklch(0.78_0.18_200/0.6)] animate-pulse">
+                      <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/50 bg-primary/15 px-3 py-1 font-mono text-[10px] font-bold tracking-wider text-primary shadow-sm">
                         <Trophy className="h-3 w-3" />
                         SHOWDOWN WINNER
                       </span>
                     ) : isRunnerUp ? (
-                      <span className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/5 px-2.5 py-0.5 font-display text-[9px] font-semibold tracking-wider text-muted-foreground">
+                      <span className="inline-flex items-center gap-1 rounded-full border border-border bg-secondary px-2.5 py-0.5 font-mono text-[9px] font-semibold tracking-wider text-muted-foreground">
                         CONTENDER ({scoreDelta === 0 ? "TIED" : `${scoreDelta.toLocaleString()} pts`})
                       </span>
                     ) : null}
                   </div>
 
                   {/* Laptop Image Container */}
-                  <div className="relative aspect-[16/10] w-full overflow-hidden rounded-2xl bg-black/70 border border-white/5 group my-3">
-                    <div className="absolute inset-0 bg-gradient-to-br from-neon-cyan/10 via-transparent to-neon-purple/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                  <div className="relative aspect-[16/10] w-full overflow-hidden rounded-xl bg-secondary/50 border border-border group my-3">
+                    <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-accent/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                     <img
                       src={product.img}
                       alt={`${product.name} render`}

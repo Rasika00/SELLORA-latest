@@ -46,13 +46,13 @@ export function CreatorBuilder() {
   ];
 
   return (
-    <section id="creator" className="relative py-24 md:py-32 border-t border-glass-border">
+    <section id="creator" className="relative py-24 md:py-32 border-t border-border">
       <div className="mx-auto w-full max-w-full px-4 sm:px-8 md:px-12">
 
         {/* Header */}
         <div className="mb-12 text-center max-w-2xl mx-auto">
           {!isSimple && (
-            <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-neon-purple/40 bg-neon-purple/10 px-3.5 py-1 text-[10px] font-mono font-bold tracking-[0.25em] text-neon-purple uppercase">
+            <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-border bg-card/60 backdrop-blur-md px-3.5 py-1 text-[10px] font-mono font-semibold tracking-[0.2em] text-primary uppercase">
               <Building2 className="h-3 w-3" /> Industry Partners
             </div>
           )}
@@ -72,16 +72,16 @@ export function CreatorBuilder() {
             return (
               <div
                 key={company.name}
-                className="group flex flex-col rounded-3xl border border-glass-border bg-card/60 overflow-hidden backdrop-blur-xl transition-all duration-300 hover:border-white/30 hover:shadow-elevated"
+                className="group flex flex-col rounded-2xl border border-border bg-card overflow-hidden shadow-card transition-all duration-200 hover:border-primary/40 hover:shadow-elevated hover:-translate-y-1"
               >
                 {/* Image - Clean, natural and balanced */}
-                <div className="relative aspect-[16/10] w-full overflow-hidden bg-black/10">
+                <div className="relative aspect-[16/10] w-full overflow-hidden bg-secondary/40">
                   <img
                     src={company.img}
                     alt={company.name}
                     className="h-full w-full object-cover brightness-105 transition-all duration-700 group-hover:scale-105 group-hover:brightness-110"
                   />
-                  <span className="absolute bottom-3 left-4 font-mono text-[10px] font-bold uppercase tracking-wider text-neon-cyan bg-black/80 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/20 shadow-md">
+                  <span className="absolute bottom-3 left-4 font-mono text-[10px] font-semibold uppercase tracking-wider text-foreground bg-background/85 backdrop-blur-md px-3 py-1 rounded-full border border-border shadow-sm">
                     {company.tagline}
                   </span>
                 </div>
@@ -95,10 +95,10 @@ export function CreatorBuilder() {
 
                   {/* Company Stats List - hidden in Simple Mode */}
                   {!isSimple && (
-                  <ul className="mt-6 space-y-3 border-t border-glass-border pt-6 text-xs text-muted-foreground">
+                  <ul className="mt-6 space-y-3 border-t border-border pt-6 text-xs text-muted-foreground">
                     {company.stats.map((stat) => (
                       <li key={stat} className="flex items-start gap-3">
-                        <span className="flex h-5 w-5 mt-0.5 shrink-0 items-center justify-center rounded-full bg-neon-cyan/10 text-neon-cyan">
+                        <span className="flex h-5 w-5 mt-0.5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
                           <Check className="h-3 w-3" />
                         </span>
                         <span className="text-foreground/90 font-medium leading-relaxed">{stat}</span>

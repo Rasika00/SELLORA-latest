@@ -297,7 +297,7 @@ export function SmartSearchModal() {
       <>
         {parts.map((part, i) =>
           part.toLowerCase() === query.trim().toLowerCase() ? (
-            <span key={i} className="text-neon-cyan font-bold bg-neon-cyan/15 px-0.5 rounded">
+            <span key={i} className="text-primary font-semibold bg-primary/15 px-0.5 rounded">
               {part}
             </span>
           ) : (
@@ -312,24 +312,20 @@ export function SmartSearchModal() {
 
   return (
     <div
-      className="fixed inset-0 z-[120] flex items-start justify-center p-3 sm:p-6 md:p-10 bg-black/75 backdrop-blur-md animate-fade-in"
+      className="fixed inset-0 z-[120] flex items-start justify-center p-3 sm:p-6 md:p-10 bg-background/80 backdrop-blur-sm animate-fade-in"
       onClick={() => setIsSearchOpen(false)}
       role="dialog"
       aria-modal="true"
     >
       <div
-        className="relative w-full max-w-3xl overflow-hidden rounded-2xl md:rounded-3xl border border-neon-cyan/40 bg-card/95 shadow-[0_0_50px_oklch(0.78_0.18_200/0.25)] flex flex-col max-h-[88vh] md:max-h-[85vh] animate-scale-in"
+        className="relative w-full max-w-3xl overflow-hidden rounded-2xl border border-border bg-card shadow-2xl flex flex-col max-h-[88vh] md:max-h-[85vh] animate-scale-in"
         onClick={(e) => e.stopPropagation()}
         onKeyDown={handleKeyDown}
       >
-        {/* Glow corner decorations */}
-        <div className="pointer-events-none absolute -top-24 -left-24 h-48 w-48 rounded-full bg-neon-cyan/20 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-24 -right-24 h-48 w-48 rounded-full bg-neon-purple/20 blur-3xl" />
-
         {/* Search Header Bar */}
-        <div className="relative p-3.5 sm:p-5 border-b border-glass-border bg-card/60 backdrop-blur-xl">
-          <div className="flex items-center gap-3 rounded-xl border border-neon-cyan/30 bg-background/80 px-3 sm:px-4 py-2.5 sm:py-3 shadow-inner focus-within:border-neon-cyan focus-within:ring-2 focus-within:ring-neon-cyan/30 transition-all">
-            <Search className="h-5 w-5 text-neon-cyan shrink-0 animate-pulse" />
+        <div className="relative p-3.5 sm:p-5 border-b border-border bg-card">
+          <div className="flex items-center gap-3 rounded-xl border border-border bg-secondary/50 px-3 sm:px-4 py-2.5 sm:py-3 focus-within:border-primary focus-within:ring-1 focus-within:ring-primary transition-all">
+            <Search className="h-5 w-5 text-primary shrink-0" />
             
             <input
               ref={inputRef}
@@ -348,7 +344,7 @@ export function SmartSearchModal() {
               className={`rounded-lg p-1.5 transition-all shrink-0 ${
                 isListening
                   ? "bg-red-500/20 text-red-400 ring-2 ring-red-400 animate-pulse"
-                  : "text-muted-foreground hover:bg-foreground/10 hover:text-neon-cyan"
+                  : "text-muted-foreground hover:bg-secondary hover:text-foreground"
               }`}
             >
               {isListening ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
@@ -362,7 +358,7 @@ export function SmartSearchModal() {
                   setSearchQuery("");
                   inputRef.current?.focus();
                 }}
-                className="rounded-lg p-1.5 text-muted-foreground hover:bg-foreground/10 hover:text-foreground shrink-0"
+                className="rounded-lg p-1.5 text-muted-foreground hover:bg-secondary hover:text-foreground shrink-0"
                 title="Clear input"
               >
                 <X className="h-4 w-4" />
@@ -370,7 +366,7 @@ export function SmartSearchModal() {
             )}
 
             {/* ESC badge */}
-            <kbd className="hidden sm:inline-flex items-center rounded border border-glass-border bg-foreground/5 px-2 py-0.5 text-[10px] font-mono text-muted-foreground">
+            <kbd className="hidden sm:inline-flex items-center rounded border border-border bg-secondary px-2 py-0.5 text-[10px] font-mono text-muted-foreground">
               ESC
             </kbd>
 
@@ -378,7 +374,7 @@ export function SmartSearchModal() {
             <button
               type="button"
               onClick={() => setIsSearchOpen(false)}
-              className="rounded-lg p-1.5 text-muted-foreground hover:bg-foreground/10 hover:text-foreground shrink-0"
+              className="rounded-lg p-1.5 text-muted-foreground hover:bg-secondary hover:text-foreground shrink-0"
               aria-label="Close search"
             >
               <X className="h-5 w-5" />
@@ -387,15 +383,15 @@ export function SmartSearchModal() {
 
           {/* Voice Search active banner */}
           {isListening && (
-            <div className="mt-2 flex items-center justify-between rounded-lg bg-neon-cyan/10 border border-neon-cyan/30 px-3 py-1.5 text-xs text-neon-cyan animate-fade-in">
+            <div className="mt-2 flex items-center justify-between rounded-lg bg-primary/10 border border-primary/20 px-3 py-1.5 text-xs text-primary animate-fade-in">
               <span className="flex items-center gap-2">
-                <span className="h-2 w-2 rounded-full bg-neon-cyan animate-ping" />
+                <span className="h-2 w-2 rounded-full bg-primary animate-ping" />
                 Listening... Say a machine name or GPU (e.g. &ldquo;RTX 4090&rdquo; or &ldquo;MacBook Pro&rdquo;)
               </span>
               <button
                 type="button"
                 onClick={toggleVoiceSearch}
-                className="text-[10px] underline uppercase tracking-wider"
+                className="text-[10px] underline uppercase tracking-wider font-semibold"
               >
                 Stop
               </button>
@@ -413,8 +409,8 @@ export function SmartSearchModal() {
                   onClick={() => setActiveCategory(pill.value)}
                   className={`shrink-0 rounded-full px-3 py-1 text-xs font-mono font-medium transition-all ${
                     active
-                      ? "bg-neon-cyan text-black shadow-neon-cyan font-bold"
-                      : "bg-foreground/5 text-muted-foreground hover:bg-foreground/10 hover:text-foreground border border-glass-border"
+                      ? "bg-primary text-primary-foreground font-semibold shadow-sm"
+                      : "bg-secondary text-muted-foreground hover:bg-secondary/80 hover:text-foreground border border-border"
                   }`}
                 >
                   {pill.label}
@@ -427,7 +423,7 @@ export function SmartSearchModal() {
         {/* Results / Suggestions Container */}
         <div
           ref={resultsContainerRef}
-          className="flex-1 overflow-y-auto p-3 sm:p-5 divide-y divide-glass-border/60 space-y-4"
+          className="flex-1 overflow-y-auto p-3 sm:p-5 divide-y divide-border space-y-4"
         >
           {/* If no search term typed yet, show Trending and Recent Searches */}
           {!searchQuery && (
@@ -437,13 +433,13 @@ export function SmartSearchModal() {
                 <div>
                   <div className="flex items-center justify-between mb-2">
                     <span className="flex items-center gap-1.5 text-xs font-mono uppercase tracking-wider text-muted-foreground">
-                      <Clock className="h-3.5 w-3.5 text-neon-cyan" />
+                      <Clock className="h-3.5 w-3.5 text-primary" />
                       Recent Searches
                     </span>
                     <button
                       type="button"
                       onClick={clearAllRecent}
-                      className="text-[10px] font-mono text-muted-foreground hover:text-red-400 transition-colors"
+                      className="text-[10px] font-mono text-muted-foreground hover:text-destructive transition-colors"
                     >
                       Clear All
                     </button>
@@ -456,13 +452,13 @@ export function SmartSearchModal() {
                           setSearchQuery(term);
                           inputRef.current?.focus();
                         }}
-                        className="group inline-flex items-center gap-1.5 rounded-full border border-glass-border bg-foreground/5 px-3 py-1 text-xs text-foreground cursor-pointer hover:border-neon-cyan/40 hover:bg-neon-cyan/10 hover:text-neon-cyan transition-all"
+                        className="group inline-flex items-center gap-1.5 rounded-full border border-border bg-secondary/50 px-3 py-1 text-xs text-foreground cursor-pointer hover:border-primary hover:text-primary transition-all"
                       >
                         <span>{term}</span>
                         <button
                           type="button"
                           onClick={(e) => removeRecentSearch(e, term)}
-                          className="text-muted-foreground hover:text-red-400"
+                          className="text-muted-foreground hover:text-destructive"
                         >
                           <X className="h-3 w-3" />
                         </button>
@@ -475,7 +471,7 @@ export function SmartSearchModal() {
               {/* Trending Suggestions */}
               <div>
                 <span className="flex items-center gap-1.5 text-xs font-mono uppercase tracking-wider text-muted-foreground mb-2.5">
-                  <TrendingUp className="h-3.5 w-3.5 text-neon-purple" />
+                  <TrendingUp className="h-3.5 w-3.5 text-primary" />
                   Popular Suggestions
                 </span>
                 <div className="flex flex-wrap gap-2">
@@ -488,9 +484,9 @@ export function SmartSearchModal() {
                         saveRecentSearch(trend);
                         inputRef.current?.focus();
                       }}
-                      className="inline-flex items-center gap-1.5 rounded-xl border border-glass-border bg-card px-3 py-1.5 text-xs font-medium text-muted-foreground hover:border-neon-cyan/40 hover:bg-neon-cyan/10 hover:text-neon-cyan hover:scale-[1.02] transition-all"
+                      className="inline-flex items-center gap-1.5 rounded-xl border border-border bg-secondary/30 px-3 py-1.5 text-xs font-medium text-muted-foreground hover:border-primary/50 hover:bg-secondary hover:text-foreground transition-all"
                     >
-                      <Sparkles className="h-3 w-3 text-neon-cyan/70" />
+                      <Sparkles className="h-3 w-3 text-primary/70" />
                       <span>{trend}</span>
                     </button>
                   ))}
@@ -500,7 +496,7 @@ export function SmartSearchModal() {
               {/* Top Recommended Laptops Header */}
               <div className="pt-2">
                 <span className="flex items-center gap-1.5 text-xs font-mono uppercase tracking-wider text-muted-foreground">
-                  <Zap className="h-3.5 w-3.5 text-neon-cyan" />
+                  <Zap className="h-3.5 w-3.5 text-primary" />
                   Featured Hardware Deck ({products.length} Models)
                 </span>
               </div>
@@ -511,7 +507,7 @@ export function SmartSearchModal() {
           {searchQuery && (
             <div className="flex items-center justify-between pb-2 text-xs font-mono text-muted-foreground">
               <span>
-                Found <strong className="text-neon-cyan">{filteredProducts.length}</strong> matching machines
+                Found <strong className="text-primary">{filteredProducts.length}</strong> matching machines
                 {activeCategory !== "all" ? ` in ${activeCategory}` : ""}
               </span>
               <span className="hidden sm:inline text-[11px] text-muted-foreground/70">
@@ -532,57 +528,57 @@ export function SmartSearchModal() {
                     key={p.id}
                     onClick={() => handleSelectProduct(p.id)}
                     onMouseEnter={() => setSelectedIndex(index)}
-                    className={`group relative flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 rounded-xl sm:rounded-2xl border p-2.5 sm:p-3.5 transition-all cursor-pointer ${
+                    className={`group relative flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 rounded-xl border p-2.5 sm:p-3.5 transition-all cursor-pointer ${
                       isSelected
-                        ? "border-neon-cyan bg-neon-cyan/10 shadow-[0_0_20px_oklch(0.78_0.18_200/0.2)]"
-                        : "border-glass-border bg-card/70 hover:border-neon-cyan/40 hover:bg-card/90"
+                        ? "border-primary bg-primary/5 shadow-sm"
+                        : "border-border bg-card/60 hover:border-border-hover hover:bg-secondary/30"
                     }`}
                   >
                     {/* Left: Thumbnail & Details */}
                     <div className="flex items-center gap-3 sm:gap-4 min-w-0">
-                      <div className="relative h-16 w-16 sm:h-20 sm:w-20 shrink-0 overflow-hidden rounded-xl border border-glass-border bg-black/40 flex items-center justify-center p-1">
+                      <div className="relative h-16 w-16 sm:h-20 sm:w-20 shrink-0 overflow-hidden rounded-xl border border-border bg-secondary/40 flex items-center justify-center p-1">
                         <img
                           src={p.img}
                           alt={p.name}
-                          className="h-full w-full object-contain transition-transform duration-300 group-hover:scale-110"
+                          className="h-full w-full object-contain transition-transform duration-300 group-hover:scale-105"
                         />
                         <span
                           className={`absolute top-1 left-1 h-1.5 w-1.5 rounded-full ${
                             p.badgeColor === "cyan"
-                              ? "bg-neon-cyan shadow-neon-cyan"
+                              ? "bg-primary"
                               : p.badgeColor === "purple"
-                              ? "bg-neon-purple shadow-neon-purple"
-                              : "bg-neon-blue"
+                              ? "bg-accent"
+                              : "bg-primary"
                           }`}
                         />
                       </div>
 
                       <div className="min-w-0 flex-1">
                         <div className="flex flex-wrap items-center gap-1.5 mb-1">
-                          <span className="rounded-md border border-glass-border bg-foreground/5 px-1.5 py-0.5 text-[9px] font-mono font-bold uppercase tracking-wider text-muted-foreground">
+                          <span className="rounded-md border border-border bg-secondary px-1.5 py-0.5 text-[9px] font-mono font-bold uppercase tracking-wider text-muted-foreground">
                             {p.badge}
                           </span>
-                          <span className="text-[10px] font-mono text-neon-cyan/90">
+                          <span className="text-[10px] font-mono text-primary font-medium">
                             {p.category}
                           </span>
                         </div>
 
-                        <h4 className="font-display text-sm sm:text-base font-bold text-foreground truncate group-hover:text-neon-cyan transition-colors">
+                        <h4 className="font-display text-sm sm:text-base font-bold text-foreground truncate group-hover:text-primary transition-colors">
                           {highlightMatch(p.name, searchQuery)}
                         </h4>
 
                         {/* Specs Pill Chips */}
                         <div className="mt-1 flex flex-wrap items-center gap-1.5 text-[11px] text-muted-foreground">
-                          <span className="inline-flex items-center gap-1 rounded bg-foreground/5 px-1.5 py-0.5 font-mono">
-                            <Cpu className="h-3 w-3 text-neon-cyan" />
+                          <span className="inline-flex items-center gap-1 rounded bg-secondary border border-border/50 px-1.5 py-0.5 font-mono">
+                            <Cpu className="h-3 w-3 text-primary" />
                             {highlightMatch(p.cpu, searchQuery)}
                           </span>
-                          <span className="inline-flex items-center gap-1 rounded bg-foreground/5 px-1.5 py-0.5 font-mono">
-                            <Zap className="h-3 w-3 text-neon-purple" />
+                          <span className="inline-flex items-center gap-1 rounded bg-secondary border border-border/50 px-1.5 py-0.5 font-mono">
+                            <Zap className="h-3 w-3 text-accent" />
                             {highlightMatch(p.gpu, searchQuery)}
                           </span>
-                          <span className="inline-flex items-center gap-1 rounded bg-foreground/5 px-1.5 py-0.5 font-mono">
-                            <Layers className="h-3 w-3 text-neon-blue" />
+                          <span className="inline-flex items-center gap-1 rounded bg-secondary border border-border/50 px-1.5 py-0.5 font-mono">
+                            <Layers className="h-3 w-3 text-primary" />
                             {highlightMatch(p.ram, searchQuery)}
                           </span>
                         </div>
@@ -590,9 +586,9 @@ export function SmartSearchModal() {
                     </div>
 
                     {/* Right: Pricing & Quick Actions */}
-                    <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-2 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-glass-border/50">
+                    <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-2 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-border">
                       <div className="text-left sm:text-right">
-                        <div className="font-display text-sm sm:text-base font-black text-foreground">
+                        <div className="font-display text-sm sm:text-base font-bold text-foreground">
                           Rs {p.price.toLocaleString()}
                         </div>
                       </div>
@@ -603,8 +599,8 @@ export function SmartSearchModal() {
                           onClick={(e) => handleAddToCart(e, p)}
                           className={`rounded-lg px-2.5 py-1 text-xs font-mono font-medium transition-all flex items-center gap-1 shrink-0 ${
                             isAdded
-                              ? "bg-green-500 text-black font-bold shadow-md"
-                              : "border border-glass-border bg-foreground/5 hover:border-neon-cyan/50 hover:bg-neon-cyan/20 hover:text-neon-cyan text-muted-foreground"
+                              ? "bg-emerald-600 text-white font-bold shadow-sm"
+                              : "border border-border bg-secondary/60 hover:border-primary hover:text-primary text-muted-foreground"
                           }`}
                           title="Quick Add to Cart"
                         >
@@ -627,7 +623,7 @@ export function SmartSearchModal() {
                             e.stopPropagation();
                             handleSelectProduct(p.id);
                           }}
-                          className="rounded-lg bg-gradient-to-r from-neon-cyan to-neon-blue px-2.5 py-1 text-xs font-mono font-bold text-black shadow-neon-cyan hover:scale-105 transition-all flex items-center gap-1"
+                          className="rounded-lg bg-primary hover:bg-primary-hover px-2.5 py-1 text-xs font-mono font-medium text-primary-foreground shadow-sm transition-all flex items-center gap-1"
                           title="View Specs"
                         >
                           <span>Specs</span>
@@ -642,7 +638,7 @@ export function SmartSearchModal() {
           ) : (
             /* Empty State */
             <div className="flex flex-col items-center justify-center py-12 text-center">
-              <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-glass-border bg-card shadow-inner mb-4">
+              <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-border bg-secondary/30 shadow-inner mb-4">
                 <Search className="h-8 w-8 text-muted-foreground/40" />
               </div>
               <h3 className="font-display text-lg font-bold text-foreground">
@@ -650,21 +646,21 @@ export function SmartSearchModal() {
               </h3>
               <p className="mt-1 max-w-sm text-xs text-muted-foreground">
                 We couldn&apos;t find any laptop matching &ldquo;
-                <span className="text-neon-cyan font-bold">{searchQuery}</span>
+                <span className="text-primary font-semibold">{searchQuery}</span>
                 &rdquo;. Try searching for &ldquo;RTX 4090&rdquo;, &ldquo;MacBook&rdquo;, or &ldquo;i9&rdquo;.
               </p>
               <div className="mt-4 flex flex-wrap justify-center gap-2">
                 <button
                   type="button"
                   onClick={() => setSearchQuery("")}
-                  className="rounded-lg border border-neon-cyan/40 bg-neon-cyan/10 px-3 py-1.5 text-xs font-mono text-neon-cyan hover:bg-neon-cyan hover:text-black transition-all"
+                  className="rounded-lg border border-primary/40 bg-primary/10 px-3 py-1.5 text-xs font-mono text-primary hover:bg-primary hover:text-primary-foreground transition-all"
                 >
                   Clear Search
                 </button>
                 <button
                   type="button"
                   onClick={() => setActiveCategory("all")}
-                  className="rounded-lg border border-glass-border bg-foreground/5 px-3 py-1.5 text-xs font-mono text-muted-foreground hover:text-foreground transition-all"
+                  className="rounded-lg border border-border bg-secondary px-3 py-1.5 text-xs font-mono text-muted-foreground hover:text-foreground transition-all"
                 >
                   Reset Category
                 </button>
@@ -674,29 +670,29 @@ export function SmartSearchModal() {
         </div>
 
         {/* Modal Footer Bar */}
-        <div className="p-3 sm:px-5 border-t border-glass-border bg-card/80 flex items-center justify-between text-[11px] font-mono text-muted-foreground">
+        <div className="p-3 sm:px-5 border-t border-border bg-card/90 flex items-center justify-between text-[11px] font-mono text-muted-foreground">
           <div className="flex items-center gap-3">
             <span className="flex items-center gap-1">
-              <kbd className="rounded border border-glass-border bg-foreground/5 px-1 py-0.5 text-[9px]">
+              <kbd className="rounded border border-border bg-secondary px-1 py-0.5 text-[9px]">
                 ↑↓
               </kbd>
               Navigate
             </span>
             <span className="flex items-center gap-1">
-              <kbd className="rounded border border-glass-border bg-foreground/5 px-1 py-0.5 text-[9px]">
+              <kbd className="rounded border border-border bg-secondary px-1 py-0.5 text-[9px]">
                 ↵
               </kbd>
               Select
             </span>
             <span className="flex items-center gap-1">
-              <kbd className="rounded border border-glass-border bg-foreground/5 px-1 py-0.5 text-[9px]">
+              <kbd className="rounded border border-border bg-secondary px-1 py-0.5 text-[9px]">
                 ESC
               </kbd>
               Dismiss
             </span>
           </div>
 
-          <span className="hidden sm:inline text-neon-cyan">
+          <span className="hidden sm:inline text-primary font-medium">
             SELLORA Quantum Search Engine
           </span>
         </div>

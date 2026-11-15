@@ -87,15 +87,15 @@ const standards = [
 ];
 
 const glow = {
-  cyan: "shadow-[0_0_40px_oklch(0.78_0.18_200/0.35)] border-neon-cyan/60",
-  purple: "shadow-[0_0_40px_oklch(0.62_0.24_295/0.35)] border-neon-purple/60",
-  blue: "shadow-[0_0_40px_oklch(0.7_0.22_260/0.35)] border-neon-blue/60",
+  cyan: "border-border hover:border-primary/50",
+  purple: "border-border hover:border-accent/50",
+  blue: "border-border hover:border-blue-500/50",
 };
 
 const iconBg = {
-  cyan: "bg-neon-cyan/15 text-neon-cyan",
-  purple: "bg-neon-purple/15 text-neon-purple",
-  blue: "bg-neon-blue/15 text-neon-blue",
+  cyan: "bg-primary/10 text-primary border border-primary/20",
+  purple: "bg-accent/10 text-accent border border-accent/20",
+  blue: "bg-blue-500/10 text-blue-500 border border-blue-500/20",
 };
 
 export function Features() {
@@ -124,15 +124,15 @@ export function Features() {
   const displayStandards = isSimple ? simpleStandards : standards;
 
   return (
-    <section id="features" className="relative py-24 md:py-32 border-t border-glass-border">
-      <div className="absolute inset-0 -z-10 bg-grid-sm opacity-30 [mask-image:radial-gradient(ellipse_at_center,black_20%,transparent_70%)]" />
+    <section id="features" className="relative py-24 md:py-32 border-t border-border">
+      <div className="absolute inset-0 -z-10 bg-grid-sm opacity-20 [mask-image:radial-gradient(ellipse_at_center,black_20%,transparent_70%)]" />
 
       <div className="mx-auto w-full max-w-full px-4 sm:px-8 md:px-12">
         <div className="mx-auto max-w-2xl text-center">
-          <p className="font-display text-xs tracking-[0.3em] text-neon-cyan">
+          <p className="font-mono text-xs tracking-[0.25em] text-primary uppercase font-semibold">
             {isSimple ? "WHAT'S INSIDE" : "TECH & WORKSTATION ARCHITECTURE"}
           </p>
-          <h2 className="font-display mt-3 text-3xl sm:text-4xl md:text-5xl font-black uppercase tracking-tight">
+          <h2 className="font-display mt-3 text-3xl sm:text-4xl md:text-5xl font-black uppercase tracking-tight text-foreground">
             Built from the <span className="text-gradient">silicon up</span>
           </h2>
           <p className="mt-4 text-sm md:text-base text-muted-foreground">
@@ -149,30 +149,30 @@ export function Features() {
             return (
               <div
                 key={f.title}
-                className={`group relative cursor-pointer rounded-2xl glass p-6 neon-border-hover ${glow[f.accent]} transition-all hover:scale-[1.02]`}
+                className={`group relative cursor-pointer rounded-2xl border border-border bg-card p-6 shadow-card hover:shadow-elevated transition-all duration-200 hover:-translate-y-1 ${glow[f.accent]}`}
               >
-                <div className={`mb-5 inline-flex h-11 w-11 items-center justify-center rounded-xl ${iconBg[f.accent]} transition-transform duration-500 group-hover:scale-110`}>
+                <div className={`mb-5 inline-flex h-11 w-11 items-center justify-center rounded-xl ${iconBg[f.accent]} transition-transform duration-300 group-hover:scale-105`}>
                   <Icon className="h-5 w-5" />
                 </div>
-                <h3 className="font-display text-[11px] tracking-[0.2em] text-muted-foreground">
+                <h3 className="font-mono text-[10px] tracking-[0.2em] uppercase text-muted-foreground font-semibold">
                   {f.title.toUpperCase()}
                 </h3>
                 <p className="mt-1.5 font-display text-xl font-bold leading-tight text-foreground">
                   {f.spec}
                 </p>
                 <p className="mt-2.5 text-xs text-muted-foreground leading-relaxed">{f.desc}</p>
-                <div className="pointer-events-none absolute inset-x-6 bottom-0 h-px bg-gradient-to-r from-transparent via-neon-cyan/60 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+                <div className="pointer-events-none absolute inset-x-6 bottom-0 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
               </div>
             );
           })}
         </div>
 
         {/* Standards Bar */}
-        <div className="mt-16 rounded-2xl border border-glass-border bg-black/40 p-6 sm:p-8 backdrop-blur-xl">
+        <div className="mt-16 rounded-2xl border border-border bg-card p-6 sm:p-8 shadow-card">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {displayStandards.map((s) => (
               <div key={s.label} className="flex items-start gap-3">
-                <CheckCircle2 className="h-5 w-5 text-neon-cyan shrink-0 mt-0.5" />
+                <CheckCircle2 className="h-5 w-5 text-primary shrink-0 mt-0.5" />
                 <div>
                   <h4 className="font-display text-xs font-bold text-foreground">{s.label}</h4>
                   <p className="text-[11px] text-muted-foreground mt-0.5">{s.desc}</p>

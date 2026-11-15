@@ -50,14 +50,14 @@ export function Navbar() {
 
   return (
     <header className="fixed top-0 inset-x-0 z-50 px-3 sm:px-6 md:px-8 pt-3 sm:pt-4 pointer-events-none">
-      <nav className="mx-auto flex w-full max-w-full items-center justify-between rounded-2xl border border-glass-border bg-card px-3 sm:px-6 py-2 sm:py-3.5 gap-2 md:glass-strong pointer-events-auto">
+      <nav className="mx-auto flex w-full max-w-full items-center justify-between rounded-2xl border border-border bg-card/90 px-3 sm:px-6 py-2 sm:py-2.5 gap-2 backdrop-blur-xl shadow-card pointer-events-auto">
         <Link to="/" className="flex items-center gap-2 shrink-0">
           <img
             src={theme === "light" ? "/logo black.png" : "/logo.png"}
             alt="Sellora"
-            className="h-8 sm:h-10 w-auto object-contain transition-all duration-300 drop-shadow-[0_0_8px_rgba(0,255,255,0.3)]"
+            className="h-8 sm:h-9 w-auto object-contain transition-all duration-300"
           />
-          <span className="font-display text-base sm:text-lg font-black tracking-widest text-foreground">SELLORA</span>
+          <span className="font-brand text-base sm:text-lg font-black tracking-widest text-foreground">SELLORA</span>
         </Link>
 
         {/* Desktop Nav Links */}
@@ -67,23 +67,23 @@ export function Navbar() {
               {l.isRouterLink ? (
                 <Link
                   to={l.href as any}
-                  className="inline-flex items-center gap-1.5 rounded-full border border-neon-cyan/50 bg-neon-cyan/15 px-3 py-1 text-[11px] font-mono font-bold uppercase tracking-wider text-neon-cyan transition-all hover:bg-neon-cyan hover:text-background shadow-[0_0_15px_oklch(0.78_0.18_200/0.25)]"
+                  className="inline-flex items-center gap-1.5 rounded-full border border-primary/40 bg-primary/10 px-3 py-1 text-[11px] font-mono font-bold uppercase tracking-wider text-primary transition-all hover:bg-primary/20 shadow-sm"
                 >
-                  <Scale className="h-3 w-3 shrink-0 animate-pulse" />
+                  <Scale className="h-3 w-3 shrink-0" />
                   <span>{l.label}</span>
                 </Link>
               ) : l.isHighlight ? (
                 <a
                   href={l.href}
-                  className="inline-flex items-center gap-1.5 rounded-full border border-neon-cyan/40 bg-neon-cyan/10 px-2.5 py-0.5 text-[11px] font-mono font-bold text-neon-cyan transition-all hover:bg-neon-cyan hover:text-background shadow-[0_0_15px_oklch(0.78_0.18_200/0.2)]"
+                  className="inline-flex items-center gap-1.5 rounded-full border border-primary/40 bg-primary/10 px-2.5 py-0.5 text-[11px] font-mono font-bold text-primary transition-all hover:bg-primary/20 shadow-sm"
                 >
-                  <Gauge className="h-3 w-3 animate-pulse" />
+                  <Gauge className="h-3 w-3" />
                   <span>{l.label}</span>
                 </a>
               ) : (
                 <a
                   href={l.href}
-                  className="text-xs font-medium text-muted-foreground transition-colors hover:text-neon-cyan tracking-wide"
+                  className="text-xs font-medium text-muted-foreground transition-colors hover:text-foreground tracking-wide"
                 >
                   {l.label}
                 </a>
@@ -98,10 +98,10 @@ export function Navbar() {
           <button
             type="button"
             onClick={() => openSearch()}
-            className="hidden md:flex items-center gap-1.5 rounded-full border border-glass-border bg-foreground/5 hover:border-neon-cyan/50 hover:bg-neon-cyan/10 px-2.5 py-1 text-[11px] text-muted-foreground transition-all duration-300 group shadow-inner shrink-0 cursor-pointer"
+            className="hidden md:flex items-center gap-1.5 rounded-full border border-border bg-secondary/50 hover:border-primary/40 hover:bg-secondary px-2.5 py-1 text-[11px] text-muted-foreground transition-all duration-200 group shadow-sm shrink-0 cursor-pointer"
             title="Smart Search (Ctrl + K or /)"
           >
-            <Search className="h-3 w-3 text-neon-cyan transition-transform group-hover:scale-110" />
+            <Search className="h-3 w-3 text-primary transition-transform group-hover:scale-110" />
             <span className="font-sans group-hover:text-foreground hidden lg:inline">Search...</span>
             <span className="font-sans group-hover:text-foreground inline lg:hidden">Search</span>
           </button>
@@ -112,33 +112,33 @@ export function Navbar() {
             onClick={() => openSearch()}
             aria-label="Smart Search"
             title="Smart Search (Ctrl + K)"
-            className="flex md:hidden items-center justify-center rounded-lg p-1.5 text-muted-foreground transition-all hover:bg-foreground/5 hover:text-neon-cyan shrink-0"
+            className="flex md:hidden items-center justify-center rounded-lg p-1.5 text-muted-foreground transition-all hover:bg-secondary hover:text-foreground shrink-0"
           >
-            <Search className="h-4 w-4 text-neon-cyan" />
+            <Search className="h-4 w-4 text-primary" />
           </button>
 
           {/* Role-Based Dashboard Quick Access */}
           {currentUser?.role === "admin" && (
             <Link
               to="/admin"
-              className="flex items-center gap-1.5 rounded-full bg-gradient-to-r from-neon-cyan via-neon-blue to-neon-purple px-3 py-1 sm:px-3.5 sm:py-1.5 text-[10px] sm:text-xs font-mono font-black uppercase tracking-wider text-black shadow-neon-cyan transition-all hover:scale-105 hover:shadow-[0_0_25px_oklch(0.78_0.18_200/0.6)] shrink-0"
+              className="flex items-center gap-1.5 rounded-full bg-primary/10 border border-primary/30 px-3 py-1 sm:px-3 sm:py-1 text-[10px] sm:text-xs font-mono font-bold uppercase tracking-wider text-primary hover:bg-primary/20 shadow-sm transition-all shrink-0"
               title="Admin Command Console"
             >
-              <ShieldCheck className="h-3 w-3 sm:h-3.5 sm:w-3.5 shrink-0 text-black stroke-[2.5]" />
+              <ShieldCheck className="h-3 w-3 sm:h-3.5 sm:w-3.5 shrink-0 stroke-[2.5]" />
               <span className="hidden sm:inline">Admin Console</span>
-              <span className="inline sm:hidden font-black">Admin</span>
+              <span className="inline sm:hidden font-bold">Admin</span>
             </Link>
           )}
 
           {currentUser?.role === "seller" && (
             <Link
               to="/seller"
-              className="flex items-center gap-1.5 rounded-full bg-neon-purple/20 border border-neon-purple/40 px-3 py-1 sm:px-3.5 sm:py-1.5 text-[10px] sm:text-xs font-mono font-bold uppercase tracking-wider text-white transition-all hover:bg-neon-purple hover:text-white shrink-0"
+              className="flex items-center gap-1.5 rounded-full bg-accent/10 border border-accent/30 px-3 py-1 sm:px-3 sm:py-1 text-[10px] sm:text-xs font-mono font-bold uppercase tracking-wider text-accent hover:bg-accent/20 shadow-sm transition-all shrink-0"
               title="Seller Vendor Hub"
             >
-              <Store className="h-3 w-3 sm:h-3.5 sm:w-3.5 shrink-0 text-neon-purple group-hover:text-white" />
+              <Store className="h-3 w-3 sm:h-3.5 sm:w-3.5 shrink-0" />
               <span className="hidden sm:inline">Seller Hub</span>
-              <span className="inline sm:hidden">Seller</span>
+              <span className="inline sm:hidden font-bold">Seller</span>
             </Link>
           )}
 
@@ -147,20 +147,20 @@ export function Navbar() {
             <div className="flex items-center gap-1 shrink-0">
               <Link
                 to="/account"
-                className="flex items-center gap-2 rounded-lg py-1 px-1.5 sm:px-2 text-xs font-mono text-foreground hover:bg-foreground/5 hover:text-neon-cyan transition-colors group"
+                className="flex items-center gap-2 rounded-lg py-1 px-1.5 sm:px-2 text-xs font-mono text-foreground hover:bg-secondary transition-colors group"
                 title="Customer Command Center & Hub"
               >
-                <div className="h-7 w-7 rounded-full bg-gradient-to-br from-neon-cyan via-neon-blue to-neon-purple flex items-center justify-center text-[11px] font-black text-black ring-1 ring-neon-cyan/50 shadow-[0_0_10px_oklch(0.78_0.18_200/0.3)] group-hover:scale-105 transition-transform">
+                <div className="h-7 w-7 rounded-full bg-secondary border border-border flex items-center justify-center text-[11px] font-bold text-foreground group-hover:border-primary/50 transition-colors">
                   {currentUser.firstName ? currentUser.firstName.charAt(0).toUpperCase() : (currentUser.email ? currentUser.email.charAt(0).toUpperCase() : "U")}
                 </div>
-                <span className="hidden lg:inline text-xs font-medium text-foreground group-hover:text-neon-cyan transition-colors">
+                <span className="hidden lg:inline text-xs font-medium text-foreground group-hover:text-primary transition-colors">
                   {currentUser.firstName || currentUser.email.split("@")[0]}
                 </span>
               </Link>
               <button
                 onClick={handleSignOut}
                 title="Sign Out"
-                className="rounded-lg p-1.5 sm:p-2 text-muted-foreground transition-colors hover:bg-red-500/10 hover:text-red-400 shrink-0"
+                className="rounded-lg p-1.5 sm:p-2 text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive shrink-0"
               >
                 <LogOut className="h-4 w-4" />
               </button>
@@ -170,10 +170,10 @@ export function Navbar() {
               <Link
                 to="/login"
                 aria-label="Account / Login"
-                className="hidden sm:inline-flex items-center gap-1.5 rounded-full border border-glass-border bg-foreground/5 hover:border-neon-cyan/50 hover:bg-neon-cyan/10 px-3 py-1 text-xs font-mono text-muted-foreground hover:text-neon-cyan transition-all duration-300 shrink-0"
+                className="hidden sm:inline-flex items-center gap-1.5 rounded-full border border-border bg-secondary/50 hover:border-primary/40 hover:bg-secondary px-3 py-1 text-xs font-mono text-muted-foreground hover:text-foreground transition-all duration-200 shrink-0"
                 title="Sign In to Account"
               >
-                <User className="h-3.5 w-3.5 text-neon-cyan" />
+                <User className="h-3.5 w-3.5 text-primary" />
                 <span>Sign In</span>
               </Link>
             </div>
@@ -186,11 +186,11 @@ export function Navbar() {
             id="ui-mode-toggle"
             aria-label={`Switch to ${mode === "hud" ? "simple" : "HUD"} mode`}
             title={`Current: ${mode.toUpperCase()} mode. Click to switch.`}
-            className="flex items-center gap-1.5 rounded-full border border-glass-border bg-foreground/5 hover:border-neon-cyan/50 px-2.5 py-1 text-xs text-muted-foreground transition-all duration-300 shrink-0 cursor-pointer"
+            className="flex items-center gap-1.5 rounded-full border border-border bg-secondary/50 hover:border-primary/40 px-2.5 py-1 text-xs text-muted-foreground transition-all duration-200 shrink-0 cursor-pointer"
           >
-            <Layers className={`h-3.5 w-3.5 ${mode === "hud" ? "text-neon-cyan" : "text-neon-purple"} transition-transform hover:scale-110`} />
+            <Layers className={`h-3.5 w-3.5 ${mode === "hud" ? "text-primary" : "text-accent"} transition-transform hover:scale-110`} />
             <span className="font-mono text-[10px] uppercase font-bold tracking-wider hidden sm:inline">
-              {mode === "hud" ? <span className="text-neon-cyan">HUD</span> : <span className="text-neon-purple">SIMPLE</span>}
+              {mode === "hud" ? <span className="text-primary">HUD</span> : <span className="text-accent">SIMPLE</span>}
             </span>
           </button>
 
@@ -200,23 +200,23 @@ export function Navbar() {
             onClick={toggleTheme}
             aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
             title={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
-            className="relative flex items-center justify-center rounded-lg p-1.5 sm:p-2 text-muted-foreground transition-all duration-300 hover:bg-foreground/5 hover:text-neon-cyan shrink-0"
+            className="relative flex items-center justify-center rounded-lg p-1.5 sm:p-2 text-muted-foreground transition-all duration-200 hover:bg-secondary hover:text-foreground shrink-0 cursor-pointer"
           >
             {theme === "dark" ? (
               <Sun className="h-4 w-4 text-amber-400 rotate-0 transition-transform duration-500 hover:rotate-90 hover:scale-110" />
             ) : (
-              <Moon className="h-4 w-4 text-neon-cyan rotate-0 transition-transform duration-500 hover:-rotate-45 hover:scale-110" />
+              <Moon className="h-4 w-4 text-primary rotate-0 transition-transform duration-500 hover:-rotate-45 hover:scale-110" />
             )}
           </button>
 
           <button 
             aria-label="Cart" 
             onClick={() => setIsCartOpen(true)}
-            className="relative rounded-lg p-1.5 sm:p-2 text-muted-foreground transition-colors hover:bg-foreground/5 hover:text-foreground shrink-0"
+            className="relative rounded-lg p-1.5 sm:p-2 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground shrink-0 cursor-pointer"
           >
             <ShoppingCart className="h-4 w-4" />
             {itemCount > 0 && (
-              <span className="absolute -right-1 -top-1 h-3.5 w-3.5 rounded-full bg-neon-cyan shadow-neon-cyan text-[9px] font-bold text-background flex items-center justify-center">
+              <span className="absolute -right-1 -top-1 h-3.5 w-3.5 rounded-full bg-primary text-[9px] font-bold text-primary-foreground shadow-sm flex items-center justify-center">
                 {itemCount}
               </span>
             )}
@@ -235,15 +235,15 @@ export function Navbar() {
 
       {/* Mobile Menu Dropdown */}
       {mobileMenuOpen && (
-        <div className="md:hidden mx-auto mt-2 max-w-full rounded-2xl glass-strong p-4 animate-fade-up border border-glass-border shadow-elevated pointer-events-auto">
-          <ul className="flex flex-col gap-2.5">
+        <div className="md:hidden mx-auto mt-2 max-w-full rounded-2xl bg-card border border-border p-4 animate-fade-up shadow-elevated pointer-events-auto">
+          <ul className="flex flex-col gap-2">
             {links.map((l) => (
               <li key={l.label}>
                 {l.isRouterLink ? (
                   <Link
                     to={l.href as any}
                     onClick={() => setMobileMenuOpen(false)}
-                    className="flex items-center gap-2 rounded-xl bg-neon-cyan/15 border border-neon-cyan/40 px-4 py-2.5 text-sm font-bold text-neon-cyan transition-all shadow-[0_0_15px_oklch(0.78_0.18_200/0.25)]"
+                    className="flex items-center gap-2 rounded-xl bg-primary/10 border border-primary/30 px-4 py-2 text-xs font-bold text-primary transition-all shadow-sm"
                   >
                     <Scale className="h-4 w-4" />
                     <span>{l.label}</span>
@@ -252,16 +252,16 @@ export function Navbar() {
                   <a
                     href={l.href}
                     onClick={() => setMobileMenuOpen(false)}
-                    className="flex items-center gap-2 rounded-xl bg-neon-cyan/15 border border-neon-cyan/40 px-4 py-2.5 text-sm font-bold text-neon-cyan transition-all shadow-[0_0_15px_oklch(0.78_0.18_200/0.25)]"
+                    className="flex items-center gap-2 rounded-xl bg-primary/10 border border-primary/30 px-4 py-2 text-xs font-bold text-primary transition-all shadow-sm"
                   >
-                    <Gauge className="h-4 w-4 animate-pulse" />
+                    <Gauge className="h-4 w-4" />
                     <span>{l.label}</span>
                   </a>
                 ) : (
                   <a
                     href={l.href}
                     onClick={() => setMobileMenuOpen(false)}
-                    className="block rounded-xl px-4 py-2 text-xs font-medium text-foreground hover:bg-foreground/5 hover:text-neon-cyan transition-all"
+                    className="block rounded-xl px-4 py-2 text-xs font-medium text-foreground hover:bg-secondary transition-all"
                   >
                     {l.label}
                   </a>
@@ -270,58 +270,58 @@ export function Navbar() {
             ))}
 
             {/* Mobile Theme Switcher */}
-            <li className="pt-2 border-t border-glass-border">
+            <li className="pt-2 border-t border-border">
               <button
                 type="button"
                 onClick={() => {
                   toggleTheme();
                 }}
-                className="flex w-full items-center justify-between rounded-xl px-4 py-2.5 text-sm font-medium text-foreground hover:bg-foreground/5 transition-all"
+                className="flex w-full items-center justify-between rounded-xl px-4 py-2 text-xs font-medium text-foreground hover:bg-secondary transition-all"
               >
                 <span className="flex items-center gap-2">
                   {theme === "dark" ? (
                     <Sun className="h-4 w-4 text-amber-400" />
                   ) : (
-                    <Moon className="h-4 w-4 text-neon-cyan" />
+                    <Moon className="h-4 w-4 text-primary" />
                   )}
                   <span>{theme === "dark" ? "Switch to Light Mode" : "Switch to Dark Mode"}</span>
                 </span>
-                <span className="text-[10px] font-mono uppercase tracking-wider text-neon-cyan bg-neon-cyan/10 px-2 py-0.5 rounded-full border border-neon-cyan/20">
+                <span className="text-[10px] font-mono uppercase tracking-wider text-primary bg-primary/10 px-2 py-0.5 rounded-full border border-primary/20">
                   {theme.toUpperCase()}
                 </span>
               </button>
             </li>
 
             {/* Mobile HUD / Simple Mode Toggle */}
-            <li className="border-t border-glass-border pt-2">
+            <li className="border-t border-border pt-2">
               <button
                 type="button"
                 onClick={toggleMode}
                 id="ui-mode-toggle-mobile"
-                className="flex w-full items-center justify-between rounded-xl px-4 py-2.5 text-sm font-medium text-foreground hover:bg-foreground/5 transition-all"
+                className="flex w-full items-center justify-between rounded-xl px-4 py-2 text-xs font-medium text-foreground hover:bg-secondary transition-all"
               >
                 <span className="flex items-center gap-2">
-                  <Layers className="h-4 w-4 text-neon-cyan" />
+                  <Layers className="h-4 w-4 text-primary" />
                   <span>{mode === "hud" ? "Switch to Simple Mode" : "Switch to HUD Mode"}</span>
                 </span>
                 <span className={`text-[10px] font-mono uppercase tracking-wider px-2 py-0.5 rounded-full border ${
                   mode === "hud"
-                    ? "text-neon-cyan bg-neon-cyan/10 border-neon-cyan/20"
-                    : "text-neon-purple bg-neon-purple/10 border-neon-purple/20"
+                    ? "text-primary bg-primary/10 border-primary/20"
+                    : "text-accent bg-accent/10 border-accent/20"
                 }`}>
                   {mode === "hud" ? "HUD" : "SIMPLE"}
                 </span>
               </button>
             </li>
 
-            <li className="pt-2 mt-1 border-t border-glass-border flex flex-col gap-2">
+            <li className="pt-2 mt-1 border-t border-border flex flex-col gap-2">
               {currentUser?.role === "admin" && (
                 <Link
                   to="/admin"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="w-full rounded-xl bg-gradient-to-r from-neon-cyan via-neon-blue to-neon-purple px-4 py-3 text-center text-xs font-mono font-black uppercase tracking-wider text-black shadow-neon-cyan hover:scale-[1.02] transition-all flex items-center justify-center gap-2"
+                  className="w-full rounded-xl bg-primary/10 border border-primary/30 px-4 py-2.5 text-center text-xs font-mono font-bold uppercase tracking-wider text-primary hover:bg-primary/20 transition-all flex items-center justify-center gap-2 shadow-sm"
                 >
-                  <ShieldCheck className="h-4 w-4 text-black stroke-[2.5]" />
+                  <ShieldCheck className="h-4 w-4 stroke-[2.5]" />
                   Launch Admin Console
                 </Link>
               )}
@@ -329,9 +329,9 @@ export function Navbar() {
                 <Link
                   to="/seller"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="w-full rounded-xl bg-neon-purple/20 border border-neon-purple/40 px-4 py-2.5 text-center text-xs font-mono font-bold uppercase tracking-wider text-white transition-all flex items-center justify-center gap-2"
+                  className="w-full rounded-xl bg-accent/10 border border-accent/30 px-4 py-2.5 text-center text-xs font-mono font-bold uppercase tracking-wider text-accent hover:bg-accent/20 transition-all flex items-center justify-center gap-2 shadow-sm"
                 >
-                  <Store className="h-4 w-4 text-neon-purple" />
+                  <Store className="h-4 w-4" />
                   Launch Seller Hub
                 </Link>
               )}
@@ -339,9 +339,9 @@ export function Navbar() {
                 <Link
                   to="/account"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="w-full rounded-xl bg-neon-cyan/10 border border-neon-cyan/30 px-4 py-2.5 text-center text-xs font-mono font-bold uppercase tracking-wider text-neon-cyan hover:bg-neon-cyan/20 transition-all flex items-center justify-center gap-2"
+                  className="w-full rounded-xl bg-secondary border border-border px-4 py-2.5 text-center text-xs font-mono font-bold uppercase tracking-wider text-foreground hover:border-primary/40 transition-all flex items-center justify-center gap-2"
                 >
-                  <User className="h-4 w-4 text-neon-cyan" />
+                  <User className="h-4 w-4 text-primary" />
                   Customer Command Center
                 </Link>
               )}
@@ -351,7 +351,7 @@ export function Navbar() {
                     setMobileMenuOpen(false);
                     handleSignOut();
                   }}
-                  className="w-full rounded-xl bg-red-500/10 border border-red-500/20 px-4 py-2.5 text-center text-xs font-bold text-red-400 hover:bg-red-500/20 transition-all flex items-center justify-center gap-2"
+                  className="w-full rounded-xl bg-destructive/10 border border-destructive/20 px-4 py-2.5 text-center text-xs font-bold text-destructive hover:bg-destructive/20 transition-all flex items-center justify-center gap-2"
                 >
                   <LogOut className="h-4 w-4" />
                   Sign Out ({currentUser.firstName || currentUser.email})
@@ -360,9 +360,9 @@ export function Navbar() {
                 <Link
                   to="/login"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="w-full rounded-xl bg-card border border-glass-border hover:border-neon-cyan/50 px-4 py-2.5 text-center text-sm font-mono font-medium text-muted-foreground hover:bg-neon-cyan/10 hover:text-neon-cyan transition-all flex items-center justify-center gap-2"
+                  className="w-full rounded-xl bg-secondary border border-border hover:border-primary/40 px-4 py-2.5 text-center text-xs font-mono font-medium text-foreground hover:bg-secondary/80 transition-all flex items-center justify-center gap-2"
                 >
-                  <User className="h-4 w-4 text-neon-cyan" />
+                  <User className="h-4 w-4 text-primary" />
                   Sign In
                 </Link>
               )}

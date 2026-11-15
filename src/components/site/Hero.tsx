@@ -21,18 +21,18 @@ export function Hero() {
     <section className="relative isolate overflow-hidden pt-28 md:pt-32">
       {/* Backdrops */}
       <div className="absolute inset-0 -z-20 bg-gradient-hero" />
-      <div className="absolute inset-0 -z-20 bg-grid opacity-50 [mask-image:radial-gradient(ellipse_at_center,black_30%,transparent_80%)]" />
+      <div className="absolute inset-0 -z-20 bg-grid opacity-30 [mask-image:radial-gradient(ellipse_at_center,black_30%,transparent_80%)]" />
 
-      {/* Ambient orbs */}
-      <div className="pointer-events-none absolute left-[8%] top-1/3 -z-10 h-80 w-80 rounded-full bg-neon-cyan/25 blur-3xl animate-glow-pulse" />
-      <div className="pointer-events-none absolute right-[8%] top-1/4 -z-10 h-[28rem] w-[28rem] rounded-full bg-neon-purple/30 blur-3xl animate-glow-pulse [animation-delay:1.5s]" />
+      {/* Ambient orbs - subtle, refined */}
+      <div className="pointer-events-none absolute left-[10%] top-1/3 -z-10 h-72 w-72 rounded-full bg-primary/10 dark:bg-primary/15 blur-3xl animate-glow-pulse" />
+      <div className="pointer-events-none absolute right-[10%] top-1/4 -z-10 h-80 w-80 rounded-full bg-accent/10 dark:bg-accent/15 blur-3xl animate-glow-pulse [animation-delay:1.5s]" />
 
       {/* Editorial stage */}
       <div className="relative mx-auto w-full max-w-full px-4 sm:px-8 md:px-12">
         {/* Eyebrow tag */}
-        <div className="mx-auto mb-6 flex w-fit items-center gap-2 rounded-full glass px-4 py-1.5 animate-fade-up">
-          <span className="h-1.5 w-1.5 rounded-full bg-neon-cyan shadow-neon-cyan" />
-          <span className="font-display text-[10px] tracking-[0.3em] text-muted-foreground">
+        <div className="mx-auto mb-6 flex w-fit items-center gap-2 rounded-full border border-border bg-card/60 backdrop-blur-md px-3.5 py-1 animate-fade-up">
+          <span className="h-1.5 w-1.5 rounded-full bg-primary" />
+          <span className="font-mono text-[10px] tracking-[0.25em] text-muted-foreground uppercase font-semibold">
             INTRODUCING · SELLORA SERIES 09
           </span>
         </div>
@@ -58,8 +58,8 @@ export function Hero() {
           {/* Floating 3D laptop centered over headline */}
           <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
             {/* Light flare */}
-            <div className="absolute h-[80%] w-[60%] rounded-full bg-gradient-glow blur-3xl" />
-            <div className="absolute top-[58%] h-32 w-[55%] rounded-[100%] bg-neon-purple/40 blur-3xl animate-glow-pulse" />
+            <div className="absolute h-[70%] w-[55%] rounded-full bg-gradient-glow blur-2xl" />
+            <div className="absolute top-[58%] h-24 w-[45%] rounded-[100%] bg-accent/20 blur-2xl animate-glow-pulse" />
 
             <div className="relative animate-float">
               <img
@@ -67,7 +67,7 @@ export function Hero() {
                 alt="SELLORA flagship laptop floating with cinematic purple and cyan rim light"
                 width={1080}
                 height={1920}
-                className="h-[55vh] sm:h-[65vh] md:h-[88vh] w-auto max-h-[900px] drop-shadow-[0_65px_85px_oklch(0_0_0/0.7)] scale-[1.15] sm:scale-[1.35] md:scale-[1.7]"
+                className="h-[55vh] sm:h-[65vh] md:h-[88vh] w-auto max-h-[900px] drop-shadow-[0_40px_60px_rgba(0,0,0,0.5)] dark:drop-shadow-[0_50px_70px_rgba(0,0,0,0.7)] scale-[1.15] sm:scale-[1.35] md:scale-[1.7]"
               />
             </div>
           </div>
@@ -77,7 +77,7 @@ export function Hero() {
             <div className="w-full flex justify-center items-center mx-auto text-center font-display text-5xl sm:text-[6rem] md:text-[8rem] lg:text-[11rem] xl:text-[13rem] 2xl:text-[14.5rem] font-black leading-none tracking-tight text-foreground select-none overflow-visible">
               <span className="inline-block whitespace-nowrap">SELLORA</span>
             </div>
-            <p className="mt-4 font-display text-xs tracking-[0.4em] text-muted-foreground md:text-sm">
+            <p className="mt-4 font-mono text-xs tracking-[0.4em] text-muted-foreground md:text-sm uppercase">
               FROM SILICON TO SHIPPED
             </p>
           </div>
@@ -92,7 +92,7 @@ export function Hero() {
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
             <a
               href="#products"
-              className="group relative inline-flex items-center justify-center gap-2 rounded-full bg-gradient-primary px-7 py-3.5 text-sm font-semibold text-primary-foreground shadow-neon-cyan transition-transform duration-300 hover:scale-105 w-full sm:w-auto"
+              className="group relative inline-flex items-center justify-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow-sm hover:shadow transition-all duration-200 hover:scale-[1.02] w-full sm:w-auto"
             >
               Explore Series
               <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
@@ -101,10 +101,10 @@ export function Hero() {
               href="https://res.cloudinary.com/ybzqvcg1/video/upload/v1790518577/Sellora.mp4"
               target="_blank"
               rel="noopener noreferrer"
-              className="group inline-flex items-center justify-center gap-2 rounded-full glass-strong px-7 py-3.5 text-sm font-semibold text-foreground neon-border-hover w-full sm:w-auto transition-transform duration-300 hover:scale-105"
+              className="group inline-flex items-center justify-center gap-2 rounded-full border border-border bg-card/60 hover:bg-card px-6 py-3 text-sm font-semibold text-foreground transition-all duration-200 hover:scale-[1.02] w-full sm:w-auto shadow-sm"
             >
-              <span className="flex h-6 w-6 items-center justify-center rounded-full bg-gradient-primary">
-                <Play className="h-3 w-3 fill-primary-foreground text-primary-foreground" />
+              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary/15 text-primary">
+                <Play className="h-2.5 w-2.5 fill-primary text-primary" />
               </span>
               Watch the Film
             </a>
@@ -115,11 +115,11 @@ export function Hero() {
         <div className="mx-auto mt-5 max-w-md w-full animate-fade-up [animation-delay:0.35s]">
           <div
             onClick={() => openSearch()}
-            className="group relative flex items-center justify-between gap-2 rounded-full border border-neon-cyan/40 bg-card/85 p-1 pl-3 backdrop-blur-xl shadow-[0_0_15px_oklch(0.78_0.18_200/0.12)] transition-all duration-300 hover:border-neon-cyan hover:shadow-[0_0_25px_oklch(0.78_0.18_200/0.22)] hover:scale-[1.01] cursor-pointer"
+            className="group relative flex items-center justify-between gap-2 rounded-full border border-border hover:border-primary/40 bg-card/90 p-1 pl-3 backdrop-blur-xl shadow-card transition-all duration-200 hover:shadow-elevated hover:scale-[1.01] cursor-pointer"
           >
             <div className="flex items-center gap-2 pl-0.5 flex-1 min-w-0">
-              <Search className="h-3.5 w-3.5 text-neon-cyan shrink-0 transition-transform duration-300 group-hover:scale-110" />
-              <span className="text-[11px] text-muted-foreground group-hover:text-foreground/90 truncate">
+              <Search className="h-3.5 w-3.5 text-primary shrink-0 transition-transform duration-200 group-hover:scale-110" />
+              <span className="text-[11px] text-muted-foreground group-hover:text-foreground truncate">
                 Search GPU, CPU, or model (e.g. RTX 4090)...
               </span>
             </div>
@@ -127,7 +127,7 @@ export function Hero() {
             <div className="flex items-center gap-1.5 shrink-0">
               <button
                 type="button"
-                className="rounded-full bg-gradient-to-r from-neon-cyan to-neon-blue px-2.5 py-1 text-[10px] font-mono font-bold text-black shadow-neon-cyan transition-transform group-hover:scale-105 flex items-center gap-1"
+                className="rounded-full bg-primary px-2.5 py-1 text-[10px] font-mono font-bold text-primary-foreground shadow-sm transition-transform group-hover:scale-105 flex items-center gap-1"
               >
                 <span>Search</span>
                 <ArrowRight className="h-2.5 w-2.5" />
@@ -137,7 +137,7 @@ export function Hero() {
 
           {/* Quick Trending spec pills */}
           <div className="mt-2 flex flex-wrap items-center justify-center gap-1 text-[10px] text-muted-foreground">
-            <span className="font-mono text-[9.5px] text-neon-cyan/90 flex items-center gap-0.5">
+            <span className="font-mono text-[9.5px] text-primary flex items-center gap-0.5">
               <Sparkles className="h-2 w-2" />
               Trending:
             </span>
@@ -146,7 +146,7 @@ export function Hero() {
                 key={tag}
                 type="button"
                 onClick={() => openSearch(tag)}
-                className="rounded-full border border-glass-border bg-foreground/5 px-2 py-0.5 text-[9.5px] font-mono text-muted-foreground transition-all hover:border-neon-cyan/40 hover:bg-neon-cyan/10 hover:text-neon-cyan hover:scale-105 cursor-pointer"
+                className="rounded-full border border-border bg-secondary/40 px-2 py-0.5 text-[9.5px] font-mono text-muted-foreground transition-all hover:border-primary/40 hover:bg-secondary hover:text-foreground cursor-pointer"
               >
                 {tag}
               </button>
@@ -155,12 +155,12 @@ export function Hero() {
         </div>
 
         {/* Scrolling metrics ticker */}
-        <div className="relative mt-10 overflow-hidden border-y border-glass-border py-4 [mask-image:linear-gradient(90deg,transparent,black_10%,black_90%,transparent)]">
+        <div className="relative mt-10 overflow-hidden border-y border-border py-3 bg-card/30 backdrop-blur-sm [mask-image:linear-gradient(90deg,transparent,black_10%,black_90%,transparent)]">
           <div className="flex w-max animate-marquee gap-12">
             {[...metrics, ...metrics].map((m, i) => (
               <div key={i} className="flex items-center gap-3">
-                <span className="h-1 w-1 rounded-full bg-neon-cyan shadow-neon-cyan" />
-                <span className="font-display text-xs tracking-[0.3em] text-muted-foreground">
+                <span className="h-1 w-1 rounded-full bg-primary" />
+                <span className="font-mono text-xs tracking-[0.25em] text-muted-foreground">
                   {m}
                 </span>
               </div>

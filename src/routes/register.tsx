@@ -94,33 +94,33 @@ export function RegisterPage() {
   };
 
   return (
-    <main className="min-h-screen bg-background text-foreground flex flex-col justify-between selection:bg-neon-cyan/30">
+    <main className="min-h-screen bg-background text-foreground flex flex-col justify-between selection:bg-primary/20">
       <Navbar />
 
       <div className="flex-1 flex flex-col justify-start items-center pt-20 sm:pt-22 md:pt-24 pb-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
         {/* Ambient background glow */}
-        <div className="absolute top-1/4 left-1/4 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-neon-cyan/10 rounded-full blur-[128px] pointer-events-none" />
-        <div className="absolute bottom-1/4 right-1/4 translate-x-1/2 translate-y-1/2 w-96 h-96 bg-neon-blue/10 rounded-full blur-[128px] pointer-events-none" />
+        <div className="absolute top-1/4 left-1/4 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-primary/5 rounded-full blur-[128px] pointer-events-none" />
+        <div className="absolute bottom-1/4 right-1/4 translate-x-1/2 translate-y-1/2 w-96 h-96 bg-accent/5 rounded-full blur-[128px] pointer-events-none" />
 
         {/* Wide Responsive Card: 2-column on PC, stacked on mobile */}
-        <div className="relative w-full max-w-5xl rounded-3xl glass-strong border border-glass-border p-6 sm:p-8 lg:p-10 shadow-elevated backdrop-blur-xl animate-fade-up">
+        <div className="relative w-full max-w-5xl rounded-2xl bg-card border border-border p-6 sm:p-8 lg:p-10 shadow-card animate-fade-up">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
 
             {/* Left Column: Branding, Value Props & Fast Navigation */}
-            <div className="lg:col-span-5 flex flex-col justify-between space-y-6 lg:border-r lg:border-white/10 lg:pr-8">
+            <div className="lg:col-span-5 flex flex-col justify-between space-y-6 lg:border-r lg:border-border lg:pr-8">
               <div>
                 <Link to="/" className="inline-block mb-3">
-                  <span className="font-display font-black text-2xl tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-neon-cyan to-neon-purple">
+                  <span className="font-display font-black text-2xl tracking-widest text-foreground">
                     SELLORA
                   </span>
                 </Link>
 
-                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-neon-cyan/10 border border-neon-cyan/30 text-neon-cyan text-xs font-mono font-semibold mb-3">
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-mono font-semibold mb-3">
                   <ShoppingBag className="h-3.5 w-3.5" />
                   <span>Customer Registration</span>
                 </div>
 
-                <h1 className="text-2xl sm:text-3xl font-bold font-display text-white tracking-tight">
+                <h1 className="text-2xl sm:text-3xl font-bold font-display text-foreground tracking-tight">
                   High-Performance Laptop Experience
                 </h1>
 
@@ -131,26 +131,26 @@ export function RegisterPage() {
 
               {/* Customer Value Props */}
               <div className="space-y-3 pt-2">
-                <div className="flex items-start gap-3 p-2.5 rounded-xl bg-white/[0.03] border border-white/5">
-                  <Truck className="h-4 w-4 text-neon-cyan shrink-0 mt-0.5" />
+                <div className="flex items-start gap-3 p-2.5 rounded-xl bg-secondary/40 border border-border">
+                  <Truck className="h-4 w-4 text-primary shrink-0 mt-0.5" />
                   <div>
-                    <p className="text-xs font-bold text-white">Direct Tracked Delivery</p>
+                    <p className="text-xs font-bold text-foreground">Direct Tracked Delivery</p>
                     <p className="text-[11px] text-muted-foreground">Rapid insured dispatch with live order tracking</p>
                   </div>
                 </div>
 
-                <div className="flex items-start gap-3 p-2.5 rounded-xl bg-white/[0.03] border border-white/5">
-                  <ShieldCheck className="h-4 w-4 text-neon-purple shrink-0 mt-0.5" />
+                <div className="flex items-start gap-3 p-2.5 rounded-xl bg-secondary/40 border border-border">
+                  <ShieldCheck className="h-4 w-4 text-primary shrink-0 mt-0.5" />
                   <div>
-                    <p className="text-xs font-bold text-white">Escrow Payment Protection</p>
+                    <p className="text-xs font-bold text-foreground">Escrow Payment Protection</p>
                     <p className="text-[11px] text-muted-foreground">Funds released only after successful machine inspection</p>
                   </div>
                 </div>
 
-                <div className="flex items-start gap-3 p-2.5 rounded-xl bg-white/[0.03] border border-white/5">
-                  <Sparkles className="h-4 w-4 text-amber-400 shrink-0 mt-0.5" />
+                <div className="flex items-start gap-3 p-2.5 rounded-xl bg-secondary/40 border border-border">
+                  <Sparkles className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
                   <div>
-                    <p className="text-xs font-bold text-white">Verified Owner Reviews</p>
+                    <p className="text-xs font-bold text-foreground">Verified Owner Reviews</p>
                     <p className="text-[11px] text-muted-foreground">Real hardware ratings from authenticated purchasers</p>
                   </div>
                 </div>
@@ -182,7 +182,7 @@ export function RegisterPage() {
                         placeholder="Alex"
                         value={firstName}
                         onChange={(e) => setFirstName(e.target.value)}
-                        className="w-full bg-black/50 border border-white/10 rounded-xl pl-9 pr-3 py-2 text-white focus:outline-none focus:border-neon-cyan transition-colors"
+                        className="w-full bg-secondary/30 border border-border rounded-xl pl-9 pr-3 py-2 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all"
                       />
                     </div>
                   </div>
@@ -199,7 +199,7 @@ export function RegisterPage() {
                         placeholder="Mercer"
                         value={lastName}
                         onChange={(e) => setLastName(e.target.value)}
-                        className="w-full bg-black/50 border border-white/10 rounded-xl pl-9 pr-3 py-2 text-white focus:outline-none focus:border-neon-cyan transition-colors"
+                        className="w-full bg-secondary/30 border border-border rounded-xl pl-9 pr-3 py-2 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all"
                       />
                     </div>
                   </div>
@@ -219,7 +219,7 @@ export function RegisterPage() {
                         placeholder="alex.mercer@gmail.com"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        className="w-full bg-black/50 border border-white/10 rounded-xl pl-9 pr-3 py-2 text-white focus:outline-none focus:border-neon-cyan transition-colors"
+                        className="w-full bg-secondary/30 border border-border rounded-xl pl-9 pr-3 py-2 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all"
                       />
                     </div>
                   </div>
@@ -236,7 +236,7 @@ export function RegisterPage() {
                         placeholder="+94 77 123 4567"
                         value={phone}
                         onChange={(e) => setPhone(e.target.value)}
-                        className="w-full bg-black/50 border border-white/10 rounded-xl pl-9 pr-3 py-2 text-white focus:outline-none focus:border-neon-cyan transition-colors"
+                        className="w-full bg-secondary/30 border border-border rounded-xl pl-9 pr-3 py-2 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all"
                       />
                     </div>
                   </div>
@@ -255,7 +255,7 @@ export function RegisterPage() {
                       placeholder="Street name, apartment, or suite number"
                       value={address}
                       onChange={(e) => setAddress(e.target.value)}
-                      className="w-full bg-black/50 border border-white/10 rounded-xl pl-9 pr-3 py-2 text-white focus:outline-none focus:border-neon-cyan transition-colors resize-none text-xs"
+                      className="w-full bg-secondary/30 border border-border rounded-xl pl-9 pr-3 py-2 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all resize-none text-xs"
                     />
                   </div>
                 </div>
@@ -271,7 +271,7 @@ export function RegisterPage() {
                       placeholder="Colombo 03"
                       value={city}
                       onChange={(e) => setCity(e.target.value)}
-                      className="w-full bg-black/50 border border-white/10 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-neon-cyan transition-colors"
+                      className="w-full bg-secondary/30 border border-border rounded-xl px-3 py-2 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all"
                     />
                   </div>
 
@@ -284,7 +284,7 @@ export function RegisterPage() {
                       placeholder="00300"
                       value={postalCode}
                       onChange={(e) => setPostalCode(e.target.value)}
-                      className="w-full bg-black/50 border border-white/10 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-neon-cyan transition-colors"
+                      className="w-full bg-secondary/30 border border-border rounded-xl px-3 py-2 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all"
                     />
                   </div>
                 </div>
@@ -303,12 +303,12 @@ export function RegisterPage() {
                         placeholder="Min. 6 characters"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        className="w-full bg-black/50 border border-white/10 rounded-xl pl-9 pr-10 py-2 text-white focus:outline-none focus:border-neon-cyan transition-colors"
+                        className="w-full bg-secondary/30 border border-border rounded-xl pl-9 pr-10 py-2 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all"
                       />
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-white cursor-pointer"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground cursor-pointer"
                       >
                         {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                       </button>
@@ -327,12 +327,12 @@ export function RegisterPage() {
                         placeholder="Re-enter password"
                         value={confirmPassword}
                         onChange={(e) => setConfirmPassword(e.target.value)}
-                        className="w-full bg-black/50 border border-white/10 rounded-xl pl-9 pr-10 py-2 text-white focus:outline-none focus:border-neon-cyan transition-colors"
+                        className="w-full bg-secondary/30 border border-border rounded-xl pl-9 pr-10 py-2 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all"
                       />
                       <button
                         type="button"
                         onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-white cursor-pointer"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground cursor-pointer"
                       >
                         {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                       </button>
@@ -344,11 +344,11 @@ export function RegisterPage() {
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full py-3 rounded-xl bg-gradient-to-r from-neon-cyan to-neon-purple text-black font-display font-bold text-xs uppercase tracking-wider shadow-[0_0_20px_rgba(0,242,254,0.3)] hover:opacity-95 transition-all flex items-center justify-center gap-2 pt-2.5 pb-2.5 mt-2 cursor-pointer disabled:opacity-60"
+                  className="w-full py-3 rounded-xl bg-primary hover:bg-primary-hover text-primary-foreground font-display font-semibold text-xs uppercase tracking-wider shadow-sm transition-all hover:shadow-md flex items-center justify-center gap-2 pt-2.5 pb-2.5 mt-2 cursor-pointer disabled:opacity-60"
                 >
                   {isLoading ? (
                     <>
-                      <RefreshCw className="h-4 w-4 animate-spin text-black" />
+                      <RefreshCw className="h-4 w-4 animate-spin text-primary-foreground" />
                       <span>Creating Account...</span>
                     </>
                   ) : (
@@ -360,17 +360,17 @@ export function RegisterPage() {
                 </button>
 
                 {/* Switch to Sign In & Seller Link */}
-                <div className="text-center pt-3 border-t border-white/10 space-y-2 text-xs">
+                <div className="text-center pt-3 border-t border-border space-y-2 text-xs">
                   <p className="text-muted-foreground">
                     Already have an account?{" "}
-                    <Link to="/login" className="text-neon-cyan font-bold hover:underline">
+                    <Link to="/login" className="text-primary font-bold hover:underline">
                       Sign in here
                     </Link>
                   </p>
                   <div>
                     <Link
                       to="/seller-register"
-                      className="inline-flex items-center gap-1.5 text-xs text-neon-purple hover:text-white transition-colors py-1.5 px-3 rounded-lg bg-neon-purple/10 border border-neon-purple/20 hover:border-neon-purple/50 font-medium"
+                      className="inline-flex items-center gap-1.5 text-xs text-foreground/80 hover:text-foreground transition-colors py-1.5 px-3 rounded-lg bg-secondary border border-border hover:border-border-hover font-medium"
                     >
                       <Store className="h-3.5 w-3.5" />
                       <span>Looking to sell laptops? Register as a Seller</span>

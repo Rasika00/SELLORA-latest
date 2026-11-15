@@ -438,19 +438,19 @@ export function CustomerAccountHub() {
   // Route guard: must be logged in
   if (!user) {
     return (
-      <div className="min-h-screen bg-[#0B0F19] text-white flex flex-col justify-between">
-        <header className="border-b border-white/10 px-6 py-4 flex items-center justify-between">
+      <div className="min-h-screen bg-background text-foreground flex flex-col justify-between">
+        <header className="border-b border-border px-6 py-4 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-3">
             <img src="/logo.png" alt="Sellora" className="h-8 w-auto object-contain" />
             <span className="font-display font-black tracking-widest text-base">SELLORA</span>
           </Link>
-          <Link to="/" className="text-xs text-muted-foreground hover:text-white flex items-center gap-1.5">
+          <Link to="/" className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1.5">
             <Home className="h-4 w-4" /> Storefront
           </Link>
         </header>
         <div className="flex-1 flex items-center justify-center px-4 py-20">
-          <div className="max-w-md w-full bg-card/70 border border-white/10 rounded-3xl p-8 text-center shadow-2xl backdrop-blur-xl">
-            <div className="h-16 w-16 mx-auto mb-6 rounded-2xl bg-neon-cyan/10 border border-neon-cyan/20 flex items-center justify-center text-neon-cyan">
+          <div className="max-w-md w-full bg-card border border-border rounded-2xl p-8 text-center shadow-card">
+            <div className="h-16 w-16 mx-auto mb-6 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary">
               <User className="h-8 w-8" />
             </div>
             <h2 className="text-2xl font-display font-bold mb-2">Customer Portal Sign In</h2>
@@ -460,13 +460,13 @@ export function CustomerAccountHub() {
             <div className="flex flex-col gap-3">
               <Link
                 to="/login"
-                className="w-full py-3 bg-gradient-to-r from-neon-cyan to-neon-purple text-black font-display text-xs font-bold uppercase tracking-wider rounded-xl shadow-[0_0_15px_rgba(0,242,254,0.3)] hover:opacity-95 transition-all text-center"
+                className="w-full py-3 bg-primary hover:bg-primary-hover text-primary-foreground font-display text-xs font-semibold uppercase tracking-wider rounded-xl shadow-sm transition-all text-center"
               >
                 Sign In
               </Link>
               <Link
                 to="/"
-                className="w-full py-2.5 border border-white/10 text-xs text-muted-foreground hover:text-white rounded-xl transition-colors text-center"
+                className="w-full py-2.5 border border-border text-xs text-muted-foreground hover:text-foreground rounded-xl transition-colors text-center"
               >
                 Return to Storefront
               </Link>
@@ -497,16 +497,16 @@ export function CustomerAccountHub() {
     : user.email.slice(0, 2).toUpperCase();
 
   return (
-    <div className="min-h-screen bg-[#0B0F19] text-white flex flex-col font-sans selection:bg-neon-cyan/30">
+    <div className="min-h-screen bg-background text-foreground flex flex-col font-sans selection:bg-primary/20">
       {/* Top Application Bar matching Admin/Seller Design */}
-      <header className="sticky top-0 z-50 border-b border-white/10 bg-[#0B0F19]/90 backdrop-blur-md px-6 py-3 flex items-center justify-between shadow-md">
+      <header className="sticky top-0 z-50 border-b border-border bg-card/90 backdrop-blur-md px-6 py-3 flex items-center justify-between shadow-sm">
         <Link to="/" className="flex items-center gap-3 group">
           <img
             src="/logo.png"
             alt="Sellora"
-            className="h-8 w-auto object-contain drop-shadow-[0_0_8px_rgba(0,255,255,0.5)] transition-transform group-hover:scale-105"
+            className="h-8 w-auto object-contain transition-transform group-hover:scale-105"
           />
-          <span className="font-display font-black tracking-widest text-base hidden sm:inline">
+          <span className="font-display font-black tracking-widest text-base hidden sm:inline text-foreground">
             SELLORA CUSTOMER PORTAL
           </span>
         </Link>
@@ -520,26 +520,26 @@ export function CustomerAccountHub() {
             id="account-ui-mode-toggle"
             aria-label={`Switch to ${mode === "hud" ? "simple" : "HUD"} mode`}
             title={`Current: ${mode.toUpperCase()} mode. Click to switch.`}
-            className="flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 hover:border-neon-cyan/50 px-2.5 py-1 text-xs text-muted-foreground transition-all shrink-0 cursor-pointer"
+            className="flex items-center gap-1.5 rounded-full border border-border bg-secondary hover:border-primary/50 px-2.5 py-1 text-xs text-muted-foreground transition-all shrink-0 cursor-pointer"
           >
-            <Layers className={`h-3.5 w-3.5 ${mode === "hud" ? "text-neon-cyan" : "text-neon-purple"} transition-transform hover:scale-110`} />
+            <Layers className={`h-3.5 w-3.5 ${mode === "hud" ? "text-primary" : "text-accent"} transition-transform hover:scale-110`} />
             <span className="font-mono text-[10px] uppercase font-bold tracking-wider hidden sm:inline">
-              {mode === "hud" ? <span className="text-neon-cyan">HUD</span> : <span className="text-neon-purple">SIMPLE</span>}
+              {mode === "hud" ? <span className="text-primary">HUD</span> : <span className="text-accent">SIMPLE</span>}
             </span>
           </button>
 
           <button
             onClick={handleRefresh}
             disabled={refreshing}
-            className="p-2 rounded-lg text-muted-foreground hover:text-white hover:bg-white/5 transition-colors"
+            className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
             title="Refresh Account Data"
           >
-            <RefreshCw className={`h-4 w-4 ${refreshing ? "animate-spin text-neon-cyan" : ""}`} />
+            <RefreshCw className={`h-4 w-4 ${refreshing ? "animate-spin text-primary" : ""}`} />
           </button>
 
           <Link
             to="/"
-            className="hidden md:inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-white px-3 py-1.5 rounded-lg border border-white/10 hover:bg-white/5 transition-colors"
+            className="hidden md:inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground px-3 py-1.5 rounded-lg border border-border hover:bg-secondary transition-colors"
           >
             <Home className="h-3.5 w-3.5" /> Storefront
           </Link>
@@ -547,7 +547,7 @@ export function CustomerAccountHub() {
           {user.role === "admin" && (
             <Link
               to="/admin"
-              className="hidden lg:inline-flex items-center gap-1.5 text-xs text-neon-cyan bg-neon-cyan/10 hover:bg-neon-cyan/20 border border-neon-cyan/30 px-3 py-1.5 rounded-lg transition-colors"
+              className="hidden lg:inline-flex items-center gap-1.5 text-xs text-primary bg-primary/10 hover:bg-primary/20 border border-primary/30 px-3 py-1.5 rounded-lg transition-colors"
             >
               <Shield className="h-3.5 w-3.5" /> Admin Panel
             </Link>
@@ -556,21 +556,21 @@ export function CustomerAccountHub() {
           {user.role === "seller" && (
             <Link
               to="/seller"
-              className="hidden lg:inline-flex items-center gap-1.5 text-xs text-neon-purple bg-neon-purple/10 hover:bg-neon-purple/20 border border-neon-purple/30 px-3 py-1.5 rounded-lg transition-colors"
+              className="hidden lg:inline-flex items-center gap-1.5 text-xs text-accent bg-accent/10 hover:bg-accent/20 border border-accent/30 px-3 py-1.5 rounded-lg transition-colors"
             >
               <Store className="h-3.5 w-3.5" /> Seller Hub
             </Link>
           )}
 
-          <div className="flex items-center gap-3 pl-2 border-l border-white/10">
-            <div className="h-8 w-8 rounded-full bg-gradient-to-tr from-neon-cyan to-neon-purple p-[2px] shadow-[0_0_10px_rgba(0,242,254,0.5)]">
-              <div className="h-full w-full bg-[#0B0F19] rounded-full flex items-center justify-center text-xs font-bold font-mono text-neon-cyan">
+          <div className="flex items-center gap-3 pl-2 border-l border-border">
+            <div className="h-8 w-8 rounded-full bg-gradient-to-tr from-primary to-accent p-[2px] shadow-sm">
+              <div className="h-full w-full bg-card rounded-full flex items-center justify-center text-xs font-bold font-mono text-primary">
                 {userInitials}
               </div>
             </div>
 
             <div className="hidden lg:block text-left">
-              <div className="text-xs font-semibold text-white leading-tight">
+              <div className="text-xs font-semibold text-foreground leading-tight">
                 {user.firstName ? `${user.firstName} ${user.lastName || ""}` : "Customer Operator"}
               </div>
               <div className="text-[10px] text-muted-foreground font-mono leading-tight">
@@ -581,7 +581,7 @@ export function CustomerAccountHub() {
             <button
               onClick={handleLogout}
               title="Sign Out"
-              className="p-2 rounded-lg text-muted-foreground hover:text-red-400 hover:bg-red-500/10 transition-colors"
+              className="p-2 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
             >
               <LogOut className="h-4 w-4" />
             </button>
@@ -592,13 +592,13 @@ export function CustomerAccountHub() {
       {/* Main Work Area: Left Sidebar + Content */}
       <div className="flex flex-1 overflow-hidden">
         {/* Left Sidebar Menu */}
-        <aside className="w-56 border-r border-white/10 bg-[#0B0F19] flex flex-col shrink-0 py-4 z-40 relative shadow-[5px_0_15px_rgba(0,0,0,0.5)]">
-          <div className="px-4 pb-3 mb-2 border-b border-white/5">
+        <aside className="w-56 border-r border-border bg-card flex flex-col shrink-0 py-4 z-40 relative shadow-sm">
+          <div className="px-4 pb-3 mb-2 border-b border-border">
             <div className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider">Account ID</div>
-            <div className="text-xs font-bold text-white truncate mt-0.5">
+            <div className="text-xs font-bold text-foreground truncate mt-0.5">
               {user.firstName ? `${user.firstName} ${user.lastName || ""}` : "Verified Buyer"}
             </div>
-            <span className="text-[9px] font-mono px-2 py-0.5 rounded-full uppercase tracking-wider font-bold inline-block bg-neon-cyan/20 text-neon-cyan border border-neon-cyan/40 mt-1">
+            <span className="text-[9px] font-mono px-2 py-0.5 rounded-full uppercase tracking-wider font-bold inline-block bg-primary/20 text-primary border border-primary/30 mt-1">
               Active Member
             </span>
           </div>
@@ -613,18 +613,18 @@ export function CustomerAccountHub() {
                   onClick={() => setActiveTab(item.id as any)}
                   className={`flex items-center justify-between rounded-lg px-3 py-2 text-sm font-medium transition-colors whitespace-nowrap ${
                     isActive
-                      ? "bg-neon-cyan/10 text-neon-cyan border border-neon-cyan/20 shadow-[inset_3px_0_0_rgba(0,242,254,1)]"
-                      : "text-muted-foreground hover:bg-white/5 hover:text-white"
+                      ? "bg-primary/10 text-primary border border-primary/20 font-semibold"
+                      : "text-muted-foreground hover:bg-secondary hover:text-foreground"
                   }`}
                 >
                   <div className="flex items-center gap-3">
-                    <Icon className={`h-4 w-4 shrink-0 ${isActive ? "animate-pulse" : ""}`} />
+                    <Icon className={`h-4 w-4 shrink-0 ${isActive ? "text-primary" : ""}`} />
                     <span>{item.label}</span>
                   </div>
                   {item.badge !== undefined && item.badge > 0 && (
                     <span
                       className={`text-[10px] font-mono px-1.5 py-0.2 rounded-full ${
-                        isActive ? "bg-neon-cyan/30 text-neon-cyan" : "bg-white/10 text-muted-foreground"
+                        isActive ? "bg-primary/20 text-primary font-bold" : "bg-secondary text-muted-foreground"
                       }`}
                     >
                       {item.badge}
@@ -635,28 +635,27 @@ export function CustomerAccountHub() {
             })}
           </nav>
 
-          <div className="px-4 pt-3 border-t border-white/5 text-[10px] font-mono text-muted-foreground">
+          <div className="px-4 pt-3 border-t border-border text-[10px] font-mono text-muted-foreground">
             <div>SELLORA Buyer Protection</div>
-            <div className="text-white/40 mt-0.5">100% Genuine Hardware</div>
+            <div className="text-muted-foreground/60 mt-0.5">100% Genuine Hardware</div>
           </div>
         </aside>
 
         {/* Content Area */}
-        <main className="flex-1 overflow-y-auto p-6 lg:p-8 relative scroll-smooth">
+        <main className="flex-1 overflow-y-auto p-6 lg:p-8 relative scroll-smooth bg-background">
           <div className="max-w-[1400px] mx-auto space-y-8 animate-fade-up">
 
             {/* TAB 1: OVERVIEW & COMMAND CENTER (C1.1) */}
             {activeTab === "overview" && (
               <div className="space-y-8 animate-fade-up">
                 {/* Welcome Banner */}
-                <div className="relative rounded-3xl bg-gradient-to-r from-neon-cyan/10 via-neon-purple/5 to-transparent border border-white/10 p-6 sm:p-8 backdrop-blur-xl overflow-hidden shadow-2xl">
-                  <div className="pointer-events-none absolute -top-24 -right-24 h-64 w-64 rounded-full bg-neon-cyan/15 blur-[90px]" />
+                <div className="relative rounded-2xl bg-card border border-border p-6 sm:p-8 overflow-hidden shadow-card">
                   <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div>
-                      <span className="text-xs font-mono px-2.5 py-0.5 rounded-full bg-neon-cyan/20 border border-neon-cyan/40 text-neon-cyan uppercase font-semibold">
+                      <span className="text-xs font-mono px-2.5 py-0.5 rounded-full bg-primary/20 border border-primary/30 text-primary uppercase font-semibold">
                         Customer Command Center
                       </span>
-                      <h1 className="text-2xl sm:text-3xl font-display font-black tracking-tight text-white mt-2">
+                      <h1 className="text-2xl sm:text-3xl font-display font-black tracking-tight text-foreground mt-2">
                         Welcome back, {user.firstName || "Customer"}!
                       </h1>
                       <p className="text-xs sm:text-sm text-muted-foreground mt-1">
@@ -666,7 +665,7 @@ export function CustomerAccountHub() {
 
                     <Link
                       to="/"
-                      className="px-4 py-2.5 rounded-xl bg-neon-cyan text-black font-display text-xs font-bold uppercase tracking-wider shadow-[0_0_15px_rgba(0,242,254,0.3)] hover:shadow-[0_0_25px_rgba(0,242,254,0.7)] transition-all flex items-center gap-2 self-start sm:self-auto"
+                      className="px-4 py-2.5 rounded-xl bg-primary hover:bg-primary-hover text-primary-foreground font-display text-xs font-semibold uppercase tracking-wider shadow-sm transition-all flex items-center gap-2 self-start sm:self-auto"
                     >
                       <ShoppingBag className="h-4 w-4" />
                       <span>Browse Hardware</span>
@@ -678,11 +677,11 @@ export function CustomerAccountHub() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
                   <div
                     onClick={() => setActiveTab("orders")}
-                    className="rounded-2xl bg-white/[0.02] border border-white/10 p-6 hover:border-neon-cyan/40 transition-all cursor-pointer group"
+                    className="rounded-2xl bg-card border border-border p-6 hover:border-primary/50 shadow-card transition-all cursor-pointer group"
                   >
                     <p className="text-xs font-mono text-muted-foreground uppercase">Total Orders Placed</p>
-                    <h3 className="text-3xl font-display font-black text-white mt-1.5">{totalOrdersCount}</h3>
-                    <div className="mt-3 text-[11px] font-mono text-neon-cyan flex items-center gap-1">
+                    <h3 className="text-3xl font-display font-black text-foreground mt-1.5">{totalOrdersCount}</h3>
+                    <div className="mt-3 text-[11px] font-mono text-primary flex items-center gap-1">
                       <ShoppingBag className="h-3 w-3" /> All-time purchase orders
                     </div>
                   </div>
@@ -692,8 +691,8 @@ export function CustomerAccountHub() {
                     className="rounded-2xl bg-blue-500/10 border border-blue-500/30 p-6 hover:border-blue-400 transition-all cursor-pointer group"
                   >
                     <p className="text-xs font-mono text-muted-foreground uppercase">Processing (Packing)</p>
-                    <h3 className="text-3xl font-display font-black text-blue-300 mt-1.5">{processingCount}</h3>
-                    <div className="mt-3 text-[11px] font-mono text-blue-400 flex items-center gap-1">
+                    <h3 className="text-3xl font-display font-black text-blue-500 dark:text-blue-300 mt-1.5">{processingCount}</h3>
+                    <div className="mt-3 text-[11px] font-mono text-blue-600 dark:text-blue-400 flex items-center gap-1">
                       <Package className="h-3 w-3" /> Preparing at vendor warehouse
                     </div>
                   </div>
@@ -703,8 +702,8 @@ export function CustomerAccountHub() {
                     className="rounded-2xl bg-purple-500/10 border border-purple-500/30 p-6 hover:border-purple-400 transition-all cursor-pointer group"
                   >
                     <p className="text-xs font-mono text-muted-foreground uppercase">Shipped (In Transit)</p>
-                    <h3 className="text-3xl font-display font-black text-purple-300 mt-1.5">{shippedCount}</h3>
-                    <div className="mt-3 text-[11px] font-mono text-purple-400 flex items-center gap-1">
+                    <h3 className="text-3xl font-display font-black text-purple-600 dark:text-purple-300 mt-1.5">{shippedCount}</h3>
+                    <div className="mt-3 text-[11px] font-mono text-purple-600 dark:text-purple-400 flex items-center gap-1">
                       <Truck className="h-3 w-3" /> With express courier
                     </div>
                   </div>
@@ -714,8 +713,8 @@ export function CustomerAccountHub() {
                     className="rounded-2xl bg-emerald-500/10 border border-emerald-500/30 p-6 hover:border-emerald-400 transition-all cursor-pointer group"
                   >
                     <p className="text-xs font-mono text-muted-foreground uppercase">Completed &amp; Delivered</p>
-                    <h3 className="text-3xl font-display font-black text-emerald-300 mt-1.5">{completedCount}</h3>
-                    <div className="mt-3 text-[11px] font-mono text-emerald-400 flex items-center gap-1">
+                    <h3 className="text-3xl font-display font-black text-emerald-600 dark:text-emerald-300 mt-1.5">{completedCount}</h3>
+                    <div className="mt-3 text-[11px] font-mono text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
                       <CheckCircle2 className="h-3 w-3" /> Delivered &bull; Ready for review
                     </div>
                   </div>
@@ -724,14 +723,14 @@ export function CustomerAccountHub() {
                 {/* Secondary Section: Fast Access Recent Orders & Profile Card */}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                   {/* Recent Orders Fast Access (C1.1) */}
-                  <div className="lg:col-span-2 rounded-2xl bg-white/[0.02] border border-white/10 p-6 space-y-4">
+                  <div className="lg:col-span-2 rounded-2xl bg-card border border-border shadow-card p-6 space-y-4">
                     <div className="flex items-center justify-between">
-                      <h3 className="font-display font-bold text-sm tracking-wide uppercase text-white flex items-center gap-2">
-                        <ShoppingBag className="h-4 w-4 text-neon-cyan" /> Recent Orders
+                      <h3 className="font-display font-bold text-sm tracking-wide uppercase text-foreground flex items-center gap-2">
+                        <ShoppingBag className="h-4 w-4 text-primary" /> Recent Orders
                       </h3>
                       <button
                         onClick={() => setActiveTab("orders")}
-                        className="text-xs text-neon-cyan hover:underline flex items-center gap-1 font-mono"
+                        className="text-xs text-primary hover:underline flex items-center gap-1 font-mono"
                       >
                         View Full Pipeline <ChevronRight className="h-3.5 w-3.5" />
                       </button>
@@ -742,24 +741,24 @@ export function CustomerAccountHub() {
                         {orders.slice(0, 3).map((ord) => (
                           <div
                             key={ord.id}
-                            className="p-4 rounded-xl bg-white/5 border border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+                            className="p-4 rounded-xl bg-secondary/40 border border-border flex flex-col sm:flex-row sm:items-center justify-between gap-4"
                           >
                             <div className="flex items-start gap-3">
-                              <div className="h-10 w-10 rounded-lg bg-neon-cyan/10 border border-neon-cyan/30 flex items-center justify-center text-neon-cyan shrink-0 mt-0.5">
+                              <div className="h-10 w-10 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shrink-0 mt-0.5">
                                 <Package className="h-5 w-5" />
                               </div>
                               <div>
                                 <div className="flex items-center gap-2">
-                                  <span className="font-mono font-bold text-xs text-white">{ord.orderNumber}</span>
+                                  <span className="font-mono font-bold text-xs text-foreground">{ord.orderNumber}</span>
                                   <span
                                     className={`text-[10px] font-mono px-2 py-0.5 rounded-full uppercase font-bold ${
                                       ord.status === "DELIVERED"
-                                        ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
+                                        ? "bg-emerald-500/20 text-emerald-500 dark:text-emerald-300 border border-emerald-500/30"
                                         : ord.status === "SHIPPED"
-                                        ? "bg-purple-500/20 text-purple-300 border border-purple-500/30"
+                                        ? "bg-purple-500/20 text-purple-600 dark:text-purple-300 border border-purple-500/30"
                                         : ord.status === "PROCESSING"
-                                        ? "bg-blue-500/20 text-blue-300 border border-blue-500/30"
-                                        : "bg-amber-500/20 text-amber-300 border border-amber-500/30"
+                                        ? "bg-blue-500/20 text-blue-600 dark:text-blue-300 border border-blue-500/30"
+                                        : "bg-amber-500/20 text-amber-600 dark:text-amber-300 border border-amber-500/30"
                                     }`}
                                   >
                                     {ord.status}
@@ -772,7 +771,7 @@ export function CustomerAccountHub() {
                             </div>
 
                             <div className="text-right sm:shrink-0">
-                              <div className="text-sm font-display font-bold text-white">
+                              <div className="text-sm font-display font-bold text-foreground">
                                 LKR {Number(ord.totalAmount ?? 0).toLocaleString()}
                               </div>
                               <div className="text-[10px] font-mono text-muted-foreground mt-0.5">
@@ -790,29 +789,29 @@ export function CustomerAccountHub() {
                   </div>
 
                   {/* Profile Summary Card */}
-                  <div className="lg:col-span-1 rounded-2xl bg-white/[0.02] border border-white/10 p-6 space-y-4">
-                    <h3 className="font-display font-bold text-sm tracking-wide uppercase text-white flex items-center gap-2">
-                      <User className="h-4 w-4 text-neon-purple" /> Delivery Profile
+                  <div className="lg:col-span-1 rounded-2xl bg-card border border-border shadow-card p-6 space-y-4">
+                    <h3 className="font-display font-bold text-sm tracking-wide uppercase text-foreground flex items-center gap-2">
+                      <User className="h-4 w-4 text-accent" /> Delivery Profile
                     </h3>
 
                     <div className="space-y-3 text-xs">
-                      <div className="flex justify-between py-1.5 border-b border-white/5">
+                      <div className="flex justify-between py-1.5 border-b border-border">
                         <span className="text-muted-foreground">Name:</span>
-                        <span className="font-semibold text-white">
+                        <span className="font-semibold text-foreground">
                           {user.firstName ? `${user.firstName} ${user.lastName || ""}` : "Not set"}
                         </span>
                       </div>
-                      <div className="flex justify-between py-1.5 border-b border-white/5">
+                      <div className="flex justify-between py-1.5 border-b border-border">
                         <span className="text-muted-foreground">Email:</span>
-                        <span className="font-mono text-white truncate max-w-[170px]">{user.email}</span>
+                        <span className="font-mono text-foreground truncate max-w-[170px]">{user.email}</span>
                       </div>
-                      <div className="flex justify-between py-1.5 border-b border-white/5">
+                      <div className="flex justify-between py-1.5 border-b border-border">
                         <span className="text-muted-foreground">Phone:</span>
-                        <span className="text-white">{user.phone || "Not set"}</span>
+                        <span className="text-foreground">{user.phone || "Not set"}</span>
                       </div>
                       <div className="flex justify-between py-1.5">
                         <span className="text-muted-foreground">Address:</span>
-                        <span className="text-white text-right max-w-[170px] truncate">
+                        <span className="text-foreground text-right max-w-[170px] truncate">
                           {user.address || "Not set"}
                         </span>
                       </div>
@@ -821,14 +820,14 @@ export function CustomerAccountHub() {
                     <div className="flex flex-col gap-2 pt-2">
                       <button
                         onClick={() => setActiveTab("addresses")}
-                        className="w-full py-2.5 rounded-xl bg-neon-cyan/15 border border-neon-cyan/40 hover:bg-neon-cyan/25 text-xs font-bold text-neon-cyan transition-all flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(0,242,254,0.15)]"
+                        className="w-full py-2.5 rounded-xl bg-primary/10 border border-primary/20 hover:bg-primary/20 text-xs font-semibold text-primary transition-all flex items-center justify-center gap-2 shadow-sm"
                       >
                         <MapPin className="h-3.5 w-3.5" />
                         <span>Manage Address Book ({addresses.length})</span>
                       </button>
                       <button
                         onClick={() => setActiveTab("settings")}
-                        className="w-full py-2 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-xs font-medium text-muted-foreground hover:text-white transition-all flex items-center justify-center gap-2"
+                        className="w-full py-2 rounded-xl bg-secondary border border-border hover:bg-secondary/80 text-xs font-medium text-foreground transition-all flex items-center justify-center gap-2"
                       >
                         <span>Edit Account Settings</span>
                         <ArrowRight className="h-3.5 w-3.5" />
@@ -843,9 +842,9 @@ export function CustomerAccountHub() {
             {activeTab === "orders" && (
               <div className="space-y-6 animate-fade-up">
                 <div>
-                  <h2 className="text-2xl font-display font-bold text-white flex items-center gap-3">
+                  <h2 className="text-2xl font-display font-bold text-foreground flex items-center gap-3">
                     <span>My Hardware Orders</span>
-                    <span className="text-xs px-2.5 py-0.5 rounded-full bg-neon-cyan/20 text-neon-cyan font-mono border border-neon-cyan/40">
+                    <span className="text-xs px-2.5 py-0.5 rounded-full bg-primary/20 text-primary font-mono border border-primary/30">
                       {orders.length} Total
                     </span>
                   </h2>
@@ -860,23 +859,23 @@ export function CustomerAccountHub() {
                       return (
                         <div
                           key={ord.id}
-                          className="rounded-2xl bg-white/[0.02] border border-white/10 p-3.5 sm:p-4 hover:border-white/20 transition-all space-y-2.5"
+                          className="rounded-2xl bg-card border border-border shadow-card p-3.5 sm:p-4 hover:border-border-hover transition-all space-y-2.5"
                         >
                           {/* Top Row: Order Details, Status, Tracking & Price */}
-                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2.5 border-b border-white/5">
+                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2.5 border-b border-border">
                             <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
-                              <span className="font-mono font-bold text-xs text-neon-cyan">{ord.orderNumber}</span>
+                              <span className="font-mono font-bold text-xs text-primary">{ord.orderNumber}</span>
                               <span
                                 className={`text-[9px] font-mono px-2 py-0.5 rounded-full uppercase font-bold tracking-wider ${
                                   ord.status === "DELIVERED"
-                                    ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
+                                    ? "bg-emerald-500/20 text-emerald-600 dark:text-emerald-300 border border-emerald-500/30"
                                     : ord.status === "SHIPPED"
-                                    ? "bg-purple-500/20 text-purple-300 border border-purple-500/30"
+                                    ? "bg-purple-500/20 text-purple-600 dark:text-purple-300 border border-purple-500/30"
                                     : ord.status === "PROCESSING"
-                                    ? "bg-blue-500/20 text-blue-300 border border-blue-500/30"
+                                    ? "bg-blue-500/20 text-blue-600 dark:text-blue-300 border border-blue-500/30"
                                     : ord.status === "CANCELLED"
-                                    ? "bg-rose-500/20 text-rose-300 border border-rose-500/30"
-                                    : "bg-amber-500/20 text-amber-300 border border-amber-500/30"
+                                    ? "bg-rose-500/20 text-rose-600 dark:text-rose-300 border border-rose-500/30"
+                                    : "bg-amber-500/20 text-amber-600 dark:text-amber-300 border border-amber-500/30"
                                 }`}
                               >
                                 {ord.status === "PENDING"
@@ -897,14 +896,14 @@ export function CustomerAccountHub() {
                             </div>
 
                             <div className="flex items-center justify-between sm:justify-end gap-3">
-                              <span className="font-display font-bold text-xs text-white">
+                              <span className="font-display font-bold text-xs text-foreground">
                                 LKR {Number(ord.totalAmount ?? 0).toLocaleString()}
                               </span>
 
                               <button
                                 type="button"
                                 onClick={() => setTrackingModalOrder(ord)}
-                                className="px-2.5 py-1 rounded-lg bg-neon-cyan/10 hover:bg-neon-cyan/20 border border-neon-cyan/30 text-neon-cyan text-[11px] font-mono font-bold flex items-center gap-1.5 transition-all shadow-[0_0_10px_rgba(0,242,254,0.15)] cursor-pointer hover:scale-[1.02]"
+                                className="px-2.5 py-1 rounded-lg bg-primary/10 hover:bg-primary/20 border border-primary/20 text-primary text-[11px] font-mono font-semibold flex items-center gap-1.5 transition-all shadow-sm cursor-pointer"
                               >
                                 <Truck className="h-3 w-3" />
                                 <span>Track Order</span>
@@ -920,16 +919,16 @@ export function CustomerAccountHub() {
                               return (
                                 <div
                                   key={item.id}
-                                  className="p-2 sm:p-2.5 rounded-xl bg-black/40 border border-white/5 flex flex-col sm:flex-row sm:items-center justify-between gap-2"
+                                  className="p-2 sm:p-2.5 rounded-xl bg-secondary/40 border border-border flex flex-col sm:flex-row sm:items-center justify-between gap-2"
                                 >
                                   <div className="flex items-center gap-3 min-w-0">
                                     <img
                                       src={item.product?.img}
                                       alt={item.product?.name}
-                                      className="h-9 w-11 rounded-lg object-cover border border-white/10 shrink-0"
+                                      className="h-9 w-11 rounded-lg object-cover border border-border shrink-0"
                                     />
                                     <div className="min-w-0">
-                                      <div className="font-display font-bold text-xs text-white truncate">
+                                      <div className="font-display font-bold text-xs text-foreground truncate">
                                         {item.product?.name || "Computing Rig"}
                                       </div>
                                       <div className="text-[10px] text-muted-foreground font-mono truncate">
@@ -941,7 +940,7 @@ export function CustomerAccountHub() {
 
                                   <div className="flex items-center justify-between sm:justify-end gap-3 shrink-0">
                                     <div className="text-right">
-                                      <div className="text-xs font-mono font-bold text-white">
+                                      <div className="text-xs font-mono font-bold text-foreground">
                                         LKR {(item.price * item.quantity).toLocaleString()}
                                       </div>
                                       <div className="text-[9px] font-mono text-muted-foreground">
@@ -953,7 +952,7 @@ export function CustomerAccountHub() {
                                       alreadyReviewed ? (
                                         <button
                                           onClick={() => setActiveTab("reviews")}
-                                          className="px-2.5 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-[10px] font-mono font-bold flex items-center gap-1 cursor-pointer"
+                                          className="px-2.5 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-300 text-[10px] font-mono font-bold flex items-center gap-1 cursor-pointer"
                                         >
                                           <CheckCircle2 className="h-3 w-3" />
                                           <span>Reviewed</span>
@@ -961,9 +960,9 @@ export function CustomerAccountHub() {
                                       ) : (
                                         <button
                                           onClick={() => handleOpenReviewModal(ord, item.product)}
-                                          className="px-2.5 py-1 rounded-lg bg-neon-cyan text-black text-[10px] font-display font-bold uppercase tracking-wider shadow-[0_0_10px_rgba(0,242,254,0.3)] hover:opacity-95 transition-all flex items-center gap-1 cursor-pointer"
+                                          className="px-2.5 py-1 rounded-lg bg-primary hover:bg-primary-hover text-primary-foreground text-[10px] font-display font-semibold uppercase tracking-wider shadow-sm transition-all flex items-center gap-1 cursor-pointer"
                                         >
-                                          <Star className="h-3 w-3 fill-black" />
+                                          <Star className="h-3 w-3 fill-current" />
                                           <span>Rate &amp; Review</span>
                                         </button>
                                       )
@@ -978,9 +977,9 @@ export function CustomerAccountHub() {
                     })}
                   </div>
                 ) : (
-                  <div className="p-12 rounded-3xl bg-white/[0.02] border border-dashed border-white/10 text-center">
+                  <div className="p-12 rounded-2xl bg-card border border-dashed border-border text-center">
                     <ShoppingBag className="h-12 w-12 text-muted-foreground mx-auto mb-3 opacity-30" />
-                    <h4 className="font-display font-bold text-white text-base">No Orders Placed Yet</h4>
+                    <h4 className="font-display font-bold text-foreground text-base">No Orders Placed Yet</h4>
                     <p className="text-xs text-muted-foreground mt-1 max-w-sm mx-auto">
                       Configure your next-gen machine from the catalog to start your orbital dispatch.
                     </p>
@@ -994,9 +993,9 @@ export function CustomerAccountHub() {
               <div className="space-y-6 animate-fade-up">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div>
-                    <h2 className="text-2xl font-display font-bold text-white flex items-center gap-3">
+                    <h2 className="text-2xl font-display font-bold text-foreground flex items-center gap-3">
                       <span>Saved Delivery Addresses</span>
-                      <span className="text-xs px-2.5 py-0.5 rounded-full bg-neon-cyan/20 text-neon-cyan font-mono border border-neon-cyan/40">
+                      <span className="text-xs px-2.5 py-0.5 rounded-full bg-primary/20 text-primary font-mono border border-primary/30">
                         {addresses.length} Saved
                       </span>
                     </h2>
@@ -1007,7 +1006,7 @@ export function CustomerAccountHub() {
 
                   <button
                     onClick={handleOpenAddAddress}
-                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-neon-cyan text-black font-display font-bold text-xs uppercase tracking-wider hover:bg-neon-cyan/90 transition-all shadow-[0_0_20px_rgba(0,242,254,0.3)] shrink-0 self-start sm:self-auto cursor-pointer"
+                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary hover:bg-primary-hover text-primary-foreground font-display font-semibold text-xs uppercase tracking-wider transition-all shadow-sm shrink-0 self-start sm:self-auto cursor-pointer"
                   >
                     <Plus className="h-4 w-4 stroke-[2.5]" />
                     <span>Add New Address</span>
@@ -1021,24 +1020,24 @@ export function CustomerAccountHub() {
                         key={addr.id}
                         className={`rounded-2xl p-5 border transition-all flex flex-col justify-between relative group ${
                           addr.isDefault
-                            ? "bg-gradient-to-b from-neon-cyan/[0.08] to-transparent border-neon-cyan/50 shadow-[0_0_25px_rgba(0,242,254,0.15)] ring-1 ring-neon-cyan/30"
-                            : "bg-white/[0.02] border-white/10 hover:border-white/20"
+                            ? "bg-primary/5 border-primary/50 shadow-sm ring-1 ring-primary/20"
+                            : "bg-card border-border hover:border-border-hover shadow-card"
                         }`}
                       >
                         <div className="space-y-3">
                           <div className="flex items-center justify-between gap-2">
-                            <span className="text-[11px] font-mono uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-white/5 border border-white/10 text-white font-bold">
+                            <span className="text-[11px] font-mono uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-secondary border border-border text-foreground font-bold">
                               {addr.label || "Home"}
                             </span>
 
                             {addr.isDefault ? (
-                              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-neon-cyan/20 text-neon-cyan border border-neon-cyan/40 font-bold flex items-center gap-1 shadow-[0_0_10px_rgba(0,242,254,0.3)]">
+                              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-primary/20 text-primary border border-primary/30 font-bold flex items-center gap-1">
                                 <Check className="h-3 w-3 stroke-[3]" /> Primary Default
                               </span>
                             ) : (
                               <button
                                 onClick={() => handleSetDefaultAddress(addr.id)}
-                                className="text-[10px] font-mono text-muted-foreground hover:text-neon-cyan transition-colors cursor-pointer"
+                                className="text-[10px] font-mono text-muted-foreground hover:text-primary transition-colors cursor-pointer"
                               >
                                 Set as Default
                               </button>
@@ -1046,20 +1045,20 @@ export function CustomerAccountHub() {
                           </div>
 
                           <div>
-                            <div className="font-display font-bold text-sm text-white">
+                            <div className="font-display font-bold text-sm text-foreground">
                               {addr.recipientName}
                             </div>
                             <div className="text-xs text-muted-foreground font-mono mt-1 flex items-center gap-1.5">
-                              <Phone className="h-3.5 w-3.5 text-neon-cyan/70 shrink-0" />
+                              <Phone className="h-3.5 w-3.5 text-primary/70 shrink-0" />
                               <span>{addr.phone}</span>
                             </div>
                           </div>
 
-                          <div className="text-xs text-white/80 leading-relaxed pt-2 border-t border-white/5">
+                          <div className="text-xs text-muted-foreground leading-relaxed pt-2 border-t border-border">
                             <div className="flex items-start gap-1.5">
-                              <MapPin className="h-3.5 w-3.5 text-neon-purple shrink-0 mt-0.5" />
+                              <MapPin className="h-3.5 w-3.5 text-accent shrink-0 mt-0.5" />
                               <div>
-                                <div>{addr.streetAddress}</div>
+                                <div className="text-foreground">{addr.streetAddress}</div>
                                 <div className="text-muted-foreground font-mono mt-0.5">
                                   {addr.city} {addr.postalCode ? `• ${addr.postalCode}` : ""}
                                 </div>
@@ -1068,17 +1067,17 @@ export function CustomerAccountHub() {
                           </div>
                         </div>
 
-                        <div className="flex items-center justify-end gap-2 pt-4 mt-3 border-t border-white/5">
+                        <div className="flex items-center justify-end gap-2 pt-4 mt-3 border-t border-border">
                           <button
                             onClick={() => handleOpenEditAddress(addr)}
-                            className="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-xs font-medium text-white transition-colors flex items-center gap-1.5 cursor-pointer"
+                            className="px-3 py-1.5 rounded-lg bg-secondary hover:bg-secondary/80 text-xs font-medium text-foreground transition-colors flex items-center gap-1.5 cursor-pointer"
                           >
                             <Edit2 className="h-3.5 w-3.5" />
                             <span>Edit</span>
                           </button>
                           <button
                             onClick={() => handleDeleteAddress(addr.id)}
-                            className="p-1.5 rounded-lg text-muted-foreground hover:text-rose-400 hover:bg-rose-500/10 transition-colors cursor-pointer"
+                            className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors cursor-pointer"
                             title="Delete Address"
                           >
                             <Trash2 className="h-3.5 w-3.5" />
@@ -1088,15 +1087,15 @@ export function CustomerAccountHub() {
                     ))}
                   </div>
                 ) : (
-                  <div className="p-12 rounded-3xl bg-white/[0.02] border border-dashed border-white/10 text-center">
+                  <div className="p-12 rounded-2xl bg-card border border-dashed border-border text-center">
                     <MapPin className="h-12 w-12 text-muted-foreground mx-auto mb-3 opacity-30" />
-                    <h4 className="font-display font-bold text-white text-base">No Saved Addresses</h4>
+                    <h4 className="font-display font-bold text-foreground text-base">No Saved Addresses</h4>
                     <p className="text-xs text-muted-foreground mt-1 max-w-sm mx-auto mb-4">
                       Add your home or office address to save time during checkout.
                     </p>
                     <button
                       onClick={handleOpenAddAddress}
-                      className="px-4 py-2 rounded-xl bg-neon-cyan text-black font-display font-bold text-xs uppercase tracking-wider hover:bg-neon-cyan/90 transition-all inline-flex items-center gap-2 cursor-pointer"
+                      className="px-4 py-2 rounded-xl bg-primary hover:bg-primary-hover text-primary-foreground font-display font-semibold text-xs uppercase tracking-wider transition-all inline-flex items-center gap-2 cursor-pointer shadow-sm"
                     >
                       <Plus className="h-4 w-4" />
                       <span>Add First Address</span>
@@ -1110,9 +1109,9 @@ export function CustomerAccountHub() {
             {activeTab === "reviews" && (
               <div className="space-y-6 animate-fade-up">
                 <div>
-                  <h2 className="text-2xl font-display font-bold text-white flex items-center gap-3">
+                  <h2 className="text-2xl font-display font-bold text-foreground flex items-center gap-3">
                     <span>My Hardware Reviews &amp; Ratings</span>
-                    <span className="text-xs px-2.5 py-0.5 rounded-full bg-neon-cyan/20 text-neon-cyan font-mono border border-neon-cyan/40">
+                    <span className="text-xs px-2.5 py-0.5 rounded-full bg-primary/20 text-primary font-mono border border-primary/30">
                       {reviews.length} Published
                     </span>
                   </h2>
@@ -1126,32 +1125,32 @@ export function CustomerAccountHub() {
                     {reviews.map((rev) => (
                       <div
                         key={rev.id}
-                        className="p-6 rounded-2xl bg-white/[0.02] border border-white/10 hover:border-white/20 transition-all space-y-4"
+                        className="p-6 rounded-2xl bg-card border border-border hover:border-border-hover shadow-card transition-all space-y-4"
                       >
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/5 pb-3">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border pb-3">
                           <div className="flex items-center gap-3">
                             <img
                               src={rev.product?.img}
                               alt={rev.product?.name}
-                              className="h-12 w-14 rounded-lg object-cover border border-white/10 shrink-0"
+                              className="h-12 w-14 rounded-lg object-cover border border-border shrink-0"
                             />
                             <div>
-                              <div className="font-display font-bold text-sm text-white">
+                              <div className="font-display font-bold text-sm text-foreground">
                                 {rev.product?.name || "Machine Unit"}
                               </div>
-                              <div className="text-[10px] font-mono text-neon-cyan mt-0.5">
+                              <div className="text-[10px] font-mono text-primary mt-0.5">
                                 Verified Order #{rev.order?.orderNumber} &bull; {new Date(rev.createdAt).toLocaleDateString()}
                               </div>
                             </div>
                           </div>
 
                           <div className="flex items-center gap-3">
-                            <div className="flex items-center gap-1 text-amber-400">
+                            <div className="flex items-center gap-1 text-amber-500">
                               {[1, 2, 3, 4, 5].map((s) => (
                                 <Star
                                   key={s}
                                   className={`h-4 w-4 ${
-                                    s <= rev.rating ? "fill-amber-400 text-amber-400" : "text-white/20"
+                                    s <= rev.rating ? "fill-amber-500 text-amber-500" : "text-muted-foreground/30"
                                   }`}
                                 />
                               ))}
@@ -1162,7 +1161,7 @@ export function CustomerAccountHub() {
                               <button
                                 type="button"
                                 onClick={() => handleOpenEditReview(rev)}
-                                className="px-3 py-1.5 rounded-xl bg-white/5 hover:bg-neon-cyan/20 text-white hover:text-neon-cyan border border-white/10 text-xs font-mono font-bold flex items-center gap-1.5 transition-all cursor-pointer"
+                                className="px-3 py-1.5 rounded-xl bg-secondary hover:bg-secondary/80 text-foreground border border-border text-xs font-mono font-bold flex items-center gap-1.5 transition-all cursor-pointer"
                               >
                                 <Edit2 className="h-3 w-3" />
                                 <span>Edit</span>
@@ -1171,7 +1170,7 @@ export function CustomerAccountHub() {
                                 type="button"
                                 disabled={deletingReviewId === rev.id}
                                 onClick={() => handleDeleteReview(rev.id)}
-                                className="px-3 py-1.5 rounded-xl bg-white/5 hover:bg-rose-500/20 text-white hover:text-rose-400 border border-white/10 hover:border-rose-500/30 text-xs font-mono font-bold flex items-center gap-1.5 transition-all cursor-pointer disabled:opacity-50"
+                                className="px-3 py-1.5 rounded-xl bg-secondary hover:bg-destructive/10 text-foreground hover:text-destructive border border-border hover:border-destructive/30 text-xs font-mono font-bold flex items-center gap-1.5 transition-all cursor-pointer disabled:opacity-50"
                                 title="Delete Review"
                               >
                                 <Trash2 className="h-3 w-3" />
@@ -1188,9 +1187,9 @@ export function CustomerAccountHub() {
                     ))}
                   </div>
                 ) : (
-                  <div className="p-12 rounded-3xl bg-white/[0.02] border border-dashed border-white/10 text-center">
+                  <div className="p-12 rounded-2xl bg-card border border-dashed border-border text-center">
                     <Star className="h-12 w-12 text-muted-foreground mx-auto mb-3 opacity-30" />
-                    <h4 className="font-display font-bold text-white text-base">No Reviews Submitted Yet</h4>
+                    <h4 className="font-display font-bold text-foreground text-base">No Reviews Submitted Yet</h4>
                     <p className="text-xs text-muted-foreground mt-1 max-w-sm mx-auto">
                       Once your ordered laptops are delivered, you can submit verified reviews directly from your Orders tab.
                     </p>
@@ -1203,7 +1202,7 @@ export function CustomerAccountHub() {
             {activeTab === "settings" && (
               <div className="space-y-6 animate-fade-up">
                 <div>
-                  <h2 className="text-2xl font-display font-bold text-white flex items-center gap-3">
+                  <h2 className="text-2xl font-display font-bold text-foreground flex items-center gap-3">
                     <span>Customer Profile &amp; Delivery Settings</span>
                   </h2>
                   <p className="text-xs text-muted-foreground mt-1">
@@ -1215,20 +1214,20 @@ export function CustomerAccountHub() {
                   <div
                     className={`max-w-2xl p-4 rounded-xl text-xs flex items-center gap-2 ${
                       profileMsg.type === "success"
-                        ? "bg-emerald-500/10 border border-emerald-500/30 text-emerald-300"
-                        : "bg-rose-500/10 border border-rose-500/30 text-rose-300"
+                        ? "bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-300"
+                        : "bg-destructive/10 border border-destructive/30 text-destructive"
                     }`}
                   >
                     {profileMsg.type === "success" ? (
-                      <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-400" />
+                      <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-500" />
                     ) : (
-                      <AlertTriangle className="h-4 w-4 shrink-0 text-rose-400" />
+                      <AlertTriangle className="h-4 w-4 shrink-0 text-destructive" />
                     )}
                     <span>{profileMsg.text}</span>
                   </div>
                 )}
 
-                <form onSubmit={handleSaveProfile} className="max-w-2xl rounded-2xl bg-white/[0.02] border border-white/10 p-6 space-y-4 text-xs">
+                <form onSubmit={handleSaveProfile} className="max-w-2xl rounded-2xl bg-card border border-border shadow-card p-6 space-y-4 text-xs">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <label className="text-muted-foreground font-mono uppercase text-[10px] block mb-1.5 font-bold">
@@ -1239,7 +1238,7 @@ export function CustomerAccountHub() {
                         placeholder="First Name"
                         value={profileForm.firstName}
                         onChange={(e) => setProfileForm({ ...profileForm, firstName: e.target.value })}
-                        className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-neon-cyan transition-colors"
+                        className="w-full bg-secondary/30 border border-border rounded-xl px-4 py-2.5 text-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
                       />
                     </div>
                     <div>
@@ -1251,7 +1250,7 @@ export function CustomerAccountHub() {
                         placeholder="Last Name"
                         value={profileForm.lastName}
                         onChange={(e) => setProfileForm({ ...profileForm, lastName: e.target.value })}
-                        className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-neon-cyan transition-colors"
+                        className="w-full bg-secondary/30 border border-border rounded-xl px-4 py-2.5 text-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
                       />
                     </div>
                   </div>
@@ -1264,7 +1263,7 @@ export function CustomerAccountHub() {
                       type="text"
                       disabled
                       value={user.email}
-                      className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-2.5 text-muted-foreground font-mono opacity-80"
+                      className="w-full bg-secondary/50 border border-border rounded-xl px-4 py-2.5 text-muted-foreground font-mono opacity-80"
                     />
                   </div>
 
@@ -1277,20 +1276,20 @@ export function CustomerAccountHub() {
                       placeholder="+94 77 123 4567"
                       value={profileForm.phone}
                       onChange={(e) => setProfileForm({ ...profileForm, phone: e.target.value })}
-                      className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-neon-cyan transition-colors"
+                      className="w-full bg-secondary/30 border border-border rounded-xl px-4 py-2.5 text-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
                     />
                   </div>
 
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
                       <label className="text-muted-foreground font-mono uppercase text-[10px] font-bold flex items-center gap-1.5">
-                        <MapPin className="h-3.5 w-3.5 text-neon-cyan" />
+                        <MapPin className="h-3.5 w-3.5 text-primary" />
                         Default Delivery Address
                       </label>
                       <button
                         type="button"
                         onClick={handleOpenAddAddress}
-                        className="text-[11px] font-mono text-neon-cyan hover:underline flex items-center gap-1 cursor-pointer"
+                        className="text-[11px] font-mono text-primary hover:underline flex items-center gap-1 cursor-pointer"
                       >
                         <Plus className="h-3 w-3" /> Add New Address
                       </button>
@@ -1302,15 +1301,15 @@ export function CustomerAccountHub() {
                           <select
                             value={selectedDefaultAddressId}
                             onChange={(e) => handleSelectDefaultAddressChange(e.target.value)}
-                            className="w-full bg-black/60 border border-white/15 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-neon-cyan transition-colors appearance-none font-sans cursor-pointer shadow-[0_0_15px_rgba(0,0,0,0.5)]"
+                            className="w-full bg-secondary/50 border border-border rounded-xl px-4 py-3 text-sm text-foreground focus:outline-none focus:border-primary transition-colors appearance-none font-sans cursor-pointer shadow-sm"
                           >
                             {addresses.map((addr) => (
-                              <option key={addr.id} value={addr.id} className="bg-[#0D121F] text-white py-2">
+                              <option key={addr.id} value={addr.id} className="bg-card text-foreground py-2">
                                 [{addr.label.toUpperCase()}] {addr.recipientName} - {addr.streetAddress}, {addr.city} {addr.isDefault ? "★ (Default)" : ""}
                               </option>
                             ))}
                           </select>
-                          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-neon-cyan">
+                          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-primary">
                             <ChevronRight className="h-4 w-4 rotate-90" />
                           </div>
                         </div>
@@ -1323,21 +1322,21 @@ export function CustomerAccountHub() {
                             addresses[0];
                           if (!currentSelected) return null;
                           return (
-                            <div className="p-4 rounded-xl bg-neon-cyan/5 border border-neon-cyan/30 text-xs flex items-start justify-between gap-3 shadow-[0_0_15px_rgba(0,242,254,0.1)]">
+                            <div className="p-4 rounded-xl bg-primary/5 border border-primary/20 text-xs flex items-start justify-between gap-3 shadow-sm">
                               <div className="space-y-1">
                                 <div className="flex items-center gap-2">
-                                  <span className="font-mono text-[10px] font-bold px-2 py-0.5 rounded bg-neon-cyan/20 text-neon-cyan border border-neon-cyan/40">
+                                  <span className="font-mono text-[10px] font-bold px-2 py-0.5 rounded bg-primary/20 text-primary border border-primary/30">
                                     {currentSelected.label}
                                   </span>
-                                  <span className="font-bold text-white">{currentSelected.recipientName}</span>
+                                  <span className="font-bold text-foreground">{currentSelected.recipientName}</span>
                                   <span className="text-muted-foreground font-mono">({currentSelected.phone})</span>
                                 </div>
-                                <div className="text-white/80">
+                                <div className="text-muted-foreground">
                                   {currentSelected.streetAddress}, {currentSelected.city}{" "}
                                   {currentSelected.postalCode ? `• ${currentSelected.postalCode}` : ""}
                                 </div>
                               </div>
-                              <span className="text-[10px] font-mono text-neon-cyan uppercase tracking-wider shrink-0 bg-neon-cyan/10 px-2 py-0.5 rounded border border-neon-cyan/20 font-bold">
+                              <span className="text-[10px] font-mono text-primary uppercase tracking-wider shrink-0 bg-primary/10 px-2 py-0.5 rounded border border-primary/20 font-bold">
                                 Active Default
                               </span>
                             </div>
@@ -1345,14 +1344,14 @@ export function CustomerAccountHub() {
                         })()}
                       </div>
                     ) : (
-                      <div className="p-4 rounded-xl bg-white/[0.02] border border-dashed border-white/10 text-center space-y-2">
+                      <div className="p-4 rounded-xl bg-card border border-dashed border-border text-center space-y-2">
                         <p className="text-xs text-muted-foreground">
                           No saved addresses found in your address book.
                         </p>
                         <button
                           type="button"
                           onClick={handleOpenAddAddress}
-                          className="px-3 py-1.5 rounded-lg bg-neon-cyan/20 text-neon-cyan border border-neon-cyan/30 hover:bg-neon-cyan/30 text-xs font-bold transition-all cursor-pointer"
+                          className="px-3 py-1.5 rounded-lg bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 text-xs font-semibold transition-all cursor-pointer"
                         >
                           + Create Your First Saved Address
                         </button>
@@ -1364,7 +1363,7 @@ export function CustomerAccountHub() {
                     <button
                       type="submit"
                       disabled={isSavingProfile}
-                      className="px-6 py-2.5 rounded-xl bg-neon-cyan text-black font-display font-bold uppercase tracking-wider shadow-[0_0_15px_rgba(0,242,254,0.3)] hover:shadow-[0_0_25px_rgba(0,242,254,0.7)] transition-all flex items-center gap-2"
+                      className="px-6 py-2.5 rounded-xl bg-primary hover:bg-primary-hover text-primary-foreground font-display font-semibold uppercase tracking-wider shadow-sm transition-all flex items-center gap-2 cursor-pointer"
                     >
                       {isSavingProfile ? <RefreshCw className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
                       <span>Save Profile Settings</span>
@@ -1379,18 +1378,18 @@ export function CustomerAccountHub() {
 
       {/* C2.1 LIVE ORDER TRACKING MODAL */}
       {trackingModalOrder && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
-          <div className="bg-[#0D121F] border border-white/15 rounded-3xl w-full max-w-2xl p-6 sm:p-8 relative shadow-2xl max-h-[90vh] overflow-y-auto space-y-6">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm animate-fade-in">
+          <div className="bg-card border border-border rounded-2xl w-full max-w-2xl p-6 sm:p-8 relative shadow-2xl max-h-[90vh] overflow-y-auto space-y-6">
             {/* Modal Header */}
-            <div className="flex items-center justify-between border-b border-white/10 pb-4">
+            <div className="flex items-center justify-between border-b border-border pb-4">
               <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-2xl bg-neon-cyan/15 border border-neon-cyan/30 flex items-center justify-center text-neon-cyan shadow-[0_0_15px_rgba(0,242,254,0.2)]">
+                <div className="h-10 w-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shadow-sm">
                   <Truck className="h-5 w-5" />
                 </div>
                 <div>
-                  <h3 className="text-base sm:text-lg font-display font-bold text-white flex items-center gap-2">
+                  <h3 className="text-base sm:text-lg font-display font-bold text-foreground flex items-center gap-2">
                     <span>Live Order Tracking</span>
-                    <span className="font-mono text-xs px-2 py-0.5 rounded bg-neon-cyan/20 text-neon-cyan border border-neon-cyan/30 font-bold">
+                    <span className="font-mono text-xs px-2 py-0.5 rounded bg-primary/20 text-primary border border-primary/30 font-bold">
                       {trackingModalOrder.orderNumber}
                     </span>
                   </h3>
@@ -1402,26 +1401,26 @@ export function CustomerAccountHub() {
               <button
                 type="button"
                 onClick={() => setTrackingModalOrder(null)}
-                className="p-2 rounded-xl text-muted-foreground hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+                className="p-2 rounded-xl text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors cursor-pointer"
               >
                 <X className="h-5 w-5" />
               </button>
             </div>
 
             {/* Current Status Highlight Banner */}
-            <div className="p-4 rounded-2xl bg-white/[0.03] border border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="p-4 rounded-xl bg-secondary/40 border border-border flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
                 <span className="text-[10px] font-mono uppercase text-muted-foreground block font-bold tracking-wider">
                   Current Shipment Status
                 </span>
-                <span className="text-sm font-display font-bold text-white flex items-center gap-2 mt-0.5">
+                <span className="text-sm font-display font-bold text-foreground flex items-center gap-2 mt-0.5">
                   <span
                     className={`h-2.5 w-2.5 rounded-full ${
                       trackingModalOrder.status === "DELIVERED"
-                        ? "bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]"
+                        ? "bg-emerald-500 shadow-sm"
                         : trackingModalOrder.status === "CANCELLED"
-                        ? "bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.8)]"
-                        : "bg-neon-cyan animate-pulse shadow-[0_0_8px_rgba(0,242,254,0.8)]"
+                        ? "bg-destructive shadow-sm"
+                        : "bg-primary animate-pulse shadow-sm"
                     }`}
                   />
                   {trackingModalOrder.status === "PENDING"
@@ -1437,7 +1436,7 @@ export function CustomerAccountHub() {
                     : trackingModalOrder.status}
                 </span>
               </div>
-              <div className="text-xs font-mono px-3 py-1.5 rounded-xl bg-neon-cyan/10 border border-neon-cyan/30 text-neon-cyan font-bold flex items-center gap-1.5 shrink-0">
+              <div className="text-xs font-mono px-3 py-1.5 rounded-xl bg-primary/10 border border-primary/20 text-primary font-bold flex items-center gap-1.5 shrink-0">
                 <Clock className="h-3.5 w-3.5" />
                 <span>
                   {trackingModalOrder.status === "DELIVERED"
@@ -1457,7 +1456,7 @@ export function CustomerAccountHub() {
 
               if (isCancelled) {
                 return (
-                  <div className="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs flex items-center gap-2">
+                  <div className="p-4 rounded-2xl bg-destructive/10 border border-destructive/20 text-destructive text-xs flex items-center gap-2">
                     <AlertTriangle className="h-4 w-4" />
                     <span>This order has been cancelled.</span>
                   </div>
@@ -1472,12 +1471,12 @@ export function CustomerAccountHub() {
               ];
 
               return (
-                <div className="p-6 rounded-2xl bg-black/40 border border-white/10 space-y-6">
+                <div className="p-6 rounded-2xl bg-secondary/40 border border-border space-y-6">
                   <div className="grid grid-cols-4 gap-2 relative">
                     {/* Connecting progress bar line */}
-                    <div className="absolute top-4 left-[12%] right-[12%] h-1 bg-white/10 -z-0">
+                    <div className="absolute top-4 left-[12%] right-[12%] h-1 bg-border/60 -z-0">
                       <div
-                        className="h-full bg-gradient-to-r from-neon-cyan to-neon-purple transition-all duration-500 shadow-[0_0_10px_rgba(0,242,254,0.5)]"
+                        className="h-full bg-primary transition-all duration-500 shadow-sm"
                         style={{
                           width: `${Math.min(100, Math.max(0, (currentStageIndex / (steps.length - 1)) * 100))}%`,
                         }}
@@ -1493,16 +1492,16 @@ export function CustomerAccountHub() {
                           <div
                             className={`h-9 w-9 rounded-full flex items-center justify-center font-bold text-xs transition-all mb-2 ${
                               isComplete
-                                ? "bg-neon-cyan text-black shadow-[0_0_15px_rgba(0,242,254,0.5)]"
-                                : "bg-[#0D121F] text-muted-foreground border border-white/20"
-                            } ${isCurrent ? "ring-2 ring-neon-cyan ring-offset-2 ring-offset-[#0B0F19]" : ""}`}
+                                ? "bg-primary text-primary-foreground shadow-sm"
+                                : "bg-card text-muted-foreground border border-border"
+                            } ${isCurrent ? "ring-2 ring-primary ring-offset-2 ring-offset-background" : ""}`}
                           >
                             {isComplete ? <Check className="h-4 w-4 stroke-[3]" /> : idx + 1}
                           </div>
-                          <div className={`text-xs font-bold leading-tight ${isComplete ? "text-white" : "text-muted-foreground"}`}>
+                          <div className={`text-xs font-bold leading-tight ${isComplete ? "text-foreground" : "text-muted-foreground"}`}>
                             {step.label}
                           </div>
-                          <div className="text-[10px] text-muted-foreground/70 mt-0.5 hidden sm:block">
+                          <div className="text-[10px] text-muted-foreground mt-0.5 hidden sm:block">
                             {step.desc}
                           </div>
                         </div>
@@ -1514,8 +1513,8 @@ export function CustomerAccountHub() {
             })()}
 
             {/* Shipping & Delivery Address Details Card */}
-            <div className="p-5 rounded-2xl bg-black/40 border border-white/10 space-y-3">
-              <div className="flex items-center gap-2 text-xs font-bold font-mono uppercase text-neon-cyan tracking-wider pb-2 border-b border-white/5">
+            <div className="p-5 rounded-2xl bg-secondary/40 border border-border space-y-3">
+              <div className="flex items-center gap-2 text-xs font-bold font-mono uppercase text-primary tracking-wider pb-2 border-b border-border">
                 <MapPin className="h-4 w-4" />
                 <span>Shipping & Delivery Destination</span>
               </div>
@@ -1525,7 +1524,7 @@ export function CustomerAccountHub() {
                   <span className="text-[10px] uppercase font-mono text-muted-foreground block font-bold">
                     Recipient Customer
                   </span>
-                  <p className="font-semibold text-white flex items-center gap-2">
+                  <p className="font-semibold text-foreground flex items-center gap-2">
                     <User className="h-3.5 w-3.5 text-muted-foreground" />
                     <span>{trackingModalOrder.customerName}</span>
                   </p>
@@ -1539,7 +1538,7 @@ export function CustomerAccountHub() {
                   <span className="text-[10px] uppercase font-mono text-muted-foreground block font-bold">
                     Delivery Street Address
                   </span>
-                  <p className="text-white leading-relaxed font-mono">
+                  <p className="text-foreground leading-relaxed font-mono">
                     {trackingModalOrder.shippingAddress}
                   </p>
                   {(trackingModalOrder.city || trackingModalOrder.zipCode) && (
@@ -1553,8 +1552,8 @@ export function CustomerAccountHub() {
 
             {/* Package Contents */}
             <div className="space-y-3">
-              <div className="flex items-center gap-2 text-xs font-bold font-mono uppercase text-white tracking-wider">
-                <Package className="h-4 w-4 text-neon-purple" />
+              <div className="flex items-center gap-2 text-xs font-bold font-mono uppercase text-foreground tracking-wider">
+                <Package className="h-4 w-4 text-accent" />
                 <span>Hardware Packages in this Shipment ({trackingModalOrder.items.length})</span>
               </div>
 
@@ -1562,16 +1561,16 @@ export function CustomerAccountHub() {
                 {trackingModalOrder.items.map((item) => (
                   <div
                     key={item.id}
-                    className="p-3 rounded-xl bg-white/[0.02] border border-white/5 flex items-center justify-between gap-3"
+                    className="p-3 rounded-xl bg-secondary/30 border border-border flex items-center justify-between gap-3"
                   >
                     <div className="flex items-center gap-3 min-w-0">
                       <img
                         src={item.product?.img}
                         alt={item.product?.name}
-                        className="h-10 w-12 rounded-lg object-cover border border-white/10 shrink-0"
+                        className="h-10 w-12 rounded-lg object-cover border border-border shrink-0"
                       />
                       <div className="min-w-0">
-                        <p className="text-xs font-bold text-white truncate">
+                        <p className="text-xs font-bold text-foreground truncate">
                           {item.product?.name || "Computing Rig"}
                         </p>
                         <p className="text-[10px] text-muted-foreground font-mono truncate">
@@ -1581,7 +1580,7 @@ export function CustomerAccountHub() {
                       </div>
                     </div>
                     <div className="text-right shrink-0">
-                      <p className="text-xs font-bold text-white font-mono">
+                      <p className="text-xs font-bold text-foreground font-mono">
                         LKR {(item.price * item.quantity).toLocaleString()}
                       </p>
                       <p className="text-[10px] text-muted-foreground font-mono">
@@ -1594,11 +1593,11 @@ export function CustomerAccountHub() {
             </div>
 
             {/* Close Button */}
-            <div className="pt-2 border-t border-white/10 flex justify-end">
+            <div className="pt-2 border-t border-border flex justify-end">
               <button
                 type="button"
                 onClick={() => setTrackingModalOrder(null)}
-                className="px-5 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-display text-xs font-bold transition-all cursor-pointer"
+                className="px-5 py-2.5 rounded-xl bg-secondary hover:bg-secondary/80 text-foreground font-display text-xs font-semibold transition-all cursor-pointer border border-border"
               >
                 Close Tracking
               </button>
@@ -1609,28 +1608,28 @@ export function CustomerAccountHub() {
 
       {/* C3.1 WRITE REVIEW MODAL */}
       {reviewModalOrder && reviewModalProduct && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
-          <div className="bg-[#0D121F] border border-white/15 rounded-3xl w-full max-w-lg p-6 sm:p-8 relative shadow-2xl">
-            <div className="flex items-center justify-between border-b border-white/10 pb-4 mb-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm animate-fade-in">
+          <div className="bg-card border border-border rounded-2xl w-full max-w-lg p-6 sm:p-8 relative shadow-2xl">
+            <div className="flex items-center justify-between border-b border-border pb-4 mb-4">
               <div className="flex items-center gap-2">
-                <Star className="h-5 w-5 text-amber-400 fill-amber-400" />
-                <h3 className="text-base font-display font-bold text-white">
+                <Star className="h-5 w-5 text-amber-500 fill-amber-500" />
+                <h3 className="text-base font-display font-bold text-foreground">
                   Review {reviewModalProduct.name}
                 </h3>
               </div>
-              <button onClick={() => setReviewModalOrder(null)} className="p-1 rounded-lg text-muted-foreground hover:text-white">
+              <button onClick={() => setReviewModalOrder(null)} className="p-1 rounded-lg text-muted-foreground hover:text-foreground">
                 <X className="h-5 w-5" />
               </button>
             </div>
 
             {reviewModalError && (
-              <div className="mb-4 p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs">
+              <div className="mb-4 p-3 rounded-xl bg-destructive/10 border border-destructive/20 text-destructive text-xs">
                 {reviewModalError}
               </div>
             )}
 
             {reviewModalSuccess && (
-              <div className="mb-4 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs">
+              <div className="mb-4 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-300 text-xs">
                 {reviewModalSuccess}
               </div>
             )}
@@ -1650,12 +1649,12 @@ export function CustomerAccountHub() {
                     >
                       <Star
                         className={`h-7 w-7 ${
-                          s <= reviewRating ? "fill-amber-400 text-amber-400" : "text-white/20"
+                          s <= reviewRating ? "fill-amber-500 text-amber-500" : "text-muted-foreground/30"
                         }`}
                       />
                     </button>
                   ))}
-                  <span className="text-xs font-mono text-amber-400 font-bold ml-2">
+                  <span className="text-xs font-mono text-amber-500 font-bold ml-2">
                     {reviewRating} of 5 Stars
                   </span>
                 </div>
@@ -1671,7 +1670,7 @@ export function CustomerAccountHub() {
                   placeholder="Share feedback on thermal performance, build quality, screen clarity, or daily workflow speed..."
                   value={reviewComment}
                   onChange={(e) => setReviewComment(e.target.value)}
-                  className="w-full bg-black/50 border border-white/10 rounded-xl p-3 text-white placeholder-muted-foreground focus:outline-none focus:border-neon-cyan resize-none leading-relaxed"
+                  className="w-full bg-secondary/30 border border-border rounded-xl p-3 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary resize-none leading-relaxed"
                 />
               </div>
 
@@ -1679,14 +1678,14 @@ export function CustomerAccountHub() {
                 <button
                   type="button"
                   onClick={() => setReviewModalOrder(null)}
-                  className="px-4 py-2 rounded-xl border border-white/10 text-muted-foreground hover:text-white"
+                  className="px-4 py-2 rounded-xl border border-border text-muted-foreground hover:text-foreground cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmittingReview}
-                  className="px-5 py-2 rounded-xl bg-neon-cyan text-black font-display font-bold uppercase tracking-wider flex items-center gap-2 shadow-[0_0_15px_rgba(0,242,254,0.3)]"
+                  className="px-5 py-2 rounded-xl bg-primary hover:bg-primary-hover text-primary-foreground font-display font-semibold uppercase tracking-wider flex items-center gap-2 shadow-sm cursor-pointer"
                 >
                   {isSubmittingReview ? <RefreshCw className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
                   <span>Submit Review</span>
@@ -1699,28 +1698,28 @@ export function CustomerAccountHub() {
 
       {/* C3.1 EDIT REVIEW MODAL */}
       {editingReview && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
-          <div className="bg-[#0D121F] border border-white/15 rounded-3xl w-full max-w-lg p-6 sm:p-8 relative shadow-2xl">
-            <div className="flex items-center justify-between border-b border-white/10 pb-4 mb-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm animate-fade-in">
+          <div className="bg-card border border-border rounded-2xl w-full max-w-lg p-6 sm:p-8 relative shadow-2xl">
+            <div className="flex items-center justify-between border-b border-border pb-4 mb-4">
               <div className="flex items-center gap-2">
-                <Edit2 className="h-5 w-5 text-neon-cyan" />
-                <h3 className="text-base font-display font-bold text-white">
+                <Edit2 className="h-5 w-5 text-primary" />
+                <h3 className="text-base font-display font-bold text-foreground">
                   Edit Review &bull; {editingReview.product?.name}
                 </h3>
               </div>
-              <button onClick={() => setEditingReview(null)} className="p-1 rounded-lg text-muted-foreground hover:text-white">
+              <button onClick={() => setEditingReview(null)} className="p-1 rounded-lg text-muted-foreground hover:text-foreground">
                 <X className="h-5 w-5" />
               </button>
             </div>
 
             {editReviewError && (
-              <div className="mb-4 p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs">
+              <div className="mb-4 p-3 rounded-xl bg-destructive/10 border border-destructive/20 text-destructive text-xs">
                 {editReviewError}
               </div>
             )}
 
             {editReviewSuccess && (
-              <div className="mb-4 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs">
+              <div className="mb-4 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-300 text-xs">
                 {editReviewSuccess}
               </div>
             )}
@@ -1740,12 +1739,12 @@ export function CustomerAccountHub() {
                     >
                       <Star
                         className={`h-7 w-7 ${
-                          s <= editRating ? "fill-amber-400 text-amber-400" : "text-white/20"
+                          s <= editRating ? "fill-amber-500 text-amber-500" : "text-muted-foreground/30"
                         }`}
                       />
                     </button>
                   ))}
-                  <span className="text-xs font-mono text-amber-400 font-bold ml-2">
+                  <span className="text-xs font-mono text-amber-500 font-bold ml-2">
                     {editRating} of 5 Stars
                   </span>
                 </div>
@@ -1760,7 +1759,7 @@ export function CustomerAccountHub() {
                   required
                   value={editComment}
                   onChange={(e) => setEditComment(e.target.value)}
-                  className="w-full bg-black/50 border border-white/10 rounded-xl p-3 text-white focus:outline-none focus:border-neon-cyan resize-none leading-relaxed"
+                  className="w-full bg-secondary/30 border border-border rounded-xl p-3 text-foreground focus:outline-none focus:border-primary resize-none leading-relaxed"
                 />
               </div>
 
@@ -1768,14 +1767,14 @@ export function CustomerAccountHub() {
                 <button
                   type="button"
                   onClick={() => setEditingReview(null)}
-                  className="px-4 py-2 rounded-xl border border-white/10 text-muted-foreground hover:text-white"
+                  className="px-4 py-2 rounded-xl border border-border text-muted-foreground hover:text-foreground cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isEditingReview}
-                  className="px-5 py-2 rounded-xl bg-neon-cyan text-black font-display font-bold uppercase tracking-wider flex items-center gap-2 shadow-[0_0_15px_rgba(0,242,254,0.3)]"
+                  className="px-5 py-2 rounded-xl bg-primary hover:bg-primary-hover text-primary-foreground font-display font-semibold uppercase tracking-wider flex items-center gap-2 shadow-sm cursor-pointer"
                 >
                   {isEditingReview ? <RefreshCw className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
                   <span>Save Review</span>
@@ -1788,31 +1787,31 @@ export function CustomerAccountHub() {
 
       {/* ADDRESS MODAL (Add / Edit Address) */}
       {addressModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
-          <div className="bg-[#0D121F] border border-white/15 rounded-3xl w-full max-w-lg p-6 sm:p-8 relative shadow-2xl max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between border-b border-white/10 pb-4 mb-5">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm animate-fade-in">
+          <div className="bg-card border border-border rounded-2xl w-full max-w-lg p-6 sm:p-8 relative shadow-2xl max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between border-b border-border pb-4 mb-5">
               <div className="flex items-center gap-2">
-                <MapPin className="h-5 w-5 text-neon-cyan" />
-                <h3 className="font-display font-bold text-lg text-white">
+                <MapPin className="h-5 w-5 text-primary" />
+                <h3 className="font-display font-bold text-lg text-foreground">
                   {editingAddress ? "Edit Delivery Address" : "Add New Delivery Address"}
                 </h3>
               </div>
               <button
                 onClick={() => setAddressModalOpen(false)}
-                className="text-muted-foreground hover:text-white p-1 rounded-lg hover:bg-white/5 cursor-pointer"
+                className="text-muted-foreground hover:text-foreground p-1 rounded-lg hover:bg-secondary cursor-pointer"
               >
                 <X className="h-5 w-5" />
               </button>
             </div>
 
             {addressError && (
-              <div className="mb-4 p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs">
+              <div className="mb-4 p-3 rounded-xl bg-destructive/10 border border-destructive/20 text-destructive text-xs">
                 {addressError}
               </div>
             )}
 
             {addressSuccess && (
-              <div className="mb-4 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-xs">
+              <div className="mb-4 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-300 text-xs">
                 {addressSuccess}
               </div>
             )}
@@ -1830,8 +1829,8 @@ export function CustomerAccountHub() {
                       onClick={() => setAddressForm((f) => ({ ...f, label: lbl }))}
                       className={`py-1.5 px-2 rounded-lg text-center font-mono text-[11px] font-bold transition-all cursor-pointer ${
                         addressForm.label === lbl
-                          ? "bg-neon-cyan/20 border border-neon-cyan text-neon-cyan shadow-[0_0_10px_rgba(0,242,254,0.3)]"
-                          : "bg-white/5 border border-white/10 text-muted-foreground hover:text-white"
+                          ? "bg-primary/20 border border-primary text-primary shadow-sm"
+                          : "bg-secondary border border-border text-muted-foreground hover:text-foreground"
                       }`}
                     >
                       {lbl}
@@ -1844,7 +1843,7 @@ export function CustomerAccountHub() {
                   placeholder="Custom label name"
                   value={addressForm.label}
                   onChange={(e) => setAddressForm((f) => ({ ...f, label: e.target.value }))}
-                  className="w-full bg-black/50 border border-white/10 rounded-xl px-3 py-2 text-white placeholder-muted-foreground focus:outline-none focus:border-neon-cyan"
+                  className="w-full bg-secondary/30 border border-border rounded-xl px-3 py-2 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary"
                 />
               </div>
 
@@ -1859,7 +1858,7 @@ export function CustomerAccountHub() {
                     placeholder="Recipient's Name"
                     value={addressForm.recipientName}
                     onChange={(e) => setAddressForm((f) => ({ ...f, recipientName: e.target.value }))}
-                    className="w-full bg-black/50 border border-white/10 rounded-xl px-3 py-2 text-white placeholder-muted-foreground focus:outline-none focus:border-neon-cyan"
+                    className="w-full bg-secondary/30 border border-border rounded-xl px-3 py-2 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary"
                   />
                 </div>
 
@@ -1873,7 +1872,7 @@ export function CustomerAccountHub() {
                     placeholder="+94 7X XXX XXXX"
                     value={addressForm.phone}
                     onChange={(e) => setAddressForm((f) => ({ ...f, phone: e.target.value }))}
-                    className="w-full bg-black/50 border border-white/10 rounded-xl px-3 py-2 text-white placeholder-muted-foreground focus:outline-none focus:border-neon-cyan"
+                    className="w-full bg-secondary/30 border border-border rounded-xl px-3 py-2 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary"
                   />
                 </div>
               </div>
@@ -1888,7 +1887,7 @@ export function CustomerAccountHub() {
                   placeholder="No. 45/A Galle Road, Apt 4"
                   value={addressForm.streetAddress}
                   onChange={(e) => setAddressForm((f) => ({ ...f, streetAddress: e.target.value }))}
-                  className="w-full bg-black/50 border border-white/10 rounded-xl px-3 py-2 text-white placeholder-muted-foreground focus:outline-none focus:border-neon-cyan"
+                  className="w-full bg-secondary/30 border border-border rounded-xl px-3 py-2 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary"
                 />
               </div>
 
@@ -1903,7 +1902,7 @@ export function CustomerAccountHub() {
                     placeholder="Colombo 03"
                     value={addressForm.city}
                     onChange={(e) => setAddressForm((f) => ({ ...f, city: e.target.value }))}
-                    className="w-full bg-black/50 border border-white/10 rounded-xl px-3 py-2 text-white placeholder-muted-foreground focus:outline-none focus:border-neon-cyan"
+                    className="w-full bg-secondary/30 border border-border rounded-xl px-3 py-2 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary"
                   />
                 </div>
 
@@ -1916,7 +1915,7 @@ export function CustomerAccountHub() {
                     placeholder="00300"
                     value={addressForm.postalCode || ""}
                     onChange={(e) => setAddressForm((f) => ({ ...f, postalCode: e.target.value }))}
-                    className="w-full bg-black/50 border border-white/10 rounded-xl px-3 py-2 text-white placeholder-muted-foreground focus:outline-none focus:border-neon-cyan"
+                    className="w-full bg-secondary/30 border border-border rounded-xl px-3 py-2 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary"
                   />
                 </div>
               </div>
@@ -1927,26 +1926,26 @@ export function CustomerAccountHub() {
                     type="checkbox"
                     checked={addressForm.isDefault}
                     onChange={(e) => setAddressForm((f) => ({ ...f, isDefault: e.target.checked }))}
-                    className="h-4 w-4 rounded border-white/20 bg-black/50 text-neon-cyan focus:ring-0 focus:ring-offset-0"
+                    className="h-4 w-4 rounded border-border bg-secondary text-primary focus:ring-0 focus:ring-offset-0"
                   />
-                  <span className="text-white text-xs select-none">
+                  <span className="text-foreground text-xs select-none">
                     Make this my primary delivery address
                   </span>
                 </label>
               </div>
 
-              <div className="flex justify-end gap-2 pt-4 border-t border-white/10">
+              <div className="flex justify-end gap-2 pt-4 border-t border-border">
                 <button
                   type="button"
                   onClick={() => setAddressModalOpen(false)}
-                  className="px-4 py-2 rounded-xl border border-white/10 text-muted-foreground hover:text-white cursor-pointer"
+                  className="px-4 py-2 rounded-xl border border-border text-muted-foreground hover:text-foreground cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isSavingAddress}
-                  className="px-5 py-2 rounded-xl bg-neon-cyan text-black font-display font-bold uppercase tracking-wider flex items-center gap-2 shadow-[0_0_15px_rgba(0,242,254,0.3)] cursor-pointer"
+                  className="px-5 py-2 rounded-xl bg-primary hover:bg-primary-hover text-primary-foreground font-display font-semibold uppercase tracking-wider flex items-center gap-2 shadow-sm cursor-pointer"
                 >
                   {isSavingAddress ? <RefreshCw className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
                   <span>{editingAddress ? "Save Changes" : "Save Address"}</span>

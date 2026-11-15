@@ -128,7 +128,7 @@ function ProductDetails() {
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-start">
             {/* Image */}
-            <div className="rounded-2xl overflow-hidden border border-glass-border bg-black">
+            <div className="rounded-2xl overflow-hidden border border-border bg-secondary/40">
               <img src={product.img} alt={product.name} className="w-full aspect-[4/3] object-cover object-left" />
             </div>
 
@@ -136,13 +136,13 @@ function ProductDetails() {
             <div className="flex flex-col gap-5">
               <div>
                 <div className="flex items-center gap-2 mb-1">
-                  <p className="text-xs font-medium text-neon-cyan uppercase tracking-wider">{product.badge}</p>
+                  <p className="text-xs font-mono font-medium text-primary uppercase tracking-wider">{product.badge}</p>
                   {stockCount > 0 ? (
-                    <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-bold">
+                    <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-500 border border-emerald-500/25 font-bold">
                       {stockCount} in stock
                     </span>
                   ) : (
-                    <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/30 font-bold">
+                    <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-destructive/10 text-destructive border border-destructive/25 font-bold">
                       Sold out
                     </span>
                   )}
@@ -155,7 +155,7 @@ function ProductDetails() {
               <div className="flex flex-col gap-2">
                 {highlights.map((h) => (
                   <div key={h} className="flex items-center gap-2">
-                    <Check className="h-4 w-4 text-neon-cyan shrink-0" />
+                    <Check className="h-4 w-4 text-primary shrink-0" />
                     <span className="text-sm text-foreground">{h}</span>
                   </div>
                 ))}
@@ -166,7 +166,7 @@ function ProductDetails() {
                 <button
                   onClick={() => addToCart(product)}
                   disabled={stockCount <= 0}
-                  className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-card border border-glass-border py-3.5 text-sm font-semibold text-foreground hover:border-neon-cyan/50 hover:text-neon-cyan transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                  className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-card border border-border py-3.5 text-sm font-semibold text-foreground hover:border-primary/50 hover:text-primary transition-all disabled:opacity-40 disabled:cursor-not-allowed shadow-sm"
                 >
                   <ShoppingCart className="h-4 w-4" />
                   {stockCount > 0 ? "Add to Cart" : "Out of Stock"}
@@ -174,14 +174,14 @@ function ProductDetails() {
                 {stockCount > 0 ? (
                   <Link
                     to={`/checkout/${product.id}`}
-                    className="flex-1 flex items-center justify-center rounded-xl bg-neon-cyan py-3.5 text-sm font-bold text-background hover:scale-[1.02] transition-all shadow-neon-cyan"
+                    className="flex-1 flex items-center justify-center rounded-xl bg-primary py-3.5 text-sm font-bold text-primary-foreground hover:bg-primary/90 transition-all shadow-sm"
                   >
                     Buy Now
                   </Link>
                 ) : (
                   <button
                     disabled
-                    className="flex-1 flex items-center justify-center rounded-xl bg-white/10 py-3.5 text-sm font-bold text-muted-foreground cursor-not-allowed"
+                    className="flex-1 flex items-center justify-center rounded-xl bg-secondary py-3.5 text-sm font-bold text-muted-foreground cursor-not-allowed border border-border"
                   >
                     Unavailable
                   </button>
@@ -189,23 +189,23 @@ function ProductDetails() {
               </div>
 
               {/* Specs (simple) */}
-              <div className="rounded-xl border border-glass-border bg-card p-4 flex flex-col gap-2.5 mt-2">
-                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Specs</p>
+              <div className="rounded-xl border border-border bg-card p-4 flex flex-col gap-2.5 mt-2 shadow-sm">
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider font-mono">Specs</p>
                 <div className="flex items-center gap-2 text-sm">
-                  <Cpu className="h-4 w-4 text-neon-cyan shrink-0" />
+                  <Cpu className="h-4 w-4 text-primary shrink-0" />
                   <span className="text-foreground">{product.cpu}</span>
                 </div>
                 <div className="flex items-center gap-2 text-sm">
-                  <MemoryStick className="h-4 w-4 text-neon-cyan shrink-0" />
+                  <MemoryStick className="h-4 w-4 text-primary shrink-0" />
                   <span className="text-foreground">{product.ram} RAM</span>
                 </div>
                 <div className="flex items-center gap-2 text-sm">
-                  <Zap className="h-4 w-4 text-neon-cyan shrink-0" />
+                  <Zap className="h-4 w-4 text-primary shrink-0" />
                   <span className="text-foreground">{product.gpu}</span>
                 </div>
                 {product.batteryWeight && (
                   <div className="flex items-center gap-2 text-sm">
-                    <Battery className="h-4 w-4 text-neon-cyan shrink-0" />
+                    <Battery className="h-4 w-4 text-primary shrink-0" />
                     <span className="text-foreground">{product.batteryWeight}</span>
                   </div>
                 )}
@@ -215,9 +215,9 @@ function ProductDetails() {
 
           {/* Simple Mode Benchmark Card */}
           {benchmark && (
-            <div className="mt-8 rounded-2xl border border-glass-border bg-card p-5 flex items-center justify-between">
+            <div className="mt-8 rounded-2xl border border-border bg-card p-5 flex items-center justify-between shadow-card">
               <div className="flex items-center gap-3">
-                <div className="p-2.5 rounded-xl bg-neon-cyan/10 border border-neon-cyan/30 text-neon-cyan">
+                <div className="p-2.5 rounded-xl bg-primary/10 border border-primary/25 text-primary">
                   <Sparkles className="h-5 w-5" />
                 </div>
                 <div>
@@ -226,7 +226,7 @@ function ProductDetails() {
                 </div>
               </div>
               <div className="text-right">
-                <span className="text-2xl font-bold font-mono text-neon-cyan">
+                <span className="text-2xl font-bold font-mono text-primary">
                   {benchmark.totalScore.toLocaleString()}
                 </span>
                 <span className="text-xs text-muted-foreground ml-1">pts</span>
@@ -298,47 +298,47 @@ function ProductDetails() {
   }
 
   return (
-    <main className="min-h-screen bg-[#060911] text-white overflow-x-hidden selection:bg-[#00E5FF]/30">
+    <main className="min-h-screen bg-background text-foreground overflow-x-hidden selection:bg-primary/30">
       <Navbar />
 
       {/* Immersive Hero Section */}
       <section className="relative min-h-[90vh] flex flex-col justify-center pt-24 pb-32 isolate">
-        <div className="absolute inset-0 -z-20 bg-grid opacity-30 [mask-image:linear-gradient(to_bottom,transparent,black_20%,black_80%,transparent)]" />
+        <div className="absolute inset-0 -z-20 bg-grid opacity-20 [mask-image:linear-gradient(to_bottom,transparent,black_20%,black_80%,transparent)]" />
 
         {/* Massive overlapping text */}
         <div className="absolute inset-0 -z-10 flex items-center justify-center overflow-hidden pointer-events-none">
-          <h1 className="font-display text-[14vw] font-black uppercase text-white/[0.03] whitespace-nowrap select-none tracking-tighter">
+          <h1 className="font-display text-[14vw] font-black uppercase text-foreground/[0.03] whitespace-nowrap select-none tracking-tighter">
             {product.category}
           </h1>
         </div>
 
         {/* Ambient Glows */}
-        <div className={`pointer-events-none absolute left-1/4 top-1/2 -z-10 h-[50vh] w-[50vw] -translate-x-1/2 -translate-y-1/2 rounded-full ${glowColor} blur-[120px] animate-glow-pulse`} />
+        <div className={`pointer-events-none absolute left-1/4 top-1/2 -z-10 h-[50vh] w-[50vw] -translate-x-1/2 -translate-y-1/2 rounded-full ${glowColor} blur-[120px] opacity-40 animate-glow-pulse`} />
 
         <div className="mx-auto w-full max-w-[1360px] px-4 sm:px-6 md:px-8">
-          <Link to="/" className="group mb-8 inline-flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-[#94A3B8] transition-colors hover:text-white">
+          <Link to="/" className="group mb-8 inline-flex items-center gap-2 text-xs uppercase tracking-[0.2em] font-mono text-muted-foreground transition-colors hover:text-foreground">
             <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" /> Back to grid
           </Link>
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
             {/* Left side: Image */}
             <div className="relative animate-fade-up [animation-delay:0.1s] lg:col-span-7">
-              <div className="group relative w-full overflow-hidden rounded-3xl border border-white/[0.08] bg-black/60 shadow-[0_0_80px_rgba(0,0,0,0.8)] aspect-[4/3] sm:aspect-[16/9] lg:aspect-[4/3]">
+              <div className="group relative w-full overflow-hidden rounded-2xl border border-border bg-card shadow-card aspect-[4/3] sm:aspect-[16/9] lg:aspect-[4/3]">
                 <img
                   src={product.img}
                   alt={`${product.name} High Resolution Render`}
                   className="h-full w-full object-cover object-left transition-transform duration-700 group-hover:scale-105"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30 pointer-events-none" />
+                <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent pointer-events-none" />
 
                 {/* Decorative HUD Elements */}
-                <div className="absolute top-6 left-6 hidden md:flex flex-col gap-1 rounded-lg bg-black/60 border border-white/10 px-3 py-2 text-[10px] text-[#94A3B8] tracking-[0.2em] font-mono backdrop-blur-md">
-                  <span className="text-[#00E5FF]">SYS.STATUS: OPTIMAL</span>
+                <div className="absolute top-6 left-6 hidden md:flex flex-col gap-1 rounded-lg bg-background/85 border border-border px-3 py-2 text-[10px] text-muted-foreground tracking-[0.2em] font-mono backdrop-blur-md">
+                  <span className="text-primary font-bold">SYS.STATUS: OPTIMAL</span>
                   <span>TEMP: 32°C</span>
                   <span>VOLTAGE: 1.2V</span>
                 </div>
-                <div className="absolute bottom-6 right-6 hidden md:flex items-center gap-2 rounded-full bg-black/60 border border-white/10 px-4 py-2 text-[10px] text-[#00E5FF] tracking-[0.2em] font-mono backdrop-blur-md">
-                  <span className="h-2 w-2 rounded-full bg-[#00E5FF] animate-pulse shadow-[0_0_10px_#00E5FF]" />
+                <div className="absolute bottom-6 right-6 hidden md:flex items-center gap-2 rounded-full bg-background/85 border border-border px-4 py-2 text-[10px] text-primary tracking-[0.2em] font-mono backdrop-blur-md">
+                  <span className="h-2 w-2 rounded-full bg-primary animate-pulse" />
                   LINK ACTIVE
                 </div>
               </div>
@@ -346,31 +346,31 @@ function ProductDetails() {
 
             {/* Right side: Details & Algo */}
             <div className="flex flex-col items-start max-w-full lg:col-span-5">
-              <span className={`mb-6 inline-block rounded-full border px-4 py-1.5 font-display text-[10px] uppercase tracking-[0.3em] shadow-[0_0_30px_rgba(0,229,255,0.2)] ${borderColor} ${textColor} bg-white/5 backdrop-blur-md animate-fade-up max-w-full truncate`}>
+              <span className={`mb-6 inline-block rounded-full border px-4 py-1.5 font-mono text-[10px] uppercase tracking-[0.25em] ${borderColor} ${textColor} bg-primary/10 backdrop-blur-md animate-fade-up max-w-full truncate font-semibold`}>
                 {product.badge}
               </span>
-              <h2 className="font-display text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-black tracking-tight uppercase animate-fade-up break-words max-w-full [animation-delay:0.1s] text-white">
+              <h2 className="font-display text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-black tracking-tight uppercase animate-fade-up break-words max-w-full [animation-delay:0.1s] text-foreground">
                 {product.name}
               </h2>
-              <p className="mt-4 text-base sm:text-lg md:text-xl text-[#94A3B8] animate-fade-up break-words [animation-delay:0.2s]">
+              <p className="mt-4 text-base sm:text-lg md:text-xl text-muted-foreground animate-fade-up break-words [animation-delay:0.2s]">
                 Engineered with {product.processor}. Built for unprecedented performance.
               </p>
 
               {/* Live Inventory Stock Badge */}
               <div className="mt-4 flex items-center gap-2 animate-fade-up [animation-delay:0.22s]">
                 {stockCount > 5 ? (
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono font-semibold bg-emerald-500/15 border border-emerald-500/30 text-emerald-300">
-                    <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono font-semibold bg-emerald-500/10 border border-emerald-500/25 text-emerald-500">
+                    <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
                     <span>In Stock: {stockCount} units ready for express dispatch</span>
                   </span>
                 ) : stockCount > 0 ? (
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono font-semibold bg-amber-500/15 border border-amber-500/30 text-amber-300">
-                    <span className="h-2 w-2 rounded-full bg-amber-400 animate-ping" />
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono font-semibold bg-amber-500/10 border border-amber-500/25 text-amber-500">
+                    <span className="h-2 w-2 rounded-full bg-amber-500 animate-ping" />
                     <span>Low Stock: Only {stockCount} units remaining in inventory!</span>
                   </span>
                 ) : (
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono font-semibold bg-rose-500/15 border border-rose-500/30 text-rose-300">
-                    <span className="h-2 w-2 rounded-full bg-rose-400" />
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono font-semibold bg-destructive/10 border border-destructive/25 text-destructive">
+                    <span className="h-2 w-2 rounded-full bg-destructive" />
                     <span>Out of Stock (Currently replenishing)</span>
                   </span>
                 )}
@@ -379,9 +379,9 @@ function ProductDetails() {
               {/* Benchmark Quick Badge */}
               {benchmark && (
                 <div className="mt-3 flex items-center gap-2.5 flex-wrap animate-fade-up [animation-delay:0.23s]">
-                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#00E5FF]/10 border border-[#00E5FF]/30 text-xs font-mono text-[#00E5FF]">
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/25 text-xs font-mono text-primary">
                     <Sparkles className="h-3.5 w-3.5" />
-                    <span>Benchmark Score: <strong className="text-white font-bold">{benchmark.totalScore.toLocaleString()} pts</strong></span>
+                    <span>Benchmark Score: <strong className="text-foreground font-bold">{benchmark.totalScore.toLocaleString()} pts</strong></span>
                   </div>
                 </div>
               )}
@@ -389,57 +389,55 @@ function ProductDetails() {
               <div className="mt-5 flex flex-wrap gap-2.5 animate-fade-up [animation-delay:0.25s]">
                 <a
                   href="#product-estimator"
-                  className="inline-flex items-center gap-2 rounded-full border border-[#00E5FF]/50 bg-[#00E5FF]/15 px-4 py-2 text-xs font-mono font-bold uppercase tracking-wider text-[#00E5FF] transition-all hover:bg-[#00E5FF] hover:text-[#060911] shadow-[0_0_20px_rgba(0,229,255,0.3)]"
+                  className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-2 text-xs font-mono font-bold uppercase tracking-wider text-primary transition-all hover:bg-primary hover:text-primary-foreground shadow-sm"
                 >
-                  <Gauge className="h-3.5 w-3.5 animate-pulse" />
+                  <Gauge className="h-3.5 w-3.5" />
                   <span>Test My Apps on This Machine ↓</span>
                 </a>
               </div>
 
               {/* Multi-Seller Merchant & Fulfillment Intelligence Card */}
-              <div className="mt-6 w-full rounded-2xl border border-white/[0.08] bg-[#0F172A]/60 backdrop-blur-xl p-5 shadow-lg relative overflow-hidden animate-fade-up [animation-delay:0.28s]">
-                <div className="pointer-events-none absolute -top-12 -right-12 h-32 w-32 rounded-full bg-[#00E5FF]/10 blur-[50px]" />
-
+              <div className="mt-6 w-full rounded-2xl border border-border bg-card p-5 shadow-card relative overflow-hidden animate-fade-up [animation-delay:0.28s]">
                 <div className="flex items-start justify-between gap-3 mb-3">
                   <div className="flex items-center gap-3">
-                    <div className="p-2.5 rounded-xl bg-[#00E5FF]/10 border border-[#00E5FF]/30 text-[#00E5FF] shrink-0">
+                    <div className="p-2.5 rounded-xl bg-primary/10 border border-primary/25 text-primary shrink-0">
                       <Store className="h-5 w-5" />
                     </div>
                     <div>
-                      <span className="text-[10px] uppercase font-mono tracking-widest text-[#94A3B8] block">
+                      <span className="text-[10px] uppercase font-mono tracking-widest text-muted-foreground block">
                         Sold &amp; Dispatched by
                       </span>
-                      <h4 className="font-display text-base font-bold text-white flex items-center gap-2">
+                      <h4 className="font-display text-base font-bold text-foreground flex items-center gap-2">
                         <span>{product.seller?.storeName || "SELLORA Central Direct"}</span>
-                        <span className="inline-flex items-center gap-1 rounded-full bg-[#00E5FF]/10 border border-[#00E5FF]/30 px-2 py-0.5 text-[9px] font-mono font-bold uppercase text-[#00E5FF]">
+                        <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 border border-primary/25 px-2 py-0.5 text-[9px] font-mono font-bold uppercase text-primary">
                           <CheckCircle2 className="h-2.5 w-2.5" /> Verified
                         </span>
                       </h4>
                     </div>
                   </div>
 
-                  <span className="rounded-lg bg-white/5 border border-white/10 px-2 py-1 text-[10px] font-mono text-[#94A3B8] shrink-0">
+                  <span className="rounded-lg bg-secondary border border-border px-2 py-1 text-[10px] font-mono text-muted-foreground shrink-0">
                     Direct Partner
                   </span>
                 </div>
 
                 {product.seller?.storeBio ? (
-                  <p className="text-xs text-[#94A3B8] leading-relaxed italic mb-4">
+                  <p className="text-xs text-muted-foreground leading-relaxed italic mb-4">
                     "{product.seller.storeBio}"
                   </p>
                 ) : (
-                  <p className="text-xs text-[#94A3B8] leading-relaxed mb-4">
+                  <p className="text-xs text-muted-foreground leading-relaxed mb-4">
                     Authorized hardware distributor with official regional warranty coverage and certified diagnostics.
                   </p>
                 )}
 
-                <div className="grid grid-cols-2 gap-2 pt-3 border-t border-white/[0.08] text-[11px] font-mono text-[#94A3B8]">
+                <div className="grid grid-cols-2 gap-2 pt-3 border-t border-border text-[11px] font-mono text-muted-foreground">
                   <div className="flex items-center gap-2">
-                    <Truck className="h-3.5 w-3.5 text-[#00E5FF] shrink-0" />
+                    <Truck className="h-3.5 w-3.5 text-primary shrink-0" />
                     <span>Dispatches in 24h</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <MapPin className="h-3.5 w-3.5 text-[#00E5FF] shrink-0" />
+                    <MapPin className="h-3.5 w-3.5 text-primary shrink-0" />
                     <span>{product.seller?.address || "Global Hub"}</span>
                   </div>
                 </div>
@@ -447,9 +445,9 @@ function ProductDetails() {
 
               {/* Auto Suggestion Comparison Algorithm */}
               <div className="mt-10 w-full animate-fade-up [animation-delay:0.3s]">
-                <div className="mb-4 flex items-center gap-2 border-b border-white/[0.08] pb-2">
-                  <Cpu className="h-4 w-4 text-[#00E5FF]" />
-                  <h3 className="font-display text-xs tracking-[0.2em] text-[#94A3B8]">SIMILAR SUGGESTIONS</h3>
+                <div className="mb-4 flex items-center gap-2 border-b border-border pb-2">
+                  <Cpu className="h-4 w-4 text-primary" />
+                  <h3 className="font-mono text-xs tracking-[0.2em] uppercase font-semibold text-muted-foreground">SIMILAR SUGGESTIONS</h3>
                 </div>
 
                 <div className="flex flex-col gap-3 w-full">
@@ -466,19 +464,19 @@ function ProductDetails() {
                     return (
                       <>
                         {suggestedLaptops.map(match => (
-                          <div key={match.id} className="flex flex-col sm:flex-row sm:items-center justify-between rounded-xl p-3 border border-white/[0.08] hover:border-[#00E5FF]/40 transition-colors bg-[#0F172A]/60 backdrop-blur-md gap-3">
+                          <div key={match.id} className="flex flex-col sm:flex-row sm:items-center justify-between rounded-xl p-3 border border-border hover:border-primary/40 transition-colors bg-card shadow-sm gap-3">
                             <div className="flex items-center gap-3 min-w-0">
-                              <img src={match.img} alt={match.name} className="h-12 w-12 sm:h-14 sm:w-14 rounded-lg bg-black object-cover shrink-0 border border-white/10" />
+                              <img src={match.img} alt={match.name} className="h-12 w-12 sm:h-14 sm:w-14 rounded-lg bg-secondary/40 object-cover shrink-0 border border-border" />
                               <div className="min-w-0 flex flex-col gap-1">
                                 <div className="flex items-center gap-2">
-                                  <p className="font-display text-sm font-bold text-white truncate">{match.name}</p>
-                                  <span className="text-[9px] uppercase tracking-widest text-[#00E5FF] font-mono">{match.processor}</span>
+                                  <p className="font-display text-sm font-bold text-foreground truncate">{match.name}</p>
+                                  <span className="text-[9px] uppercase tracking-widest text-primary font-mono">{match.processor}</span>
                                 </div>
                                 <div className="flex flex-wrap gap-1.5">
-                                  <span className="rounded bg-white/10 px-1.5 py-0.5 text-[9px] text-[#94A3B8]">{match.ram}</span>
-                                  <span className="rounded bg-white/10 px-1.5 py-0.5 text-[9px] text-[#94A3B8]">{match.gpu}</span>
-                                  <span className="rounded bg-white/10 px-1.5 py-0.5 text-[9px] text-[#94A3B8]">{match.cpu}</span>
-                                  {match.display && <span className="rounded bg-white/10 px-1.5 py-0.5 text-[9px] text-[#94A3B8]">{match.display.split(' ')[0]}</span>}
+                                  <span className="rounded bg-secondary px-1.5 py-0.5 text-[9px] text-muted-foreground">{match.ram}</span>
+                                  <span className="rounded bg-secondary px-1.5 py-0.5 text-[9px] text-muted-foreground">{match.gpu}</span>
+                                  <span className="rounded bg-secondary px-1.5 py-0.5 text-[9px] text-muted-foreground">{match.cpu}</span>
+                                  {match.display && <span className="rounded bg-secondary px-1.5 py-0.5 text-[9px] text-muted-foreground">{match.display.split(' ')[0]}</span>}
                                 </div>
                               </div>
                             </div>
@@ -493,7 +491,7 @@ function ProductDetails() {
                               s2: suggestedLaptops[0]?.id || "2",
                               s3: suggestedLaptops[1]?.id || "3"
                             } as any}
-                            className="mt-3 flex items-center justify-center rounded-xl bg-[#00E5FF]/10 px-4 py-3 text-xs font-bold uppercase tracking-wider text-[#00E5FF] border border-[#00E5FF]/20 hover:bg-[#00E5FF] hover:text-[#060911] transition-colors w-full"
+                            className="mt-3 flex items-center justify-center rounded-xl bg-primary/10 px-4 py-2.5 text-xs font-mono font-bold uppercase tracking-wider text-primary border border-primary/25 hover:bg-primary hover:text-primary-foreground transition-colors w-full shadow-sm"
                           >
                             Compare All Machines
                           </Link>
@@ -509,11 +507,11 @@ function ProductDetails() {
       </section>
 
       {/* Specifications HUD Section */}
-      <section className="relative py-24 bg-[#060911] border-y border-white/[0.08]">
+      <section className="relative py-24 bg-card/40 border-y border-border">
         <div className="mx-auto w-full max-w-[1360px] px-4 sm:px-6 md:px-8">
-          <div className="mb-16 flex items-center justify-between border-b border-white/[0.08] pb-4">
-            <h3 className="font-display text-sm tracking-[0.3em] text-[#94A3B8]">TECHNICAL SPECIFICATIONS</h3>
-            <Expand className="h-4 w-4 text-[#94A3B8]" />
+          <div className="mb-16 flex items-center justify-between border-b border-border pb-4">
+            <h3 className="font-mono text-xs tracking-[0.25em] uppercase font-semibold text-muted-foreground">TECHNICAL SPECIFICATIONS</h3>
+            <Expand className="h-4 w-4 text-muted-foreground" />
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
@@ -528,19 +526,19 @@ function ProductDetails() {
       </section>
 
       {/* Interactive Workload & Game Estimator Section */}
-      <section id="product-estimator" className="relative py-20 border-b border-white/[0.08] scroll-mt-20 bg-[#060911]">
+      <section id="product-estimator" className="relative py-20 border-b border-border scroll-mt-20 bg-background">
         <div className="mx-auto w-full max-w-[1360px] px-4 sm:px-6 md:px-8">
-          <div className="mb-8 flex items-center justify-between border-b border-white/[0.08] pb-4">
+          <div className="mb-8 flex items-center justify-between border-b border-border pb-4">
             <div>
-              <span className="font-display text-[10px] tracking-[0.3em] text-[#00E5FF] uppercase font-bold">
+              <span className="font-mono text-[10px] tracking-[0.25em] text-primary uppercase font-bold">
                 REAL-TIME HARDWARE ESTIMATOR
               </span>
-              <h3 className="font-display text-2xl sm:text-3xl font-bold uppercase tracking-tight text-white mt-1">
+              <h3 className="font-display text-2xl sm:text-3xl font-bold uppercase tracking-tight text-foreground mt-1">
                 Will {product.name} Run Your Daily Workload?
               </h3>
             </div>
-            <div className="hidden sm:flex items-center gap-2 rounded-full border border-[#00E5FF]/40 bg-[#00E5FF]/10 px-3.5 py-1 text-xs font-mono text-[#00E5FF]">
-              <Gauge className="h-3.5 w-3.5 animate-pulse" />
+            <div className="hidden sm:flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3.5 py-1 text-xs font-mono text-primary">
+              <Gauge className="h-3.5 w-3.5" />
               <span>{product.gpu} Evaluated</span>
             </div>
           </div>
@@ -556,22 +554,22 @@ function ProductDetails() {
       <div className="h-32" />
 
       {/* Sticky Bottom Bar */}
-      <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-white/[0.08] bg-[#0F172A]/90 backdrop-blur-2xl px-4 sm:px-8 md:px-12 py-3 sm:py-4 animate-fade-up">
+      <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-background/90 backdrop-blur-xl px-4 sm:px-8 md:px-12 py-3 sm:py-3.5 animate-fade-up">
         <div className="mx-auto flex w-full max-w-[1360px] flex-wrap items-center justify-between gap-3 sm:gap-4">
           <div className="flex flex-col min-w-0">
             <div className="flex items-center gap-2">
-              <span className="text-[10px] uppercase tracking-widest text-[#94A3B8]">Configure from</span>
+              <span className="text-[10px] uppercase tracking-widest text-muted-foreground font-mono">Configure from</span>
               {stockCount > 0 ? (
-                <span className="text-[9px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-bold">
+                <span className="text-[9px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-500 border border-emerald-500/25 font-bold">
                   {stockCount} in stock
                 </span>
               ) : (
-                <span className="text-[9px] font-mono px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/30 font-bold">
+                <span className="text-[9px] font-mono px-2 py-0.5 rounded-full bg-destructive/10 text-destructive border border-destructive/25 font-bold">
                   Sold out
                 </span>
               )}
             </div>
-            <span className="font-display text-lg sm:text-xl md:text-2xl font-bold text-white truncate">
+            <span className="font-display text-lg sm:text-xl md:text-2xl font-bold text-foreground truncate">
               Rs {product.price.toLocaleString()}
             </span>
           </div>
@@ -579,22 +577,22 @@ function ProductDetails() {
             <button
               onClick={() => addToCart(product)}
               disabled={stockCount <= 0}
-              className="flex-1 sm:flex-none rounded-xl bg-white/[0.05] hover:bg-white/[0.1] border border-white/[0.1] px-5 sm:px-6 py-3 text-xs sm:text-sm font-bold text-white transition-all text-center whitespace-normal sm:whitespace-nowrap flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+              className="flex-1 sm:flex-none rounded-xl bg-secondary hover:bg-secondary/80 border border-border px-5 sm:px-6 py-2.5 text-xs sm:text-sm font-semibold text-foreground transition-all text-center whitespace-normal sm:whitespace-nowrap flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
             >
-              <ShoppingCart className="w-4 h-4 text-[#00E5FF]" />
+              <ShoppingCart className="w-4 h-4 text-primary" />
               {stockCount > 0 ? "Add to Cart" : "Out of Stock"}
             </button>
             {stockCount > 0 ? (
               <Link
                 to={`/checkout/${product.id}`}
-                className="flex-1 sm:flex-none rounded-xl bg-[#00E5FF] hover:bg-[#33EBFF] text-[#060911] px-6 sm:px-8 py-3 text-xs sm:text-sm font-bold shadow-[0_0_20px_rgba(0,229,255,0.4)] transition-transform hover:scale-105 text-center whitespace-normal sm:whitespace-nowrap flex items-center justify-center"
+                className="flex-1 sm:flex-none rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground px-6 sm:px-8 py-2.5 text-xs sm:text-sm font-bold shadow-sm transition-transform hover:scale-[1.02] text-center whitespace-normal sm:whitespace-nowrap flex items-center justify-center"
               >
                 Configure & Buy
               </Link>
             ) : (
               <button
                 disabled
-                className="flex-1 sm:flex-none rounded-xl bg-white/10 px-6 sm:px-8 py-3 text-xs sm:text-sm font-bold text-muted-foreground cursor-not-allowed"
+                className="flex-1 sm:flex-none rounded-xl bg-secondary px-6 sm:px-8 py-2.5 text-xs sm:text-sm font-bold text-muted-foreground cursor-not-allowed border border-border"
               >
                 Unavailable
               </button>
@@ -610,25 +608,25 @@ function ProductDetails() {
 
 function HUDCard({ icon: Icon, label, value, desc, color }: { icon: React.ElementType, label: string, value: string, desc: string, color: string }) {
   const glow =
-    color === "cyan" ? "group-hover:border-[#00E5FF]/50 group-hover:shadow-[0_0_20px_rgba(0,229,255,0.2)]" :
-      color === "purple" ? "group-hover:border-neon-purple/50 group-hover:shadow-[0_0_20px_oklch(0.62_0.24_295/0.2)]" :
-        "group-hover:border-neon-blue/50 group-hover:shadow-[0_0_20px_oklch(0.7_0.22_260/0.2)]";
+    color === "cyan" ? "hover:border-primary/50" :
+      color === "purple" ? "hover:border-accent/50" :
+        "hover:border-blue-500/50";
 
   const iconColor =
-    color === "cyan" ? "text-[#00E5FF]" :
-      color === "purple" ? "text-neon-purple" :
-        "text-neon-blue";
+    color === "cyan" ? "text-primary" :
+      color === "purple" ? "text-accent" :
+        "text-blue-500";
 
   return (
-    <div className={`group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-white/[0.08] bg-[#0F172A]/40 backdrop-blur-md p-6 md:p-8 transition-all duration-500 hover:scale-[1.02] ${glow}`}>
+    <div className={`group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-border bg-card p-6 md:p-8 shadow-card hover:shadow-elevated transition-all duration-200 hover:-translate-y-1 ${glow}`}>
       <div className="flex items-center justify-between">
         <Icon className={`h-6 w-6 sm:h-8 sm:w-8 ${iconColor}`} />
-        <span className="font-mono text-[9px] uppercase tracking-widest text-[#94A3B8]">VERIFIED</span>
+        <span className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground">VERIFIED</span>
       </div>
       <div className="mt-8">
-        <p className="font-mono text-[10px] uppercase tracking-wider text-[#94A3B8]">{label}</p>
-        <p className="mt-1 font-display text-lg sm:text-xl font-bold text-white truncate">{value}</p>
-        <p className="mt-1 text-xs text-[#94A3B8]">{desc}</p>
+        <p className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">{label}</p>
+        <p className="mt-1 font-display text-lg sm:text-xl font-bold text-foreground truncate">{value}</p>
+        <p className="mt-1 text-xs text-muted-foreground">{desc}</p>
       </div>
     </div>
   );

@@ -458,23 +458,23 @@ export function evaluateSingleApp(app: SoftwareApp, hw: HardwareProfile): AppEva
 
   if (finalScore >= 85) {
     status = "flawless";
-    statusBadge = "Flawless Performance (85–100)";
+    statusBadge = "Flawless Performance";
     statusColor = "emerald";
   } else if (finalScore >= 75) {
     status = "smooth";
-    statusBadge = "Pro Grade / High Performance (75–85)";
+    statusBadge = "Pro Grade / High Performance";
     statusColor = "cyan";
   } else if (finalScore >= 55) {
     status = "playable";
-    statusBadge = "Solid High Performance (55–75)";
+    statusBadge = "Solid High Performance";
     statusColor = "cyan";
   } else if (finalScore >= 40) {
     status = "stutter";
-    statusBadge = "Entry Dedicated / Moderate (40–55)";
+    statusBadge = "Entry Dedicated / Moderate";
     statusColor = "amber";
   } else {
     status = "bottleneck";
-    statusBadge = "Hardware Bottleneck (<40)";
+    statusBadge = "Hardware Bottleneck";
     statusColor = "rose";
   }
 
@@ -701,19 +701,19 @@ export function evaluateWorkload(
   let overallSummary = "Handles your chosen apps with balanced performance.";
 
   if (totalScore >= 85) {
-    overallTier = "Apex Tier Powerhouse (85–100%)";
+    overallTier = "Apex Tier Powerhouse";
     overallSummary = "No compromises. Designed for uninterrupted 4K timeline rendering, ray-traced gaming, and heavy workloads simultaneously.";
   } else if (totalScore >= 75) {
-    overallTier = "High Performance Pro (75–85%)";
+    overallTier = "High Performance Pro";
     overallSummary = "Smooth 60+ FPS in games and swift rendering speeds. Easily handles demanding creative and developer stacks.";
   } else if (totalScore >= 55) {
-    overallTier = "Solid High Performance (55–75%)";
+    overallTier = "Solid High Performance";
     overallSummary = "Solid performance for high-end creative and gaming needs. Handles modern 1080p workloads and productivity with ease.";
   } else if (totalScore >= 40) {
-    overallTier = "Entry Level / Moderate Load (40–55%)";
+    overallTier = "Entry Level / Moderate Load";
     overallSummary = "Works for standard tasks, but will encounter thermal, VRAM, or RAM limits during heavy export or ultra settings.";
   } else {
-    overallTier = "Hardware Upgrade Recommended (<40%)";
+    overallTier = "Hardware Upgrade Recommended";
     overallSummary = "Significant hardware bottlenecks detected for this stack. RAM or GPU upgrade strongly advised.";
   }
 

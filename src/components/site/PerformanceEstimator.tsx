@@ -851,12 +851,32 @@ export function PerformanceEstimator({ initialProductId, isCompactEmbedded = fal
 
           {/* Individual App Playability Breakdown Cards */}
           <div className="space-y-4">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <h4 className="font-display text-base sm:text-lg font-bold uppercase tracking-wider text-foreground">
                 Per-Application Playability & Workload Breakdown
               </h4>
               <span className="text-xs text-muted-foreground font-mono">
                 {evaluation.appEvaluations.length} Benchmarks Calculated
+              </span>
+            </div>
+
+            {/* Score Tier Rubric Legend */}
+            <div className="flex flex-wrap items-center gap-2 p-3 rounded-2xl bg-secondary/40 border border-border text-[11px] font-mono">
+              <span className="text-muted-foreground uppercase font-bold mr-1">Rating Tiers:</span>
+              <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 font-semibold">
+                85–100 Flawless
+              </span>
+              <span className="px-2.5 py-0.5 rounded-full bg-cyan-500/15 text-cyan-400 border border-cyan-500/30 font-semibold">
+                75–85 Pro Grade
+              </span>
+              <span className="px-2.5 py-0.5 rounded-full bg-blue-500/15 text-blue-400 border border-blue-500/30 font-semibold">
+                55–75 Solid Performance
+              </span>
+              <span className="px-2.5 py-0.5 rounded-full bg-amber-500/15 text-amber-400 border border-amber-500/30 font-semibold">
+                40–55 Entry Dedicated
+              </span>
+              <span className="px-2.5 py-0.5 rounded-full bg-rose-500/15 text-rose-400 border border-rose-500/30 font-semibold">
+                &lt;40 Bottleneck
               </span>
             </div>
 

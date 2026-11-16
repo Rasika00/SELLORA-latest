@@ -611,11 +611,10 @@ export function CustomerAccountHub() {
                 <button
                   key={item.id}
                   onClick={() => setActiveTab(item.id as any)}
-                  className={`flex items-center justify-between rounded-lg px-3 py-2 text-sm font-medium transition-colors whitespace-nowrap ${
-                    isActive
-                      ? "bg-primary/10 text-primary border border-primary/20 font-semibold"
-                      : "text-muted-foreground hover:bg-secondary hover:text-foreground"
-                  }`}
+                  className={`flex items-center justify-between rounded-lg px-3 py-2 text-sm font-medium transition-colors whitespace-nowrap ${isActive
+                    ? "bg-primary/10 text-primary border border-primary/20 font-semibold"
+                    : "text-muted-foreground hover:bg-secondary hover:text-foreground"
+                    }`}
                 >
                   <div className="flex items-center gap-3">
                     <Icon className={`h-4 w-4 shrink-0 ${isActive ? "text-primary" : ""}`} />
@@ -623,9 +622,8 @@ export function CustomerAccountHub() {
                   </div>
                   {item.badge !== undefined && item.badge > 0 && (
                     <span
-                      className={`text-[10px] font-mono px-1.5 py-0.2 rounded-full ${
-                        isActive ? "bg-primary/20 text-primary font-bold" : "bg-secondary text-muted-foreground"
-                      }`}
+                      className={`text-[10px] font-mono px-1.5 py-0.2 rounded-full ${isActive ? "bg-primary/20 text-primary font-bold" : "bg-secondary text-muted-foreground"
+                        }`}
                     >
                       {item.badge}
                     </span>
@@ -751,15 +749,14 @@ export function CustomerAccountHub() {
                                 <div className="flex items-center gap-2">
                                   <span className="font-mono font-bold text-xs text-foreground">{ord.orderNumber}</span>
                                   <span
-                                    className={`text-[10px] font-mono px-2 py-0.5 rounded-full uppercase font-bold ${
-                                      ord.status === "DELIVERED"
-                                        ? "bg-emerald-500/20 text-emerald-500 dark:text-emerald-300 border border-emerald-500/30"
-                                        : ord.status === "SHIPPED"
+                                    className={`text-[10px] font-mono px-2 py-0.5 rounded-full uppercase font-bold ${ord.status === "DELIVERED"
+                                      ? "bg-emerald-500/20 text-emerald-500 dark:text-emerald-300 border border-emerald-500/30"
+                                      : ord.status === "SHIPPED"
                                         ? "bg-purple-500/20 text-purple-600 dark:text-purple-300 border border-purple-500/30"
                                         : ord.status === "PROCESSING"
-                                        ? "bg-blue-500/20 text-blue-600 dark:text-blue-300 border border-blue-500/30"
-                                        : "bg-amber-500/20 text-amber-600 dark:text-amber-300 border border-amber-500/30"
-                                    }`}
+                                          ? "bg-blue-500/20 text-blue-600 dark:text-blue-300 border border-blue-500/30"
+                                          : "bg-amber-500/20 text-amber-600 dark:text-amber-300 border border-amber-500/30"
+                                      }`}
                                   >
                                     {ord.status}
                                   </span>
@@ -866,29 +863,28 @@ export function CustomerAccountHub() {
                             <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
                               <span className="font-mono font-bold text-xs text-primary">{ord.orderNumber}</span>
                               <span
-                                className={`text-[9px] font-mono px-2 py-0.5 rounded-full uppercase font-bold tracking-wider ${
-                                  ord.status === "DELIVERED"
-                                    ? "bg-emerald-500/20 text-emerald-600 dark:text-emerald-300 border border-emerald-500/30"
-                                    : ord.status === "SHIPPED"
+                                className={`text-[9px] font-mono px-2 py-0.5 rounded-full uppercase font-bold tracking-wider ${ord.status === "DELIVERED"
+                                  ? "bg-emerald-500/20 text-emerald-600 dark:text-emerald-300 border border-emerald-500/30"
+                                  : ord.status === "SHIPPED"
                                     ? "bg-purple-500/20 text-purple-600 dark:text-purple-300 border border-purple-500/30"
                                     : ord.status === "PROCESSING"
-                                    ? "bg-blue-500/20 text-blue-600 dark:text-blue-300 border border-blue-500/30"
-                                    : ord.status === "CANCELLED"
-                                    ? "bg-rose-500/20 text-rose-600 dark:text-rose-300 border border-rose-500/30"
-                                    : "bg-amber-500/20 text-amber-600 dark:text-amber-300 border border-amber-500/30"
-                                }`}
+                                      ? "bg-blue-500/20 text-blue-600 dark:text-blue-300 border border-blue-500/30"
+                                      : ord.status === "CANCELLED"
+                                        ? "bg-rose-500/20 text-rose-600 dark:text-rose-300 border border-rose-500/30"
+                                        : "bg-amber-500/20 text-amber-600 dark:text-amber-300 border border-amber-500/30"
+                                  }`}
                               >
                                 {ord.status === "PENDING"
                                   ? "Order Placed"
                                   : ord.status === "PROCESSING"
-                                  ? "Packed & Verified"
-                                  : ord.status === "SHIPPED"
-                                  ? "In Transit"
-                                  : ord.status === "DELIVERED"
-                                  ? "Delivered"
-                                  : ord.status === "CANCELLED"
-                                  ? "Cancelled"
-                                  : ord.status}
+                                    ? "Packed & Verified"
+                                    : ord.status === "SHIPPED"
+                                      ? "In Transit"
+                                      : ord.status === "DELIVERED"
+                                        ? "Delivered"
+                                        : ord.status === "CANCELLED"
+                                          ? "Cancelled"
+                                          : ord.status}
                               </span>
                               <span className="text-[11px] text-muted-foreground font-mono">
                                 Placed on {new Date(ord.createdAt).toLocaleDateString()}
@@ -1018,11 +1014,10 @@ export function CustomerAccountHub() {
                     {addresses.map((addr) => (
                       <div
                         key={addr.id}
-                        className={`rounded-2xl p-5 border transition-all flex flex-col justify-between relative group ${
-                          addr.isDefault
-                            ? "bg-primary/5 border-primary/50 shadow-sm ring-1 ring-primary/20"
-                            : "bg-card border-border hover:border-border-hover shadow-card"
-                        }`}
+                        className={`rounded-2xl p-5 border transition-all flex flex-col justify-between relative group ${addr.isDefault
+                          ? "bg-primary/5 border-primary/50 shadow-sm ring-1 ring-primary/20"
+                          : "bg-card border-border hover:border-border-hover shadow-card"
+                          }`}
                       >
                         <div className="space-y-3">
                           <div className="flex items-center justify-between gap-2">
@@ -1149,9 +1144,8 @@ export function CustomerAccountHub() {
                               {[1, 2, 3, 4, 5].map((s) => (
                                 <Star
                                   key={s}
-                                  className={`h-4 w-4 ${
-                                    s <= rev.rating ? "fill-amber-500 text-amber-500" : "text-muted-foreground/30"
-                                  }`}
+                                  className={`h-4 w-4 ${s <= rev.rating ? "fill-amber-500 text-amber-500" : "text-muted-foreground/30"
+                                    }`}
                                 />
                               ))}
                             </div>
@@ -1212,11 +1206,10 @@ export function CustomerAccountHub() {
 
                 {profileMsg && (
                   <div
-                    className={`max-w-2xl p-4 rounded-xl text-xs flex items-center gap-2 ${
-                      profileMsg.type === "success"
-                        ? "bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-300"
-                        : "bg-destructive/10 border border-destructive/30 text-destructive"
-                    }`}
+                    className={`max-w-2xl p-4 rounded-xl text-xs flex items-center gap-2 ${profileMsg.type === "success"
+                      ? "bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-300"
+                      : "bg-destructive/10 border border-destructive/30 text-destructive"
+                      }`}
                   >
                     {profileMsg.type === "success" ? (
                       <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-500" />
@@ -1415,25 +1408,24 @@ export function CustomerAccountHub() {
                 </span>
                 <span className="text-sm font-display font-bold text-foreground flex items-center gap-2 mt-0.5">
                   <span
-                    className={`h-2.5 w-2.5 rounded-full ${
-                      trackingModalOrder.status === "DELIVERED"
-                        ? "bg-emerald-500 shadow-sm"
-                        : trackingModalOrder.status === "CANCELLED"
+                    className={`h-2.5 w-2.5 rounded-full ${trackingModalOrder.status === "DELIVERED"
+                      ? "bg-emerald-500 shadow-sm"
+                      : trackingModalOrder.status === "CANCELLED"
                         ? "bg-destructive shadow-sm"
                         : "bg-primary animate-pulse shadow-sm"
-                    }`}
+                      }`}
                   />
                   {trackingModalOrder.status === "PENDING"
                     ? "Order Placed & Awaiting Vendor Dispatch"
                     : trackingModalOrder.status === "PROCESSING"
-                    ? "Packed & Verified (Thermal QC Check Complete)"
-                    : trackingModalOrder.status === "SHIPPED"
-                    ? "In Transit (Express Courier Dispatch)"
-                    : trackingModalOrder.status === "DELIVERED"
-                    ? "Delivered & Verified by Operator"
-                    : trackingModalOrder.status === "CANCELLED"
-                    ? "Order Cancelled & Refunded"
-                    : trackingModalOrder.status}
+                      ? "Packed & Verified (Thermal QC Check Complete)"
+                      : trackingModalOrder.status === "SHIPPED"
+                        ? "In Transit (Express Courier Dispatch)"
+                        : trackingModalOrder.status === "DELIVERED"
+                          ? "Delivered & Verified by Operator"
+                          : trackingModalOrder.status === "CANCELLED"
+                            ? "Order Cancelled & Refunded"
+                            : trackingModalOrder.status}
                 </span>
               </div>
               <div className="text-xs font-mono px-3 py-1.5 rounded-xl bg-primary/10 border border-primary/20 text-primary font-bold flex items-center gap-1.5 shrink-0">
@@ -1442,8 +1434,8 @@ export function CustomerAccountHub() {
                   {trackingModalOrder.status === "DELIVERED"
                     ? "Delivered to Customer"
                     : trackingModalOrder.status === "CANCELLED"
-                    ? "Cancelled"
-                    : "Estimated Delivery: 24 - 48h"}
+                      ? "Cancelled"
+                      : "Estimated Delivery: 24 - 48h"}
                 </span>
               </div>
             </div>
@@ -1490,11 +1482,10 @@ export function CustomerAccountHub() {
                       return (
                         <div key={step.key} className="flex flex-col items-center text-center z-10">
                           <div
-                            className={`h-9 w-9 rounded-full flex items-center justify-center font-bold text-xs transition-all mb-2 ${
-                              isComplete
-                                ? "bg-primary text-primary-foreground shadow-sm"
-                                : "bg-card text-muted-foreground border border-border"
-                            } ${isCurrent ? "ring-2 ring-primary ring-offset-2 ring-offset-background" : ""}`}
+                            className={`h-9 w-9 rounded-full flex items-center justify-center font-bold text-xs transition-all mb-2 ${isComplete
+                              ? "bg-primary text-primary-foreground shadow-sm"
+                              : "bg-card text-muted-foreground border border-border"
+                              } ${isCurrent ? "ring-2 ring-primary ring-offset-2 ring-offset-background" : ""}`}
                           >
                             {isComplete ? <Check className="h-4 w-4 stroke-[3]" /> : idx + 1}
                           </div>
@@ -1648,9 +1639,8 @@ export function CustomerAccountHub() {
                       className="p-1 transition-transform hover:scale-125 focus:outline-none"
                     >
                       <Star
-                        className={`h-7 w-7 ${
-                          s <= reviewRating ? "fill-amber-500 text-amber-500" : "text-muted-foreground/30"
-                        }`}
+                        className={`h-7 w-7 ${s <= reviewRating ? "fill-amber-500 text-amber-500" : "text-muted-foreground/30"
+                          }`}
                       />
                     </button>
                   ))}
@@ -1738,9 +1728,8 @@ export function CustomerAccountHub() {
                       className="p-1 transition-transform hover:scale-125 focus:outline-none"
                     >
                       <Star
-                        className={`h-7 w-7 ${
-                          s <= editRating ? "fill-amber-500 text-amber-500" : "text-muted-foreground/30"
-                        }`}
+                        className={`h-7 w-7 ${s <= editRating ? "fill-amber-500 text-amber-500" : "text-muted-foreground/30"
+                          }`}
                       />
                     </button>
                   ))}
@@ -1827,11 +1816,10 @@ export function CustomerAccountHub() {
                       key={lbl}
                       type="button"
                       onClick={() => setAddressForm((f) => ({ ...f, label: lbl }))}
-                      className={`py-1.5 px-2 rounded-lg text-center font-mono text-[11px] font-bold transition-all cursor-pointer ${
-                        addressForm.label === lbl
-                          ? "bg-primary/20 border border-primary text-primary shadow-sm"
-                          : "bg-secondary border border-border text-muted-foreground hover:text-foreground"
-                      }`}
+                      className={`py-1.5 px-2 rounded-lg text-center font-mono text-[11px] font-bold transition-all cursor-pointer ${addressForm.label === lbl
+                        ? "bg-primary/20 border border-primary text-primary shadow-sm"
+                        : "bg-secondary border border-border text-muted-foreground hover:text-foreground"
+                        }`}
                     >
                       {lbl}
                     </button>

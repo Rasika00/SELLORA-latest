@@ -456,25 +456,25 @@ export function evaluateSingleApp(app: SoftwareApp, hw: HardwareProfile): AppEva
   let diagnosis = "";
   let advice = "";
 
-  if (finalScore >= 88) {
+  if (finalScore >= 85) {
     status = "flawless";
-    statusBadge = "Flawless Performance";
+    statusBadge = "Flawless Performance (85–100)";
     statusColor = "emerald";
-  } else if (finalScore >= 74) {
+  } else if (finalScore >= 75) {
     status = "smooth";
-    statusBadge = "Smooth 60+ FPS / Pro Grade";
+    statusBadge = "Pro Grade / High Performance (75–85)";
     statusColor = "cyan";
-  } else if (finalScore >= 58) {
+  } else if (finalScore >= 55) {
     status = "playable";
-    statusBadge = "Playable / Modest Settings";
-    statusColor = "amber";
+    statusBadge = "Solid High Performance (55–75)";
+    statusColor = "cyan";
   } else if (finalScore >= 40) {
     status = "stutter";
-    statusBadge = "Stutters Under Load";
+    statusBadge = "Entry Dedicated / Moderate (40–55)";
     statusColor = "amber";
   } else {
     status = "bottleneck";
-    statusBadge = "Hardware Bottleneck";
+    statusBadge = "Hardware Bottleneck (<40)";
     statusColor = "rose";
   }
 
@@ -487,11 +487,16 @@ export function evaluateSingleApp(app: SoftwareApp, hw: HardwareProfile): AppEva
         metricValue = "Full Res 60 FPS";
         diagnosis = `Hardware NVENC/ProRes encoding active with ${hw.ramGb}GB RAM. Effortlessly handles multi-cam 4K ProRes timelines without dropping frames.`;
         advice = "Ready for cinematic documentary & commercial editing.";
-      } else if (finalScore >= 68) {
+      } else if (finalScore >= 55) {
         headline = "Smooth 4K Playback with 1/2 Proxy Option";
-        metricValue = "1/2 Res 60 FPS / Full 42 FPS";
-        diagnosis = `${hw.gpuName} (${hw.tgpWattage}W TGP) renders standard 4K timelines smoothly, but multi-layer transitions may buffer during export.`;
+        metricValue = "1/2 Res 60 FPS / Full 48 FPS";
+        diagnosis = `${hw.gpuName} (${hw.tgpWattage}W TGP) renders standard 4K timelines smoothly, with fast GPU export acceleration.`;
         advice = hw.ramGb < 32 ? "Upgrade to 32GB RAM to prevent export stutter on heavy projects." : "Enable CUDA GPU acceleration in Project Settings.";
+      } else if (finalScore >= 40) {
+        headline = "Playable 1080p Timeline / Proxy Recommended for 4K";
+        metricValue = "1080p 60 FPS / 4K 28 FPS";
+        diagnosis = "Handles 1080p and light 4K editing. Multi-layer color grades may cause playback drops.";
+        advice = "Generate ProRes or DNxHR proxies before editing complex 4K timelines.";
       } else {
         headline = "Stutters During 4K Export & Scrubbing";
         metricValue = "Frequent Frame Drops";
@@ -502,18 +507,23 @@ export function evaluateSingleApp(app: SoftwareApp, hw: HardwareProfile): AppEva
 
     case "cyberpunk-2077":
       metricLabel = "Estimated FPS (1080p High)";
-      if (finalScore >= 88) {
+      if (finalScore >= 85) {
         headline = "Smooth 85+ FPS with Ray Tracing Ultra";
         metricValue = "85 - 110 FPS";
         diagnosis = `High-power GPU with ${hw.tgpWattage}W TGP provides maximum raster and RT headroom in Night City.`;
         advice = "Max out Ray Tracing Overdrive with DLSS 3 Frame Generation.";
-      } else if (finalScore >= 68) {
-        headline = hw.tgpWattage <= 75 ? "50-65 FPS (1080p High) / 60+ FPS with DLSS" : "Smooth 60+ FPS High Settings";
-        metricValue = hw.tgpWattage <= 75 ? "52 - 64 FPS (DLSS Auto)" : "62 - 78 FPS";
-        diagnosis = `${hw.gpuName} with ${hw.tgpWattage}W TGP runs Cyberpunk comfortably at 1080p High. 6GB VRAM requires keeping crowd density at Medium.`;
+      } else if (finalScore >= 75) {
+        headline = "Smooth 70-85 FPS High Settings";
+        metricValue = "72 - 86 FPS";
+        diagnosis = `${hw.gpuName} with ${hw.tgpWattage}W TGP delivers exceptional fluidity at 1080p/1440p High.`;
+        advice = "Enable DLSS Quality for optimal balance of fidelity and framerate.";
+      } else if (finalScore >= 55) {
+        headline = "Smooth 60+ FPS (1080p High / DLSS)";
+        metricValue = hw.tgpWattage <= 75 ? "58 - 68 FPS (DLSS Auto)" : "64 - 80 FPS";
+        diagnosis = `${hw.gpuName} with ${hw.tgpWattage}W TGP delivers solid high-performance 1080p gameplay with DLSS.`;
         advice = "Turn on DLSS Quality + Frame Generation for guaranteed 60+ FPS lock.";
-      } else if (finalScore >= 50) {
-        headline = "38-48 FPS Native / 55 FPS with FSR/DLSS Balanced";
+      } else if (finalScore >= 40) {
+        headline = "38-48 FPS Native / 50 FPS with FSR/DLSS Balanced";
         metricValue = "42 - 50 FPS";
         diagnosis = `Lower TGP (${hw.tgpWattage}W) and limited VRAM throttle shader clock speeds during open-world combat.`;
         advice = "Lower Volumetric Fog and Screen Space Reflections to Medium.";
@@ -532,11 +542,16 @@ export function evaluateSingleApp(app: SoftwareApp, hw: HardwareProfile): AppEva
         metricValue = "~18 sec / frame";
         diagnosis = `Substantial CUDA/Tensor cores and ${hw.tgpWattage}W power delivery shred complex ray-traced scenes in seconds.`;
         advice = "Enable OptiX Denoising in Viewport for instant photorealistic previews.";
-      } else if (finalScore >= 65) {
+      } else if (finalScore >= 55) {
         headline = "Fast Viewport & Responsive Shading";
-        metricValue = "~45 sec / frame";
+        metricValue = "~38 sec / frame";
         diagnosis = `${hw.gpuName} handles medium-poly scenes easily. High sample count rendering will warm up the ${hw.tgpWattage}W cooling system.`;
         advice = "Keep Viewport Samples around 32-64 to preserve smooth navigation.";
+      } else if (finalScore >= 40) {
+        headline = "Playable Viewport / Modest Render Times";
+        metricValue = "~75 sec / frame";
+        diagnosis = "Suitable for basic 3D modeling and low-poly asset creation.";
+        advice = "Use CPU+GPU hybrid rendering with denoising enabled.";
       } else {
         headline = "Render Delays / High Memory Spillage";
         metricValue = "> 2 min / frame";
@@ -552,11 +567,16 @@ export function evaluateSingleApp(app: SoftwareApp, hw: HardwareProfile): AppEva
         metricValue = "25+ Containers";
         diagnosis = `${hw.ramGb}GB RAM and high multi-core count provide ample memory pools for databases, caches, and API nodes.`;
         advice = "You can run full production mirrors locally without paging.";
-      } else if (finalScore >= 65) {
+      } else if (finalScore >= 55) {
         headline = "Solid Development Stack (Node + DB + Redis)";
-        metricValue = "10 - 15 Containers";
+        metricValue = "12 - 18 Containers";
         diagnosis = `${hw.ramGb}GB RAM accommodates a typical fullstack Docker Compose environment smoothly.`;
         advice = "Allocate up to 8GB to WSL2 / Docker Engine settings.";
+      } else if (finalScore >= 40) {
+        headline = "Lightweight Containers (4–8 containers)";
+        metricValue = "4 - 8 Containers";
+        diagnosis = "Good for frontend dev with a local database container.";
+        advice = "Limit container memory limits in docker-compose.yml.";
       } else {
         headline = "Requires 16GB RAM Upgrade (Heavy Disk Swapping)";
         metricValue = "3 - 5 Containers max";
@@ -567,16 +587,21 @@ export function evaluateSingleApp(app: SoftwareApp, hw: HardwareProfile): AppEva
 
     case "autocad-solidworks":
       metricLabel = "BIM / Assembly Fluidity";
-      if (finalScore >= 80) {
+      if (finalScore >= 85) {
         headline = "Silky Smooth 3D CAD Assemblies (5,000+ Parts)";
         metricValue = "60 FPS Viewport";
         diagnosis = `Fast single-core clock speeds from ${hw.cpuName} and dedicated GPU eliminate geometry redraw delays.`;
         advice = "ISV workstation certified grade performance.";
-      } else if (finalScore >= 60) {
+      } else if (finalScore >= 55) {
         headline = "Responsive Part Modeling & Drafting";
-        metricValue = "45 - 60 FPS";
+        metricValue = "50 - 60 FPS";
         diagnosis = "Great for component design and mid-size architectural floorplans.";
         advice = "Turn off real-time ambient shadows in massive assemblies.";
+      } else if (finalScore >= 40) {
+        headline = "2D Drafting & Simple 3D Parts";
+        metricValue = "30 - 45 FPS";
+        diagnosis = "Adequate for 2D AutoCAD and simple parts, but large assemblies may drop frames.";
+        advice = "Use lightweight assembly mode.";
       } else {
         headline = "Lag During Rotation of Complex Assemblies";
         metricValue = "< 30 FPS Viewport";
@@ -587,19 +612,24 @@ export function evaluateSingleApp(app: SoftwareApp, hw: HardwareProfile): AppEva
 
     case "valorant-cs2":
       metricLabel = "Competitive Framerate";
-      if (finalScore >= 80) {
+      if (finalScore >= 85) {
         headline = "Esports God Tier: 240Hz - 360Hz Ready";
         metricValue = "280 - 450+ FPS";
         diagnosis = `${hw.cpuName} single-thread latency is ultra-low, completely unbottlenecking high-refresh displays.`;
         advice = "Enable Reflex Low Latency for sub-5ms input response.";
-      } else if (finalScore >= 60) {
-        headline = "Smooth 144Hz - 200 FPS Tournament Play";
-        metricValue = "160 - 220 FPS";
-        diagnosis = "Easily saturates standard 144Hz laptop panels with zero micro-stuttering.";
+      } else if (finalScore >= 55) {
+        headline = "Smooth 144Hz - 240 FPS Tournament Play";
+        metricValue = "180 - 240 FPS";
+        diagnosis = "Easily saturates standard 144Hz-240Hz panels with zero micro-stuttering.";
         advice = "Lock FPS to match your display refresh rate.";
+      } else if (finalScore >= 40) {
+        headline = "Playable 90 - 120 FPS Casual Play";
+        metricValue = "90 - 130 FPS";
+        diagnosis = "Solid for casual matchmaking on 60Hz-120Hz screens.";
+        advice = "Keep graphical settings on Competitive Low.";
       } else {
         headline = "Playable 60-90 FPS (Minor 1% Low Drops)";
-        metricValue = "75 - 110 FPS";
+        metricValue = "60 - 85 FPS";
         diagnosis = "Playable for casual matches, but sudden smokes or utility can cause frame dips.";
         advice = "Set material quality and shadows to Low.";
       }
@@ -608,13 +638,17 @@ export function evaluateSingleApp(app: SoftwareApp, hw: HardwareProfile): AppEva
     default:
       metricLabel = "Overall Efficiency";
       metricValue = `${finalScore}% Capability`;
-      if (finalScore >= 80) {
+      if (finalScore >= 85) {
         headline = "Flawless Execution with Headroom to Spare";
         diagnosis = "Hardware exceeds recommended application guidelines.";
         advice = "Ideal configuration for continuous daily production.";
-      } else if (finalScore >= 60) {
-        headline = "Solid Everyday Performance";
-        diagnosis = "Handles mainstream workloads with minor setting adjustments.";
+      } else if (finalScore >= 55) {
+        headline = "Solid High Performance";
+        diagnosis = "Handles mainstream workloads with high fluidity and stability.";
+        advice = "Great hardware balance for intensive productivity.";
+      } else if (finalScore >= 40) {
+        headline = "Standard Everyday Performance";
+        diagnosis = "Handles standard workloads with minor setting adjustments.";
         advice = "Close background processes during intensive tasks.";
       } else {
         headline = "Potential Hardware Bottleneck";
@@ -666,20 +700,20 @@ export function evaluateWorkload(
   let overallTier = "Solid Workhorse";
   let overallSummary = "Handles your chosen apps with balanced performance.";
 
-  if (totalScore >= 90) {
-    overallTier = "Apex Tier Powerhouse";
+  if (totalScore >= 85) {
+    overallTier = "Apex Tier Powerhouse (85–100%)";
     overallSummary = "No compromises. Designed for uninterrupted 4K timeline rendering, ray-traced gaming, and heavy workloads simultaneously.";
-  } else if (totalScore >= 80) {
-    overallTier = "High Performance Pro";
+  } else if (totalScore >= 75) {
+    overallTier = "High Performance Pro (75–85%)";
     overallSummary = "Smooth 60+ FPS in games and swift rendering speeds. Easily handles demanding creative and developer stacks.";
-  } else if (totalScore >= 65) {
-    overallTier = "Capable Mainstream Performer";
-    overallSummary = "Good performance for everyday creative and gaming needs. May require DLSS or proxy workflows for maximum fluidity.";
-  } else if (totalScore >= 50) {
-    overallTier = "Entry Level / Moderate Stutters";
-    overallSummary = "Works for basic tasks, but will encounter noticeable thermal, VRAM, or RAM limits during heavy export or modern AAA gaming.";
+  } else if (totalScore >= 55) {
+    overallTier = "Solid High Performance (55–75%)";
+    overallSummary = "Solid performance for high-end creative and gaming needs. Handles modern 1080p workloads and productivity with ease.";
+  } else if (totalScore >= 40) {
+    overallTier = "Entry Level / Moderate Load (40–55%)";
+    overallSummary = "Works for standard tasks, but will encounter thermal, VRAM, or RAM limits during heavy export or ultra settings.";
   } else {
-    overallTier = "Hardware Upgrade Recommended";
+    overallTier = "Hardware Upgrade Recommended (<40%)";
     overallSummary = "Significant hardware bottlenecks detected for this stack. RAM or GPU upgrade strongly advised.";
   }
 

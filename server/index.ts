@@ -8,6 +8,22 @@ import { fileURLToPath } from "url";
 import { prisma } from "./db";
 import { products as fallbackProducts } from "../src/data/products";
 import { calculateBenchmark } from "../src/lib/benchmarkEngine";
+import {
+  assertAuthConfigured,
+  authenticatedUser,
+  checkRequestOrigin,
+  clearSessionCookie,
+  optionalAuth,
+  requireAdmin,
+  requireAuth,
+  requireOwnedRecord,
+  requireProductWriter,
+  requireSelfOrAdmin,
+  requireSellerOrAdmin,
+  sendApiError,
+  setSessionCookie,
+} from "./auth";
+import { getOrderTracking, initialTrackingEvent, updateOrderTracking } from "./order-tracking";
 
 dotenv.config();
 
@@ -19,6 +35,9 @@ const PORT = process.env.PORT || 3001;
 
 app.use(cors());
 app.use(express.json());
+app.use("/api", checkRequestOrigin);
+// These routes expose private orders or can change roles used for order authorization.
+app.use("/api/admin", requireAuth, requireAdmin);
 
 // Health Check & Database Connection Status
 app.get("/api/health", async (_req, res) => {
@@ -328,7 +347,7 @@ app.get("/api/products", async (req, res) => {
 
 // Products: Get single product by ID
 app.get("/api/products/:id", async (req, res) => {
-  const { id } = req.params;
+  const id = String(req.params.id);
   try {
     if (process.env.DATABASE_URL) {
       const product = await Promise.race([
@@ -378,7 +397,7 @@ app.get("/api/products/:id", async (req, res) => {
 });
 
 // Products: Create new product (Admin / Seller)
-app.post("/api/products", async (req, res) => {
+app.post("/api/products", requireAuth, requireSellerOrAdmin, async (req, res) => {
   try {
     const {
       name,
@@ -397,9 +416,11 @@ app.post("/api/products", async (req, res) => {
       img,
       detailedSpecs,
       status,
-      sellerId,
-      submittedByRole,
+      sellerId: requestedSellerId,
     } = req.body;
+
+    const actor = authenticatedUser(res);
+    const sellerId = actor.role === "admin" ? requestedSellerId : actor.id;
 
     if (!name || !category || price === undefined) {
       return res.status(400).json({ error: "Name, category, and price are required." });
@@ -414,9 +435,9 @@ app.post("/api/products", async (req, res) => {
     //   - otherwise -> "PENDING_APPROVAL"
     // If admin submits without sellerId:
     //   - defaults to status or "APPROVED"
-    let finalStatus = status;
+    let finalStatus = actor.role === "admin" ? status : (settings.autoApproveProducts ? "APPROVED" : "PENDING_APPROVAL");
     if (!finalStatus) {
-      if (sellerId && submittedByRole !== "admin") {
+      if (sellerId && actor.role !== "admin") {
         finalStatus = settings.autoApproveProducts ? "APPROVED" : "PENDING_APPROVAL";
       } else {
         finalStatus = "APPROVED";
@@ -485,9 +506,9 @@ app.post("/api/products", async (req, res) => {
 });
 
 // Products: Update product details
-app.put("/api/products/:id", async (req, res) => {
+app.put("/api/products/:id", requireAuth, requireProductWriter, async (req, res) => {
   try {
-    const { id } = req.params;
+    const id = String(req.params.id);
     const {
       name,
       badge,
@@ -553,9 +574,9 @@ app.put("/api/products/:id", async (req, res) => {
 });
 
 // Products: Quick Stock Update (Seller/Admin Inventory Management)
-app.patch("/api/products/:id/stock", async (req, res) => {
+app.patch("/api/products/:id/stock", requireAuth, requireProductWriter, async (req, res) => {
   try {
-    const { id } = req.params;
+    const id = String(req.params.id);
     const { stock, delta } = req.body;
 
     const existing = await prisma.product.findUnique({ where: { id } });
@@ -591,9 +612,9 @@ app.patch("/api/products/:id/stock", async (req, res) => {
 });
 
 // Products: Quick update product approval status (A2.2)
-app.patch("/api/products/:id/status", async (req, res) => {
+app.patch("/api/products/:id/status", requireAuth, requireAdmin, async (req, res) => {
   try {
-    const { id } = req.params;
+    const id = String(req.params.id);
     const { status } = req.body;
 
     if (!["APPROVED", "PENDING_APPROVAL", "REJECTED"].includes(status)) {
@@ -613,9 +634,9 @@ app.patch("/api/products/:id/status", async (req, res) => {
 });
 
 // Products: Delete product
-app.delete("/api/products/:id", async (req, res) => {
+app.delete("/api/products/:id", requireAuth, requireProductWriter, async (req, res) => {
   try {
-    const { id } = req.params;
+    const id = String(req.params.id);
     await prisma.product.delete({ where: { id } });
     res.json({ success: true, message: `Product ${id} deleted successfully.` });
   } catch (error: any) {
@@ -625,7 +646,7 @@ app.delete("/api/products/:id", async (req, res) => {
 });
 
 // Orders: Place new order
-app.post("/api/orders", async (req, res) => {
+app.post("/api/orders", optionalAuth, async (req, res) => {
   try {
     const {
       customerName,
@@ -636,24 +657,15 @@ app.post("/api/orders", async (req, res) => {
       zipCode,
       items,
       totalAmount,
-      userId,
     } = req.body;
 
     if (!customerEmail || !customerName || !items || !Array.isArray(items) || items.length === 0) {
       return res.status(400).json({ error: "Invalid order data. Name, email, and items are required." });
     }
 
-    // Try finding user by email if userId not explicitly provided
-    let finalUserId = userId;
-    if (!finalUserId && customerEmail) {
-      const existingUser = await prisma.user.findUnique({
-        where: { email: String(customerEmail).trim().toLowerCase() },
-        select: { id: true },
-      });
-      if (existingUser) {
-        finalUserId = existingUser.id;
-      }
-    }
+    // Contact email is not identity. Guests remain unlinked, even if they supply a userId.
+    const actor = res.locals.auth;
+    const finalUserId = actor?.id;
 
     const orderNumber = `ORD-${Math.floor(100000 + Math.random() * 900000)}`;
 
@@ -669,6 +681,8 @@ app.post("/api/orders", async (req, res) => {
         zipCode: zipCode ? String(zipCode).trim() : null,
         totalAmount: Number(totalAmount),
         status: "PENDING",
+        // Nested writes save Order, items and initial history atomically.
+        trackingEvents: initialTrackingEvent(actor?.id),
         items: {
           create: items.map((item: any) => ({
             productId: item.productId,
@@ -721,7 +735,7 @@ app.post("/api/orders", async (req, res) => {
 });
 
 // Orders: Get all orders (for admin)
-app.get("/api/orders", async (_req, res) => {
+app.get("/api/orders", requireAuth, requireAdmin, async (_req, res) => {
   try {
     const orders = await prisma.order.findMany({
       include: {
@@ -768,39 +782,26 @@ app.get("/api/orders", async (_req, res) => {
 });
 
 // Orders: Update order status (A4.1)
-app.patch("/api/orders/:id/status", async (req, res) => {
+app.patch("/api/orders/:id/status", requireAuth, requireSellerOrAdmin, async (req, res) => {
   try {
-    const { id } = req.params;
-    const { status } = req.body;
-
-    const validStatuses = ["PENDING", "PROCESSING", "SHIPPED", "DELIVERED", "CANCELLED"];
-    if (!validStatuses.includes(status)) {
-      return res.status(400).json({ error: `Invalid status. Must be one of: ${validStatuses.join(", ")}` });
-    }
-
-    const updated = await prisma.order.update({
-      where: { id },
-      data: { status },
-      include: {
-        items: {
-          include: {
-            product: true,
-          },
-        },
-      },
-    });
-
-    res.json({ success: true, order: updated });
-  } catch (error: any) {
-    console.error("Failed to update order status:", error);
-    res.status(500).json({ error: "Failed to update order status in database", details: error.message });
+    const result = await updateOrderTracking(prisma, String(req.params.id), authenticatedUser(res), req.body);
+    res.json({ success: true, ...result });
+  } catch (error) {
+    sendApiError(res, error);
   }
 });
 
-// Orders: Delete order
-app.delete("/api/orders/:id", async (req, res) => {
+app.get("/api/orders/:id/tracking", requireAuth, async (req, res) => {
   try {
-    const { id } = req.params;
+    const order = await getOrderTracking(prisma, String(req.params.id), authenticatedUser(res));
+    res.json({ success: true, order });
+  } catch (error) { sendApiError(res, error); }
+});
+
+// Orders: Delete order
+app.delete("/api/orders/:id", requireAuth, requireAdmin, async (req, res) => {
+  try {
+    const id = String(req.params.id);
     await prisma.order.delete({ where: { id } });
     res.json({ success: true, message: `Order ${id} removed successfully.` });
   } catch (error: any) {
@@ -812,6 +813,7 @@ app.delete("/api/orders/:id", async (req, res) => {
 // Auth: Register
 app.post("/api/auth/register", async (req, res) => {
   try {
+    assertAuthConfigured();
     const { email, password, firstName, lastName, phone, address, city, postalCode, role, storeName, storeBio } = req.body || {};
 
     if (!email || !password) {
@@ -827,17 +829,8 @@ app.post("/api/auth/register", async (req, res) => {
     }
 
     const passwordHash = await bcrypt.hash(password, 10);
-    const assignedRole = email.toLowerCase().includes("admin")
-      ? "admin"
-      : role === "seller"
-        ? "seller"
-        : "customer";
-
-    const sellerStatus = assignedRole === "admin"
-      ? "APPROVED"
-      : assignedRole === "seller"
-        ? "PENDING"
-        : "NONE";
+    const assignedRole = role === "seller" ? "seller" : "customer";
+    const sellerStatus = assignedRole === "seller" ? "PENDING" : "NONE";
 
     const user = await prisma.user.create({
       data: {
@@ -885,6 +878,8 @@ app.post("/api/auth/register", async (req, res) => {
       }).catch((err) => console.warn("Could not auto-create initial address in address book:", err));
     }
 
+    setSessionCookie(res, { ...user, password: passwordHash });
+    res.setHeader("Cache-Control", "no-store");
     res.status(201).json({
       success: true,
       message: "User registered successfully in PostgreSQL",
@@ -892,13 +887,14 @@ app.post("/api/auth/register", async (req, res) => {
     });
   } catch (error: any) {
     console.error("Registration error:", error);
-    res.status(500).json({ error: "Registration failed", details: error.message });
+    sendApiError(res, error);
   }
 });
 
 // Auth: Login
 app.post("/api/auth/login", async (req, res) => {
   try {
+    assertAuthConfigured();
     const { email, password } = req.body || {};
 
     if (!email || !password) {
@@ -922,6 +918,8 @@ app.post("/api/auth/login", async (req, res) => {
       return res.status(401).json({ error: "Invalid email or password." });
     }
 
+    setSessionCookie(res, user);
+    res.setHeader("Cache-Control", "no-store");
     res.json({
       success: true,
       user: {
@@ -940,8 +938,14 @@ app.post("/api/auth/login", async (req, res) => {
     });
   } catch (error: any) {
     console.error("Login error:", error);
-    res.status(500).json({ error: "Login failed", details: error.message });
+    sendApiError(res, error);
   }
+});
+
+app.post("/api/auth/logout", (_req, res) => {
+  clearSessionCookie(res);
+  res.setHeader("Cache-Control", "no-store");
+  res.json({ success: true });
 });
 
 // ==============================================================================
@@ -949,7 +953,7 @@ app.post("/api/auth/login", async (req, res) => {
 // ==============================================================================
 
 // Users: Get all users with order and review counts
-app.get("/api/users", async (_req, res) => {
+app.get("/api/users", requireAuth, requireAdmin, async (_req, res) => {
   try {
     const users = await prisma.user.findMany({
       select: {
@@ -980,9 +984,9 @@ app.get("/api/users", async (_req, res) => {
 });
 
 // Users: Get single user by ID
-app.get("/api/users/:id", async (req, res) => {
+app.get("/api/users/:id", requireAuth, requireSelfOrAdmin("id"), async (req, res) => {
   try {
-    const { id } = req.params;
+    const id = String(req.params.id);
     const user = await prisma.user.findUnique({
       where: { id },
       select: {
@@ -1017,9 +1021,9 @@ app.get("/api/users/:id", async (req, res) => {
 });
 
 // Users: Update user profile and info
-app.put("/api/users/:id", async (req, res) => {
+app.put("/api/users/:id", requireAuth, requireAdmin, async (req, res) => {
   try {
-    const { id } = req.params;
+    const id = String(req.params.id);
     const {
       firstName,
       lastName,
@@ -1076,9 +1080,9 @@ app.put("/api/users/:id", async (req, res) => {
 });
 
 // Users: Update user role
-app.patch("/api/users/:id/role", async (req, res) => {
+app.patch("/api/users/:id/role", requireAuth, requireAdmin, async (req, res) => {
   try {
-    const { id } = req.params;
+    const id = String(req.params.id);
     const { role } = req.body || {};
 
     if (!role || !["customer", "seller", "admin"].includes(String(role).toLowerCase())) {
@@ -1120,9 +1124,9 @@ app.patch("/api/users/:id/role", async (req, res) => {
 });
 
 // Users: Toggle user active status (suspend/activate)
-app.patch("/api/users/:id/status", async (req, res) => {
+app.patch("/api/users/:id/status", requireAuth, requireAdmin, async (req, res) => {
   try {
-    const { id } = req.params;
+    const id = String(req.params.id);
     const { isActive } = req.body || {};
 
     if (typeof isActive !== "boolean") {
@@ -1160,9 +1164,9 @@ app.patch("/api/users/:id/status", async (req, res) => {
 });
 
 // Users: Delete user
-app.delete("/api/users/:id", async (req, res) => {
+app.delete("/api/users/:id", requireAuth, requireAdmin, async (req, res) => {
   try {
-    const { id } = req.params;
+    const id = String(req.params.id);
     await prisma.user.delete({ where: { id } });
     res.json({ success: true, message: `User ${id} removed successfully.` });
   } catch (error: any) {
@@ -1226,7 +1230,7 @@ app.get("/api/admin/sellers", async (_req, res) => {
 // Sellers: Update verification status or sanctions (Approve, Reject, Suspend, Reinstate)
 app.patch("/api/admin/sellers/:id/verification", async (req, res) => {
   try {
-    const { id } = req.params;
+    const id = String(req.params.id);
     const { sellerStatus, rejectionReason } = req.body || {};
 
     const validStatuses = ["APPROVED", "REJECTED", "SUSPENDED", "PENDING"];
@@ -1456,29 +1460,16 @@ app.post("/api/feedback", async (req, res) => {
 // Reviews: Get all reviews for a specific product
 app.get("/api/products/:productId/reviews", async (req, res) => {
   try {
-    const { productId } = req.params;
+    const productId = String(req.params.productId);
     if (!productId) {
       return res.status(400).json({ error: "Product ID is required" });
     }
 
     const reviews = await prisma.review.findMany({
       where: { productId },
-      include: {
-        user: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            email: true,
-          },
-        },
-        order: {
-          select: {
-            orderNumber: true,
-            createdAt: true,
-            status: true,
-          },
-        },
+      select: {
+        id: true, rating: true, comment: true, createdAt: true, updatedAt: true,
+        user: { select: { firstName: true, lastName: true } },
       },
       orderBy: { createdAt: "desc" },
     });
@@ -1511,22 +1502,15 @@ app.get("/api/products/:productId/reviews", async (req, res) => {
 });
 
 // Reviews: Check if customer is eligible to review product (must have a completed/placed order containing this product)
-app.get("/api/products/:productId/review-eligibility", async (req, res) => {
+app.get("/api/products/:productId/review-eligibility", requireAuth, async (req, res) => {
   try {
-    const { productId } = req.params;
-    const { email, userId } = req.query;
-
-    if (!email && !userId) {
-      return res.json({ eligible: false, message: "Login to review purchased hardware." });
-    }
+    const productId = String(req.params.productId);
+    const userId = authenticatedUser(res).id;
 
     // Find orders by this user containing this product
     const eligibleOrder = await prisma.order.findFirst({
       where: {
-        OR: [
-          ...(userId ? [{ userId: String(userId) }] : []),
-          ...(email ? [{ customerEmail: String(email).trim().toLowerCase() }] : []),
-        ],
+        userId,
         items: {
           some: { productId },
         },
@@ -1566,49 +1550,23 @@ app.get("/api/products/:productId/review-eligibility", async (req, res) => {
 });
 
 // Reviews: Submit review for an ordered product
-app.post("/api/products/:productId/reviews", async (req, res) => {
+app.post("/api/products/:productId/reviews", requireAuth, async (req, res) => {
   try {
-    const { productId } = req.params;
-    const { userId, email, orderId, rating, comment } = req.body;
+    const productId = String(req.params.productId);
+    const { orderId, rating, comment } = req.body;
 
     if (!productId || !comment || !rating) {
       return res.status(400).json({ error: "Rating and review comment are required." });
     }
 
-    // Resolve user ID
-    let finalUserId = userId;
-    if (!finalUserId && email) {
-      const user = await prisma.user.findUnique({
-        where: { email: String(email).trim().toLowerCase() },
-      });
-      if (user) finalUserId = user.id;
-    }
-
-    if (!finalUserId) {
-      return res.status(401).json({ error: "Customer account required to submit a verified review." });
-    }
-
-    // Resolve order ID if not directly provided
-    let finalOrderId = orderId;
-    if (!finalOrderId) {
-      const verifiedOrder = await prisma.order.findFirst({
-        where: {
-          OR: [
-            { userId: finalUserId },
-            ...(email ? [{ customerEmail: String(email).trim().toLowerCase() }] : []),
-          ],
-          items: {
-            some: { productId },
-          },
-        },
-        orderBy: { createdAt: "desc" },
-      });
-
-      if (!verifiedOrder) {
-        return res.status(403).json({ error: "You can only review laptops from a verified order." });
-      }
-      finalOrderId = verifiedOrder.id;
-    }
+    const finalUserId = authenticatedUser(res).id;
+    // Always verify ownership, including when the client provides an orderId.
+    const verifiedOrder = await prisma.order.findFirst({
+      where: { ...(orderId && { id: String(orderId) }), userId: finalUserId, items: { some: { productId } } },
+      orderBy: { createdAt: "desc" },
+    });
+    if (!verifiedOrder) return res.status(403).json({ error: "You can only review laptops from your own order." });
+    const finalOrderId = verifiedOrder.id;
 
     // Check for existing review on this order & product
     const existing = await prisma.review.findUnique({
@@ -1651,9 +1609,9 @@ app.post("/api/products/:productId/reviews", async (req, res) => {
 });
 
 // Reviews: Delete review (Admin moderation)
-app.delete("/api/reviews/:id", async (req, res) => {
+app.delete("/api/reviews/:id", requireAuth, requireOwnedRecord("review", true), async (req, res) => {
   try {
-    const { id } = req.params;
+    const id = String(req.params.id);
     await prisma.review.delete({ where: { id } });
     res.json({ success: true, message: "Review deleted successfully." });
   } catch (error: any) {
@@ -1750,9 +1708,9 @@ app.post("/api/admin/cache/clear", (_req, res) => {
 // ==========================================
 
 // Seller: Live Overview Statistics (S1.1)
-app.get("/api/seller/stats/:sellerId", async (req, res) => {
+app.get("/api/seller/stats/:sellerId", requireAuth, requireSellerOrAdmin, requireSelfOrAdmin("sellerId"), async (req, res) => {
   try {
-    const { sellerId } = req.params;
+    const sellerId = String(req.params.sellerId);
     if (!sellerId) {
       return res.status(400).json({ error: "Seller ID is required" });
     }
@@ -1889,9 +1847,9 @@ app.get("/api/seller/stats/:sellerId", async (req, res) => {
 });
 
 // Seller: Get Inventory Catalog (S2.1)
-app.get("/api/seller/products/:sellerId", async (req, res) => {
+app.get("/api/seller/products/:sellerId", requireAuth, requireSellerOrAdmin, requireSelfOrAdmin("sellerId"), async (req, res) => {
   try {
-    const { sellerId } = req.params;
+    const sellerId = String(req.params.sellerId);
     if (!sellerId) {
       return res.status(400).json({ error: "Seller ID is required" });
     }
@@ -1919,9 +1877,9 @@ app.get("/api/seller/products/:sellerId", async (req, res) => {
 });
 
 // Seller: Get Full Order Pipeline & Fulfillment Queue (S3.1)
-app.get("/api/seller/orders/:sellerId", async (req, res) => {
+app.get("/api/seller/orders/:sellerId", requireAuth, requireSellerOrAdmin, requireSelfOrAdmin("sellerId"), async (req, res) => {
   try {
-    const { sellerId } = req.params;
+    const sellerId = String(req.params.sellerId);
     if (!sellerId) {
       return res.status(400).json({ error: "Seller ID is required" });
     }
@@ -1982,6 +1940,9 @@ app.get("/api/seller/orders/:sellerId", async (req, res) => {
           id: order.id,
           orderNumber: order.orderNumber,
           status: order.status,
+          carrierName: order.carrierName,
+          trackingNumber: order.trackingNumber,
+          estimatedDelivery: order.estimatedDelivery,
           customerName: order.customerName,
           customerEmail: order.customerEmail,
           customerPhone: order.customerPhone,
@@ -2016,62 +1977,23 @@ app.get("/api/seller/orders/:sellerId", async (req, res) => {
 });
 
 // Seller: Update Order Fulfillment Status (S3.1)
-app.patch("/api/seller/orders/:orderId/fulfillment", async (req, res) => {
+app.patch("/api/seller/orders/:orderId/fulfillment", requireAuth, requireSellerOrAdmin, async (req, res) => {
   try {
-    const { orderId } = req.params;
-    const { status, sellerId, trackingNumber, carrierNotes } = req.body;
-
-    const allowedStatuses = ["PENDING", "PROCESSING", "SHIPPED", "DELIVERED", "CANCELLED"];
-    if (!allowedStatuses.includes(status)) {
-      return res.status(400).json({ error: `Invalid status: ${status}` });
-    }
-
-    // Verify order exists
-    const order = await prisma.order.findUnique({
-      where: { id: orderId },
-      include: {
-        items: {
-          include: {
-            product: true,
-          },
-        },
-      },
-    });
-
-    if (!order) {
-      return res.status(404).json({ error: "Order not found" });
-    }
-
-    // Update order status in PostgreSQL
-    const updated = await prisma.order.update({
-      where: { id: orderId },
-      data: { status },
-      include: {
-        items: {
-          include: {
-            product: true,
-          },
-        },
-      },
-    });
-
+    const result = await updateOrderTracking(prisma, String(req.params.orderId), authenticatedUser(res), req.body);
     res.json({
       success: true,
-      message: `Order ${order.orderNumber} updated to ${status}`,
-      order: updated,
-      trackingNumber: trackingNumber || null,
-      carrierNotes: carrierNotes || null,
+      message: `Order ${result.order.orderNumber} is ${result.order.status}`,
+      ...result,
+      trackingNumber: result.order.trackingNumber,
+      carrierNotes: result.historyCreated ? (req.body?.note ?? req.body?.carrierNotes ?? null) : null,
     });
-  } catch (error: any) {
-    console.error("Failed to update seller order fulfillment:", error);
-    res.status(500).json({ error: "Failed to update order fulfillment", details: error.message });
-  }
+  } catch (error) { sendApiError(res, error); }
 });
 
 // Seller: Update Storefront Profile & Branding Settings (S4.1)
-app.put("/api/seller/profile/:sellerId", async (req, res) => {
+app.put("/api/seller/profile/:sellerId", requireAuth, requireSellerOrAdmin, requireSelfOrAdmin("sellerId"), async (req, res) => {
   try {
-    const { sellerId } = req.params;
+    const sellerId = String(req.params.sellerId);
     const { storeName, storeBio, phone, address, firstName, lastName } = req.body || {};
 
     if (!sellerId) {
@@ -2125,9 +2047,9 @@ app.put("/api/seller/profile/:sellerId", async (req, res) => {
 });
 
 // Seller: Vendor Earnings & Payout Ledger (S5.1)
-app.get("/api/seller/earnings/:sellerId", async (req, res) => {
+app.get("/api/seller/earnings/:sellerId", requireAuth, requireSellerOrAdmin, requireSelfOrAdmin("sellerId"), async (req, res) => {
   try {
-    const { sellerId } = req.params;
+    const sellerId = String(req.params.sellerId);
     if (!sellerId) {
       return res.status(400).json({ error: "Seller ID is required" });
     }
@@ -2235,20 +2157,9 @@ app.get("/api/seller/earnings/:sellerId", async (req, res) => {
 // ==============================================================================
 
 // Customer: Get Orders Pipeline (C2.1)
-app.get("/api/customer/orders", async (req, res) => {
+app.get("/api/customer/orders", requireAuth, async (req, res) => {
   try {
-    const { userId, email } = req.query;
-
-    if (!userId && !email) {
-      return res.status(400).json({ error: "User ID or email is required" });
-    }
-
-    const whereClause: any = {
-      OR: [
-        ...(userId ? [{ userId: String(userId) }] : []),
-        ...(email ? [{ customerEmail: String(email).trim().toLowerCase() }] : []),
-      ],
-    };
+    const whereClause = { userId: authenticatedUser(res).id };
 
     const orders = await prisma.order.findMany({
       where: whereClause,
@@ -2282,22 +2193,9 @@ app.get("/api/customer/orders", async (req, res) => {
 });
 
 // Customer: Get Customer's Submitted Reviews (C3.1)
-app.get("/api/customer/reviews", async (req, res) => {
+app.get("/api/customer/reviews", requireAuth, async (req, res) => {
   try {
-    const { userId, email } = req.query;
-
-    let finalUserId = userId ? String(userId) : undefined;
-    if (!finalUserId && email) {
-      const u = await prisma.user.findUnique({
-        where: { email: String(email).trim().toLowerCase() },
-        select: { id: true },
-      });
-      if (u) finalUserId = u.id;
-    }
-
-    if (!finalUserId) {
-      return res.json([]);
-    }
+    const finalUserId = authenticatedUser(res).id;
 
     const reviews = await prisma.review.findMany({
       where: { userId: finalUserId },
@@ -2337,9 +2235,9 @@ app.get("/api/customer/reviews", async (req, res) => {
 });
 
 // Customer: Edit / Update Submitted Review (C3.1)
-app.put("/api/customer/reviews/:id", async (req, res) => {
+app.put("/api/customer/reviews/:id", requireAuth, requireOwnedRecord("review"), async (req, res) => {
   try {
-    const { id } = req.params;
+    const id = String(req.params.id);
     const { rating, comment } = req.body;
 
     if (!rating || !comment) {
@@ -2366,9 +2264,9 @@ app.put("/api/customer/reviews/:id", async (req, res) => {
 });
 
 // Customer: Update Profile Settings (C1.1)
-app.put("/api/customer/profile/:userId", async (req, res) => {
+app.put("/api/customer/profile/:userId", requireAuth, requireSelfOrAdmin("userId"), async (req, res) => {
   try {
-    const { userId } = req.params;
+    const userId = String(req.params.userId);
     const { firstName, lastName, phone, address } = req.body || {};
 
     const updatedUser = await prisma.user.update({
@@ -2410,22 +2308,9 @@ app.put("/api/customer/profile/:userId", async (req, res) => {
 // =========================================================================
 
 // Get saved customer addresses
-app.get("/api/customer/addresses", async (req, res) => {
+app.get("/api/customer/addresses", requireAuth, async (req, res) => {
   try {
-    const { userId, email } = req.query;
-    let finalUserId = userId ? String(userId) : undefined;
-
-    if (!finalUserId && email) {
-      const u = await prisma.user.findUnique({
-        where: { email: String(email).trim().toLowerCase() },
-        select: { id: true },
-      });
-      if (u) finalUserId = u.id;
-    }
-
-    if (!finalUserId) {
-      return res.json([]);
-    }
+    const finalUserId = authenticatedUser(res).id;
 
     const addresses = await prisma.address.findMany({
       where: { userId: finalUserId },
@@ -2440,22 +2325,10 @@ app.get("/api/customer/addresses", async (req, res) => {
 });
 
 // Create new saved address
-app.post("/api/customer/addresses", async (req, res) => {
+app.post("/api/customer/addresses", requireAuth, async (req, res) => {
   try {
-    const { userId, email, label, recipientName, phone, streetAddress, city, postalCode, isDefault } = req.body || {};
-
-    let finalUserId = userId ? String(userId) : undefined;
-    if (!finalUserId && email) {
-      const u = await prisma.user.findUnique({
-        where: { email: String(email).trim().toLowerCase() },
-        select: { id: true },
-      });
-      if (u) finalUserId = u.id;
-    }
-
-    if (!finalUserId) {
-      return res.status(400).json({ error: "User ID or valid email is required to save an address." });
-    }
+    const { label, recipientName, phone, streetAddress, city, postalCode, isDefault } = req.body || {};
+    const finalUserId = authenticatedUser(res).id;
 
     if (!recipientName || !phone || !streetAddress || !city) {
       return res.status(400).json({ error: "Recipient name, phone, street address, and city are required." });
@@ -2494,9 +2367,9 @@ app.post("/api/customer/addresses", async (req, res) => {
 });
 
 // Update saved address
-app.put("/api/customer/addresses/:id", async (req, res) => {
+app.put("/api/customer/addresses/:id", requireAuth, requireOwnedRecord("address"), async (req, res) => {
   try {
-    const { id } = req.params;
+    const id = String(req.params.id);
     const { label, recipientName, phone, streetAddress, city, postalCode, isDefault } = req.body || {};
 
     const existing = await prisma.address.findUnique({ where: { id } });
@@ -2532,9 +2405,9 @@ app.put("/api/customer/addresses/:id", async (req, res) => {
 });
 
 // Set address as primary default
-app.patch("/api/customer/addresses/:id/default", async (req, res) => {
+app.patch("/api/customer/addresses/:id/default", requireAuth, requireOwnedRecord("address"), async (req, res) => {
   try {
-    const { id } = req.params;
+    const id = String(req.params.id);
     const existing = await prisma.address.findUnique({ where: { id } });
     if (!existing) {
       return res.status(404).json({ error: "Address not found." });
@@ -2558,9 +2431,9 @@ app.patch("/api/customer/addresses/:id/default", async (req, res) => {
 });
 
 // Delete saved address
-app.delete("/api/customer/addresses/:id", async (req, res) => {
+app.delete("/api/customer/addresses/:id", requireAuth, requireOwnedRecord("address"), async (req, res) => {
   try {
-    const { id } = req.params;
+    const id = String(req.params.id);
     const existing = await prisma.address.findUnique({ where: { id } });
     if (!existing) {
       return res.status(404).json({ error: "Address not found." });

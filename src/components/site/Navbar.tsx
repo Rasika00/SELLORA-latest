@@ -32,10 +32,14 @@ export function Navbar() {
     };
   }, []);
 
-  const handleSignOut = () => {
-    logout();
-    setCurrentUser(null);
-    navigate({ to: "/login" });
+  const handleSignOut = async () => {
+    try {
+      await logout();
+      setCurrentUser(null);
+      navigate({ to: "/login" });
+    } catch {
+      window.alert("Sign out failed. Please try again.");
+    }
   };
 
   const links: { label: string; href: string; isRouterLink?: boolean; isHighlight?: boolean }[] = [

@@ -168,9 +168,13 @@ export function CustomerAccountHub() {
     }
   };
 
-  const handleLogout = () => {
-    logout();
-    navigate({ to: "/login" });
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate({ to: "/login" });
+    } catch {
+      window.alert("Sign out failed. Please try again.");
+    }
   };
 
   // Address Handlers

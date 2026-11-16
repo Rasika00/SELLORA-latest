@@ -140,10 +140,14 @@ export function AdminDashboard() {
     }
   }, [currentUser]);
 
-  const handleLogout = () => {
-    logout();
-    setCurrentUser(null);
-    navigate({ to: "/login" });
+  const handleLogout = async () => {
+    try {
+      await logout();
+      setCurrentUser(null);
+      navigate({ to: "/login" });
+    } catch {
+      window.alert("Sign out failed. Please try again.");
+    }
   };
 
   // Wait until mounted on client

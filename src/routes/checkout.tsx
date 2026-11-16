@@ -92,7 +92,7 @@ function CartCheckoutPage() {
   const handlePayment = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsProcessing(true);
-    
+
     try {
       // If user selected manual new address and chose to save to address book
       if (currentUser && selectedAddressId === "manual" && saveToAddressBook) {
@@ -166,14 +166,14 @@ function CartCheckoutPage() {
             <p className="text-xs text-muted-foreground">Delivery To: <span className="text-foreground">{formData.address}, {formData.city}</span></p>
           </div>
           <div className="flex flex-col gap-3">
-            <Link 
-              to="/account" 
+            <Link
+              to="/account"
               className="block w-full rounded-xl bg-primary hover:bg-primary-hover text-primary-foreground px-6 py-3 text-sm font-semibold shadow-sm transition-all text-center"
             >
               View Order in Customer Hub
             </Link>
-            <Link 
-              to="/" 
+            <Link
+              to="/"
               className="block w-full rounded-xl bg-secondary hover:bg-secondary/80 px-6 py-2.5 text-xs font-semibold text-foreground transition-colors border border-border text-center"
             >
               Return to Store
@@ -191,7 +191,7 @@ function CartCheckoutPage() {
         <Link to="/" className="inline-flex items-center gap-2 text-xs uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors mb-8">
           <ArrowLeft className="w-4 h-4" /> Back to Store
         </Link>
-        
+
         <h1 className="font-display text-4xl sm:text-5xl font-black mb-12">SECURE CHECKOUT</h1>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
@@ -227,11 +227,10 @@ function CartCheckoutPage() {
                           <div
                             key={addr.id}
                             onClick={() => handleSelectAddress(addr)}
-                            className={`p-4 rounded-xl border cursor-pointer transition-all relative ${
-                              isSelected
-                                ? "bg-primary/10 border-primary shadow-sm ring-1 ring-primary"
-                                : "bg-secondary/40 border-border hover:border-border-hover"
-                            }`}
+                            className={`p-4 rounded-xl border cursor-pointer transition-all relative ${isSelected
+                              ? "bg-primary/10 border-primary shadow-sm ring-1 ring-primary"
+                              : "bg-secondary/40 border-border hover:border-border-hover"
+                              }`}
                           >
                             <div className="flex items-center justify-between gap-2 mb-2">
                               <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-secondary text-foreground font-bold border border-border">
@@ -260,11 +259,10 @@ function CartCheckoutPage() {
                       {/* Option to ship to a new manual address */}
                       <div
                         onClick={handleSelectManual}
-                        className={`p-4 rounded-xl border border-dashed cursor-pointer transition-all flex flex-col items-center justify-center text-center ${
-                          selectedAddressId === "manual"
-                            ? "bg-primary/10 border-primary ring-1 ring-primary"
-                            : "bg-secondary/20 border-border hover:border-border-hover text-muted-foreground hover:text-foreground"
-                        }`}
+                        className={`p-4 rounded-xl border border-dashed cursor-pointer transition-all flex flex-col items-center justify-center text-center ${selectedAddressId === "manual"
+                          ? "bg-primary/10 border-primary ring-1 ring-primary"
+                          : "bg-secondary/20 border-border hover:border-border-hover text-muted-foreground hover:text-foreground"
+                          }`}
                       >
                         <Plus className="h-5 w-5 mb-1 text-primary" />
                         <span className="text-xs font-bold text-foreground">Deliver to New Address</span>
@@ -399,8 +397,8 @@ function CartCheckoutPage() {
                 </div>
               </div>
 
-              <button 
-                type="submit" 
+              <button
+                type="submit"
                 disabled={isProcessing}
                 className="w-full rounded-xl bg-primary hover:bg-primary-hover px-8 py-3.5 text-sm font-semibold uppercase tracking-wider text-primary-foreground shadow-sm transition-all hover:shadow-md flex items-center justify-center gap-2 disabled:opacity-70 cursor-pointer"
               >
@@ -420,13 +418,13 @@ function CartCheckoutPage() {
           <div className="lg:col-span-5">
             <div className="bg-card rounded-2xl p-6 sm:p-8 sticky top-24 border border-border shadow-card">
               <h3 className="font-display text-lg font-bold mb-6 uppercase tracking-widest">Order Summary</h3>
-              
+
               <div className="divide-y divide-border mb-6 max-h-[360px] overflow-y-auto pr-1">
                 {items.map((item) => (
                   <div key={item.product.id} className="py-4 flex gap-4 first:pt-0">
-                    <img 
-                      src={item.product.img} 
-                      alt={item.product.name} 
+                    <img
+                      src={item.product.img}
+                      alt={item.product.name}
                       className="w-16 h-16 object-cover rounded-xl bg-secondary/40 border border-border shrink-0"
                     />
                     <div className="flex-1 min-w-0">

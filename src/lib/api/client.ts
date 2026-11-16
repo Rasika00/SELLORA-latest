@@ -1,5 +1,7 @@
 import { products as fallbackProducts, type Product } from "@/data/products";
 import { initialFeedbacks, type FeedbackItem } from "@/data/feedbacks";
+import { OrderRequestError, requestOrderJson } from "./order-tracking";
+export { getOrderTracking, type OrderTracking, type OrderTrackingEvent } from "./order-tracking";
 
 const API_BASE = "/api";
 const LOCAL_FEEDBACK_KEY = "sellora_community_feedback";
@@ -1047,20 +1049,11 @@ export interface CustomerReviewRecord {
   };
 }
 
-export async function getCustomerOrders(params: { userId?: string; email?: string }): Promise<CustomerOrderRecord[]> {
-  try {
-    const q = new URLSearchParams();
-    if (params.userId) q.append("userId", params.userId);
-    if (params.email) q.append("email", params.email);
-
-    const res = await fetch(`${API_BASE}/customer/orders?${q.toString()}`);
-    if (res.ok) {
-      return await res.json();
-    }
-  } catch (err) {
-    console.error("Failed to fetch customer orders:", err);
-  }
-  return [];
+export async function getCustomerOrders(_params?: { userId?: string; email?: string }): Promise<CustomerOrderRecord[]> {
+  // Identity comes from the verified session cookie, never a userId/email query.
+  const data = await requestOrderJson("/customer/orders");
+  if (!Array.isArray(data)) throw new OrderRequestError("invalid-response");
+  return data;
 }
 
 export async function getCustomerReviews(params: { userId?: string; email?: string }): Promise<CustomerReviewRecord[]> {

@@ -1,6 +1,8 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { getCurrentUser, setCurrentUser, logout, type UserSession } from "@/lib/auth";
+import { OrderTrackingModal, OrderRequestErrorNotice } from "@/components/account/OrderTrackingModal";
+import { asOrderRequestError, type OrderRequestError, type OrderTracking } from "@/lib/api/order-tracking";
 import { useUIMode } from "@/context/UIModeContext";
 import {
   getCustomerOrders,
@@ -66,6 +68,7 @@ export function CustomerAccountHub() {
 
   // Orders, reviews, and addresses state
   const [orders, setOrders] = useState<CustomerOrderRecord[]>([]);
+  const [ordersError, setOrdersError] = useState<OrderRequestError | null>(null);
   const [reviews, setReviews] = useState<CustomerReviewRecord[]>([]);
   const [addresses, setAddresses] = useState<CustomerAddressRecord[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -100,6 +103,11 @@ export function CustomerAccountHub() {
 
   // Live Order Tracking Modal state
   const [trackingModalOrder, setTrackingModalOrder] = useState<CustomerOrderRecord | null>(null);
+  const handleTrackingLoaded = useCallback((tracking: OrderTracking) => {
+    setOrders(previous => previous.map(order => order.id === tracking.id
+      ? { ...order, status: tracking.status, updatedAt: tracking.updatedAt }
+      : order));
+  }, []);
 
   // Review Modal state (C3.1)
   const [reviewModalOrder, setReviewModalOrder] = useState<CustomerOrderRecord | null>(null);
@@ -136,9 +144,13 @@ export function CustomerAccountHub() {
   }, []);
 
   const loadCustomerData = async (curr: UserSession) => {
+    setOrdersError(null);
     try {
       const [ords, revs, addrs] = await Promise.all([
-        getCustomerOrders({ userId: curr.id, email: curr.email }),
+        getCustomerOrders().catch(error => {
+          setOrdersError(asOrderRequestError(error));
+          return [];
+        }),
         getCustomerReviews({ userId: curr.id, email: curr.email }),
         getCustomerAddresses({ userId: curr.id, email: curr.email }),
       ]);
@@ -482,10 +494,10 @@ export function CustomerAccountHub() {
   }
 
   // Active counts for C1.1
-  const totalOrdersCount = orders.length;
-  const processingCount = orders.filter((o) => o.status === "PROCESSING").length;
-  const shippedCount = orders.filter((o) => o.status === "SHIPPED").length;
-  const completedCount = orders.filter((o) => o.status === "DELIVERED").length;
+  const totalOrdersCount = ordersError ? "—" : orders.length;
+  const processingCount = ordersError ? "—" : orders.filter((o) => o.status === "PROCESSING").length;
+  const shippedCount = ordersError ? "—" : orders.filter((o) => o.status === "SHIPPED").length;
+  const completedCount = ordersError ? "—" : orders.filter((o) => o.status === "DELIVERED").length;
 
   // Sidebar navigation items
   const menuItems = [
@@ -594,10 +606,10 @@ export function CustomerAccountHub() {
       </header>
 
       {/* Main Work Area: Left Sidebar + Content */}
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex min-w-0 flex-1 flex-col overflow-hidden md:flex-row">
         {/* Left Sidebar Menu */}
-        <aside className="w-56 border-r border-border bg-card flex flex-col shrink-0 py-4 z-40 relative shadow-sm">
-          <div className="px-4 pb-3 mb-2 border-b border-border">
+        <aside className="relative z-40 flex w-full shrink-0 flex-col border-b border-border bg-card py-3 shadow-sm md:w-56 md:border-b-0 md:border-r md:py-4">
+          <div className="hidden px-4 pb-3 mb-2 border-b border-border md:block">
             <div className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider">Account ID</div>
             <div className="text-xs font-bold text-foreground truncate mt-0.5">
               {user.firstName ? `${user.firstName} ${user.lastName || ""}` : "Verified Buyer"}
@@ -607,7 +619,7 @@ export function CustomerAccountHub() {
             </span>
           </div>
 
-          <nav className="flex flex-col gap-1.5 px-3 flex-1">
+          <nav aria-label="Customer account navigation" className="flex flex-1 gap-1.5 overflow-x-auto px-3 md:flex-col md:overflow-visible">
             {menuItems.map((item) => {
               const Icon = item.icon;
               const isActive = activeTab === item.id;
@@ -615,7 +627,7 @@ export function CustomerAccountHub() {
                 <button
                   key={item.id}
                   onClick={() => setActiveTab(item.id as any)}
-                  className={`flex items-center justify-between rounded-lg px-3 py-2 text-sm font-medium transition-colors whitespace-nowrap ${
+                  className={`flex shrink-0 items-center justify-between rounded-lg px-3 py-2 text-sm font-medium transition-colors whitespace-nowrap ${
                     isActive
                       ? "bg-primary/10 text-primary border border-primary/20 font-semibold"
                       : "text-muted-foreground hover:bg-secondary hover:text-foreground"
@@ -639,15 +651,16 @@ export function CustomerAccountHub() {
             })}
           </nav>
 
-          <div className="px-4 pt-3 border-t border-border text-[10px] font-mono text-muted-foreground">
+          <div className="hidden px-4 pt-3 border-t border-border text-[10px] font-mono text-muted-foreground md:block">
             <div>SELLORA Buyer Protection</div>
             <div className="text-muted-foreground/60 mt-0.5">100% Genuine Hardware</div>
           </div>
         </aside>
 
         {/* Content Area */}
-        <main className="flex-1 overflow-y-auto p-6 lg:p-8 relative scroll-smooth bg-background">
+        <main className="relative min-w-0 flex-1 overflow-y-auto bg-background p-4 scroll-smooth sm:p-6 lg:p-8">
           <div className="max-w-[1400px] mx-auto space-y-8 animate-fade-up">
+            {ordersError && <OrderRequestErrorNotice error={ordersError} onRetry={handleRefresh} />}
 
             {/* TAB 1: OVERVIEW & COMMAND CENTER (C1.1) */}
             {activeTab === "overview" && (
@@ -694,10 +707,10 @@ export function CustomerAccountHub() {
                     onClick={() => setActiveTab("orders")}
                     className="rounded-2xl bg-blue-500/10 border border-blue-500/30 p-6 hover:border-blue-400 transition-all cursor-pointer group"
                   >
-                    <p className="text-xs font-mono text-muted-foreground uppercase">Processing (Packing)</p>
+                    <p className="text-xs font-mono text-muted-foreground uppercase">Processing</p>
                     <h3 className="text-3xl font-display font-black text-blue-500 dark:text-blue-300 mt-1.5">{processingCount}</h3>
                     <div className="mt-3 text-[11px] font-mono text-blue-600 dark:text-blue-400 flex items-center gap-1">
-                      <Package className="h-3 w-3" /> Preparing at vendor warehouse
+                      <Package className="h-3 w-3" /> Orders being processed
                     </div>
                   </div>
 
@@ -708,7 +721,7 @@ export function CustomerAccountHub() {
                     <p className="text-xs font-mono text-muted-foreground uppercase">Shipped (In Transit)</p>
                     <h3 className="text-3xl font-display font-black text-purple-600 dark:text-purple-300 mt-1.5">{shippedCount}</h3>
                     <div className="mt-3 text-[11px] font-mono text-purple-600 dark:text-purple-400 flex items-center gap-1">
-                      <Truck className="h-3 w-3" /> With express courier
+                      <Truck className="h-3 w-3" /> Orders marked as shipped
                     </div>
                   </div>
 
@@ -740,7 +753,7 @@ export function CustomerAccountHub() {
                       </button>
                     </div>
 
-                    {orders.length > 0 ? (
+                    {ordersError ? null : orders.length > 0 ? (
                       <div className="space-y-3">
                         {orders.slice(0, 3).map((ord) => (
                           <div
@@ -849,7 +862,7 @@ export function CustomerAccountHub() {
                   <h2 className="text-2xl font-display font-bold text-foreground flex items-center gap-3">
                     <span>My Hardware Orders</span>
                     <span className="text-xs px-2.5 py-0.5 rounded-full bg-primary/20 text-primary font-mono border border-primary/30">
-                      {orders.length} Total
+                      {ordersError ? "Unavailable" : `${orders.length} Total`}
                     </span>
                   </h2>
                   <p className="text-xs text-muted-foreground mt-1">
@@ -857,7 +870,7 @@ export function CustomerAccountHub() {
                   </p>
                 </div>
 
-                {orders.length > 0 ? (
+                {ordersError ? null : orders.length > 0 ? (
                   <div className="space-y-3">
                     {orders.map((ord) => {
                       return (
@@ -885,7 +898,7 @@ export function CustomerAccountHub() {
                                 {ord.status === "PENDING"
                                   ? "Order Placed"
                                   : ord.status === "PROCESSING"
-                                  ? "Packed & Verified"
+                                  ? "Processing"
                                   : ord.status === "SHIPPED"
                                   ? "In Transit"
                                   : ord.status === "DELIVERED"
@@ -1380,142 +1393,15 @@ export function CustomerAccountHub() {
         </main>
       </div>
 
-      {/* C2.1 LIVE ORDER TRACKING MODAL */}
+      {/* Existing tracking modal, now backed by the authorized tracking API. */}
       {trackingModalOrder && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm animate-fade-in">
-          <div className="bg-card border border-border rounded-2xl w-full max-w-2xl p-6 sm:p-8 relative shadow-2xl max-h-[90vh] overflow-y-auto space-y-6">
-            {/* Modal Header */}
-            <div className="flex items-center justify-between border-b border-border pb-4">
-              <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shadow-sm">
-                  <Truck className="h-5 w-5" />
-                </div>
-                <div>
-                  <h3 className="text-base sm:text-lg font-display font-bold text-foreground flex items-center gap-2">
-                    <span>Live Order Tracking</span>
-                    <span className="font-mono text-xs px-2 py-0.5 rounded bg-primary/20 text-primary border border-primary/30 font-bold">
-                      {trackingModalOrder.orderNumber}
-                    </span>
-                  </h3>
-                  <p className="text-xs text-muted-foreground font-mono mt-0.5">
-                    Placed on: {new Date(trackingModalOrder.createdAt).toLocaleDateString()} &bull; Total Amount: LKR {Number(trackingModalOrder.totalAmount ?? 0).toLocaleString()}
-                  </p>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => setTrackingModalOrder(null)}
-                className="p-2 rounded-xl text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors cursor-pointer"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-
-            {/* Current Status Highlight Banner */}
-            <div className="p-4 rounded-xl bg-secondary/40 border border-border flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <div>
-                <span className="text-[10px] font-mono uppercase text-muted-foreground block font-bold tracking-wider">
-                  Current Shipment Status
-                </span>
-                <span className="text-sm font-display font-bold text-foreground flex items-center gap-2 mt-0.5">
-                  <span
-                    className={`h-2.5 w-2.5 rounded-full ${
-                      trackingModalOrder.status === "DELIVERED"
-                        ? "bg-emerald-500 shadow-sm"
-                        : trackingModalOrder.status === "CANCELLED"
-                        ? "bg-destructive shadow-sm"
-                        : "bg-primary animate-pulse shadow-sm"
-                    }`}
-                  />
-                  {trackingModalOrder.status === "PENDING"
-                    ? "Order Placed & Awaiting Vendor Dispatch"
-                    : trackingModalOrder.status === "PROCESSING"
-                    ? "Packed & Verified (Thermal QC Check Complete)"
-                    : trackingModalOrder.status === "SHIPPED"
-                    ? "In Transit (Express Courier Dispatch)"
-                    : trackingModalOrder.status === "DELIVERED"
-                    ? "Delivered & Verified by Operator"
-                    : trackingModalOrder.status === "CANCELLED"
-                    ? "Order Cancelled & Refunded"
-                    : trackingModalOrder.status}
-                </span>
-              </div>
-              <div className="text-xs font-mono px-3 py-1.5 rounded-xl bg-primary/10 border border-primary/20 text-primary font-bold flex items-center gap-1.5 shrink-0">
-                <Clock className="h-3.5 w-3.5" />
-                <span>
-                  {trackingModalOrder.status === "DELIVERED"
-                    ? "Delivered to Customer"
-                    : trackingModalOrder.status === "CANCELLED"
-                    ? "Cancelled"
-                    : "Estimated Delivery: 24 - 48h"}
-                </span>
-              </div>
-            </div>
-
-            {/* 4-Stage Visual Progress Timeline */}
-            {(() => {
-              const stages = ["PENDING", "PROCESSING", "SHIPPED", "DELIVERED"];
-              const currentStageIndex = stages.indexOf(trackingModalOrder.status);
-              const isCancelled = trackingModalOrder.status === "CANCELLED";
-
-              if (isCancelled) {
-                return (
-                  <div className="p-4 rounded-2xl bg-destructive/10 border border-destructive/20 text-destructive text-xs flex items-center gap-2">
-                    <AlertTriangle className="h-4 w-4" />
-                    <span>This order has been cancelled.</span>
-                  </div>
-                );
-              }
-
-              const steps = [
-                { key: "PENDING", label: "Order Placed", desc: "Received by vendor" },
-                { key: "PROCESSING", label: "Packed & Verified", desc: "Thermal QC check" },
-                { key: "SHIPPED", label: "In Transit", desc: "Express Dispatch" },
-                { key: "DELIVERED", label: "Delivered", desc: "Operator Handover" },
-              ];
-
-              return (
-                <div className="p-6 rounded-2xl bg-secondary/40 border border-border space-y-6">
-                  <div className="grid grid-cols-4 gap-2 relative">
-                    {/* Connecting progress bar line */}
-                    <div className="absolute top-4 left-[12%] right-[12%] h-1 bg-border/60 -z-0">
-                      <div
-                        className="h-full bg-primary transition-all duration-500 shadow-sm"
-                        style={{
-                          width: `${Math.min(100, Math.max(0, (currentStageIndex / (steps.length - 1)) * 100))}%`,
-                        }}
-                      />
-                    </div>
-
-                    {steps.map((step, idx) => {
-                      const isComplete = currentStageIndex >= idx;
-                      const isCurrent = currentStageIndex === idx;
-
-                      return (
-                        <div key={step.key} className="flex flex-col items-center text-center z-10">
-                          <div
-                            className={`h-9 w-9 rounded-full flex items-center justify-center font-bold text-xs transition-all mb-2 ${
-                              isComplete
-                                ? "bg-primary text-primary-foreground shadow-sm"
-                                : "bg-card text-muted-foreground border border-border"
-                            } ${isCurrent ? "ring-2 ring-primary ring-offset-2 ring-offset-background" : ""}`}
-                          >
-                            {isComplete ? <Check className="h-4 w-4 stroke-[3]" /> : idx + 1}
-                          </div>
-                          <div className={`text-xs font-bold leading-tight ${isComplete ? "text-foreground" : "text-muted-foreground"}`}>
-                            {step.label}
-                          </div>
-                          <div className="text-[10px] text-muted-foreground mt-0.5 hidden sm:block">
-                            {step.desc}
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              );
-            })()}
-
+        <OrderTrackingModal
+          key={trackingModalOrder.id}
+          orderId={trackingModalOrder.id}
+          orderNumber={trackingModalOrder.orderNumber}
+          onLoaded={handleTrackingLoaded}
+          onClose={() => setTrackingModalOrder(null)}
+        >
             {/* Shipping & Delivery Address Details Card */}
             <div className="p-5 rounded-2xl bg-secondary/40 border border-border space-y-3">
               <div className="flex items-center gap-2 text-xs font-bold font-mono uppercase text-primary tracking-wider pb-2 border-b border-border">
@@ -1596,18 +1482,7 @@ export function CustomerAccountHub() {
               </div>
             </div>
 
-            {/* Close Button */}
-            <div className="pt-2 border-t border-border flex justify-end">
-              <button
-                type="button"
-                onClick={() => setTrackingModalOrder(null)}
-                className="px-5 py-2.5 rounded-xl bg-secondary hover:bg-secondary/80 text-foreground font-display text-xs font-semibold transition-all cursor-pointer border border-border"
-              >
-                Close Tracking
-              </button>
-            </div>
-          </div>
-        </div>
+        </OrderTrackingModal>
       )}
 
       {/* C3.1 WRITE REVIEW MODAL */}

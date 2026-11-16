@@ -853,7 +853,7 @@ export function PerformanceEstimator({ initialProductId, isCompactEmbedded = fal
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <h4 className="font-display text-base sm:text-lg font-bold uppercase tracking-wider text-foreground">
-                Per-Application Playability & Workload Breakdown
+                Per-Application Performance
               </h4>
               <span className="text-xs text-muted-foreground font-mono">
                 {evaluation.appEvaluations.length} Benchmarks Calculated
@@ -888,109 +888,90 @@ export function PerformanceEstimator({ initialProductId, isCompactEmbedded = fal
                   const isAmber = item.statusColor === "amber";
 
                   const badgeBg = isEmerald
-                    ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/40"
+                    ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/30"
                     : isCyan
-                    ? "bg-neon-cyan/15 text-neon-cyan border-neon-cyan/40"
+                    ? "bg-primary/15 text-primary border-primary/30"
                     : isAmber
-                    ? "bg-amber-500/15 text-amber-400 border-amber-500/40"
-                    : "bg-rose-500/15 text-rose-400 border-rose-500/40";
+                    ? "bg-amber-500/15 text-amber-400 border-amber-500/30"
+                    : "bg-destructive/15 text-destructive border-destructive/30";
 
                   const scoreBarColor = isEmerald
                     ? "bg-emerald-400"
                     : isCyan
-                    ? "bg-neon-cyan"
+                    ? "bg-primary"
                     : isAmber
                     ? "bg-amber-400"
-                    : "bg-rose-400";
+                    : "bg-destructive";
 
                   return (
                     <div
                       key={item.app.id}
-                      className="flex flex-col justify-between rounded-3xl border border-glass-border bg-card/60 p-5 sm:p-6 backdrop-blur-xl transition-all duration-300 hover:border-white/30 hover:shadow-elevated"
+                      className="rounded-2xl border border-border bg-card p-5 shadow-card transition-all duration-200 hover:border-border-hover space-y-3.5"
                     >
-                      <div>
-                        {/* Top App Header */}
-                        <div className="flex items-start justify-between gap-2 mb-3">
-                          <div>
-                            <span className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">
-                              {item.app.categoryLabel}
-                            </span>
-                            <h5 className="font-display text-base font-bold text-foreground">
-                              {item.app.name}
-                            </h5>
-                          </div>
-                          <div className="text-right shrink-0">
-                            <span className="font-display text-xl font-bold text-foreground">
-                              {item.score}
-                            </span>
-                            <span className="text-[10px] font-mono text-muted-foreground block">/100</span>
-                          </div>
-                        </div>
-
-                        {/* Score Bar */}
-                        <div className="h-1.5 w-full rounded-full bg-white/10 overflow-hidden mb-4">
-                          <div
-                            className={`h-full ${scoreBarColor} transition-all duration-500`}
-                            style={{ width: `${item.score}%` }}
-                          />
-                        </div>
-
-                        {/* Status Badge */}
-                        <div className="mb-3.5">
-                          <span
-                            className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-mono font-bold border ${badgeBg}`}
-                          >
-                            {item.status === "flawless" || item.status === "smooth" ? (
-                              <CheckCircle2 className="h-3.5 w-3.5" />
-                            ) : item.status === "playable" ? (
-                              <Info className="h-3.5 w-3.5" />
-                            ) : (
-                              <AlertTriangle className="h-3.5 w-3.5" />
-                            )}
-                            <span>{item.statusBadge}</span>
+                      {/* Top App Header */}
+                      <div className="flex items-start justify-between gap-2">
+                        <div>
+                          <span className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">
+                            {item.app.categoryLabel}
                           </span>
+                          <h5 className="font-display text-sm sm:text-base font-bold text-foreground">
+                            {item.app.name}
+                          </h5>
                         </div>
+                        <div className="text-right shrink-0">
+                          <span className="font-display text-xl font-bold text-foreground">
+                            {item.score}
+                          </span>
+                          <span className="text-[10px] font-mono text-muted-foreground inline ml-0.5">/100</span>
+                        </div>
+                      </div>
 
-                        {/* Estimated Metric Highlight */}
-                        <div className="rounded-xl bg-secondary/50 border border-border p-3 mb-3">
-                          <span className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground block">
+                      {/* Score Bar */}
+                      <div className="h-1.5 w-full rounded-full bg-secondary overflow-hidden">
+                        <div
+                          className={`h-full ${scoreBarColor} transition-all duration-500`}
+                          style={{ width: `${item.score}%` }}
+                        />
+                      </div>
+
+                      {/* Status Badge */}
+                      <div>
+                        <span
+                          className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[11px] font-mono font-bold border ${badgeBg}`}
+                        >
+                          {item.status === "flawless" || item.status === "smooth" ? (
+                            <CheckCircle2 className="h-3.5 w-3.5" />
+                          ) : item.status === "playable" ? (
+                            <Info className="h-3.5 w-3.5" />
+                          ) : (
+                            <AlertTriangle className="h-3.5 w-3.5" />
+                          )}
+                          <span>{item.statusBadge}</span>
+                        </span>
+                      </div>
+
+                      {/* Key Performance Metric Box */}
+                      <div className="rounded-xl bg-secondary/40 border border-border p-3 space-y-1">
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground font-semibold">
                             {item.metricLabel}
                           </span>
-                          <span className="font-display text-sm font-bold text-primary">
+                          <span className="font-mono font-bold text-foreground">
                             {item.metricValue}
                           </span>
-                          <p className="text-xs font-semibold text-foreground/90 mt-1">
-                            {item.headline}
-                          </p>
                         </div>
-
-                        {/* Detailed Technical Diagnosis */}
-                        <p className="text-xs text-muted-foreground leading-relaxed">
-                          {item.diagnosis}
-                        </p>
-
-                        {/* Bottleneck Alerts */}
-                        {item.bottlenecks.length > 0 && (
-                          <div className="mt-3 space-y-1.5">
-                            {item.bottlenecks.map((bn, i) => (
-                              <div
-                                key={i}
-                                className="flex items-start gap-1.5 text-[11px] font-mono text-amber-400 bg-amber-500/10 border border-amber-500/20 px-2 py-1 rounded"
-                              >
-                                <AlertTriangle className="h-3 w-3 shrink-0 mt-0.5" />
-                                <span>{bn}</span>
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Pro Tip / Advice */}
-                      <div className="mt-4 pt-4 border-t border-glass-border">
-                        <p className="text-[11px] text-muted-foreground/80 leading-relaxed italic">
-                          <strong className="text-foreground/90 not-italic">Pro Tip:</strong> {item.advice}
+                        <p className="text-xs font-medium text-muted-foreground leading-snug line-clamp-1">
+                          {item.headline}
                         </p>
                       </div>
+
+                      {/* Bottleneck Tag (Only if bottleneck detected) */}
+                      {item.bottlenecks.length > 0 && (
+                        <div className="flex items-center gap-1.5 text-[10px] font-mono text-amber-500 dark:text-amber-400 bg-amber-500/10 border border-amber-500/20 px-2.5 py-1 rounded-lg">
+                          <AlertTriangle className="h-3 w-3 shrink-0" />
+                          <span className="truncate">{item.bottlenecks[0]}</span>
+                        </div>
+                      )}
                     </div>
                   );
                 })}

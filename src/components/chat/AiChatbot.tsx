@@ -194,7 +194,11 @@ export function AiChatbot() {
           setTestingKey(false);
           return;
         } else {
-          const errorData = await res.json().catch(() => ({}));
+          const rawText = await res.text().catch(() => "");
+          let errorData: any = null;
+          try {
+            if (rawText && rawText.trim()) errorData = JSON.parse(rawText);
+          } catch {}
           lastError = errorData?.error?.message || `HTTP ${res.status}: ${res.statusText}`;
         }
       } catch (err: any) {
@@ -278,13 +282,17 @@ export function AiChatbot() {
           }
         );
 
-        if (response.ok) {
-          const data = await response.json();
+        const rawText = await response.text().catch(() => "");
+        let data: any = null;
+        try {
+          if (rawText && rawText.trim()) data = JSON.parse(rawText);
+        } catch {}
+
+        if (response.ok && data) {
           const reply = data.candidates?.[0]?.content?.parts?.[0]?.text;
           if (reply) return reply;
         } else {
-          const err = await response.json().catch(() => ({}));
-          lastError = err?.error?.message || `HTTP ${response.status}`;
+          lastError = data?.error?.message || `HTTP ${response.status}`;
         }
       } catch (err: any) {
         lastError = err?.message || "Network Error";

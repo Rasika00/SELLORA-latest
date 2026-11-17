@@ -37,7 +37,10 @@ export function setCurrentUser(user: UserSession | null): void {
   window.dispatchEvent(new Event("sellora-auth-change"));
 }
 
-export function logout(): void {
+export async function logout(): Promise<void> {
+  // Clear the HttpOnly server session before reporting a successful sign-out.
+  const response = await fetch("/api/auth/logout", { method: "POST", credentials: "same-origin" });
+  if (!response.ok) throw new Error("Sign out failed. Please try again.");
   setCurrentUser(null);
 }
 

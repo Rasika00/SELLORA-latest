@@ -56,22 +56,38 @@ model User {
 }
 
 model Order {
-  id              String      @id @default(cuid())
-  orderNumber     String      @unique
-  user            User?       @relation(fields: [userId], references: [id])
-  userId          String?
-  customerName    String
-  customerEmail   String
-  customerPhone   String?
-  shippingAddress String
-  city            String?
-  zipCode         String?
-  totalAmount     Float
-  status          String      @default("PENDING")
-  items           OrderItem[]
-  reviews         Review[]
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @updatedAt
+  id                String               @id @default(cuid())
+  orderNumber       String               @unique
+  user              User?                @relation(fields: [userId], references: [id])
+  userId            String?
+  customerName      String
+  customerEmail     String
+  customerPhone     String?
+  shippingAddress   String
+  city              String?
+  zipCode           String?
+  totalAmount       Float
+  status            String               @default("PENDING")
+  carrierName       String?
+  trackingNumber    String?
+  estimatedDelivery DateTime?
+  trackingEvents    OrderTrackingEvent[]
+  items             OrderItem[]
+  reviews           Review[]
+  createdAt         DateTime             @default(now())
+  updatedAt         DateTime             @updatedAt
+}
+
+model OrderTrackingEvent {
+  id        String   @id @default(cuid())
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  orderId   String
+  status    String
+  note      String?
+  actorId   String?  // null for automatically generated events
+  createdAt DateTime @default(now())
+
+  @@index([orderId, createdAt])
 }
 
 model OrderItem {

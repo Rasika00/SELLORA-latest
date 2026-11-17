@@ -1,15 +1,25 @@
 import { products as fallbackProducts, type Product } from "@/data/products";
+import type { UserSession } from "@/lib/auth";
 import { initialFeedbacks, type FeedbackItem } from "@/data/feedbacks";
+import {
+  OrderRequestError,
+  requestOrderJson,
+  updateOrderTracking,
+  type OrderTrackingUpdate,
+} from "./order-tracking";
+export { getOrderTracking, type OrderTracking, type OrderTrackingEvent } from "./order-tracking";
 
 const API_BASE = "/api";
 const LOCAL_FEEDBACK_KEY = "sellora_community_feedback";
 
+export { createOrder } from "./checkout";
+export type { CreateOrderPayload, OrderItemInput } from "./checkout";
 /**
  * Safely parses JSON from a fetch Response without throwing
  * "Failed to execute 'json' on 'Response': Unexpected end of JSON input"
  * when the response body is empty, 204 No Content, proxy 502/504 error, or HTML.
  */
-export async function safeParseJson<T = any>(res: Response, fallback: T = null as any): Promise<T> {
+export async function safeParseJson<T>(res: Response, fallback: T): Promise<T> {
   try {
     const text = await res.text();
     if (!text || !text.trim()) {
@@ -21,27 +31,11 @@ export async function safeParseJson<T = any>(res: Response, fallback: T = null a
   }
 }
 
-export interface OrderItemInput {
-  productId: string;
-  quantity: number;
-  price: number;
-}
-
-export interface CreateOrderPayload {
-  customerName: string;
-  customerEmail: string;
-  customerPhone?: string;
-  shippingAddress: string;
-  city?: string;
-  zipCode?: string;
-  totalAmount: number;
-  items: OrderItemInput[];
-}
 
 export async function checkDatabaseHealth(): Promise<{ status: string; database?: string; error?: string }> {
   try {
     const res = await fetch(`${API_BASE}/health`);
-    const parsed = await safeParseJson(res, null);
+    const parsed = await safeParseJson<{ status: string; database?: string; error?: string } | null>(res, null);
     if (parsed) return parsed;
     return { status: "disconnected", error: `HTTP ${res.status}` };
   } catch (err: any) {
@@ -67,7 +61,7 @@ export async function getAdminStats(): Promise<{
   try {
     const res = await fetch(`${API_BASE}/admin/stats`);
     if (res.ok) {
-      return await safeParseJson(res, null);
+      return await safeParseJson<Awaited<ReturnType<typeof getAdminStats>>>(res, null);
     }
   } catch (err) {
     console.warn("Failed to fetch admin stats from backend:", err);
@@ -110,7 +104,7 @@ export async function getSalesAnalytics(): Promise<SalesAnalyticsResponse | null
   try {
     const res = await fetch(`${API_BASE}/admin/sales-analytics`);
     if (res.ok) {
-      return await safeParseJson(res, null);
+      return await safeParseJson<SalesAnalyticsResponse | null>(res, null);
     }
   } catch (err) {
     console.warn("Failed to fetch sales analytics from backend:", err);
@@ -171,27 +165,31 @@ export async function getProducts(options?: {
   return filtered;
 }
 
-export async function createProduct(payload: Partial<Product>) {
+export type ProductWritePayload = Omit<Partial<Product>, "detailedSpecs"> & {
+  detailedSpecs?: Partial<NonNullable<Product["detailedSpecs"]>>;
+};
+
+export async function createProduct(payload: ProductWritePayload) {
   const res = await fetch(`${API_BASE}/products`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
   });
-  const data = await safeParseJson(res, {});
-  if (!res.ok) {
+  const data = await safeParseJson<{ product?: Product; error?: string }>(res, {});
+  if (!res.ok || !data.product) {
     throw new Error(data.error || "Failed to create product");
   }
   return data.product;
 }
 
-export async function updateProduct(id: string, payload: Partial<Product>) {
+export async function updateProduct(id: string, payload: ProductWritePayload) {
   const res = await fetch(`${API_BASE}/products/${id}`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
   });
-  const data = await safeParseJson(res, {});
-  if (!res.ok) {
+  const data = await safeParseJson<{ product?: Product; error?: string }>(res, {});
+  if (!res.ok || !data.product) {
     throw new Error(data.error || "Failed to update product");
   }
   return data.product;
@@ -203,8 +201,8 @@ export async function updateProductStatus(id: string, status: "APPROVED" | "PEND
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ status }),
   });
-  const data = await safeParseJson(res, {});
-  if (!res.ok) {
+  const data = await safeParseJson<{ product?: Product; error?: string }>(res, {});
+  if (!res.ok || !data.product) {
     throw new Error(data.error || "Failed to update product status");
   }
   return data.product;
@@ -216,8 +214,8 @@ export async function updateProductStock(id: string, params: { stock?: number; d
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(params),
   });
-  const data = await safeParseJson(res, {});
-  if (!res.ok) {
+  const data = await safeParseJson<{ product?: Product; error?: string }>(res, {});
+  if (!res.ok || !data.product) {
     throw new Error(data.error || "Failed to update product stock");
   }
   return data.product;
@@ -227,7 +225,7 @@ export async function deleteProduct(id: string) {
   const res = await fetch(`${API_BASE}/products/${id}`, {
     method: "DELETE",
   });
-  const data = await safeParseJson(res, {});
+  const data = await safeParseJson<{ error?: string }>(res, {});
   if (!res.ok) {
     throw new Error(data.error || "Failed to delete product");
   }
@@ -238,7 +236,7 @@ export async function getProductById(id: string): Promise<Product | undefined> {
   try {
     const res = await fetch(`${API_BASE}/products/${id}`);
     if (res.ok) {
-      const data = await safeParseJson(res, null);
+      const data = await safeParseJson<Product | null>(res, null);
       if (data && data.id) {
         return data;
       }
@@ -251,115 +249,38 @@ export async function getProductById(id: string): Promise<Product | undefined> {
   return fallbackProducts.find((p) => p.id === id);
 }
 
-export async function createOrder(payload: CreateOrderPayload) {
-  let createdData: any = null;
-  try {
-    const res = await fetch(`${API_BASE}/orders`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
-
-    const parsed = await safeParseJson(res, null);
-    if (res.ok && parsed && (parsed.order || parsed.success)) {
-      createdData = parsed;
-    } else {
-      console.warn("Backend order creation returned non-OK or empty body, utilizing local receipt engine.");
-    }
-  } catch (error) {
-    console.warn("Database order creation failed, generating local receipt:", error);
-  }
-
-  const generatedNum = createdData?.order?.orderNumber || `ORD-${Math.floor(100000 + Math.random() * 900000)}`;
-  const orderRecord: CustomerOrderRecord = {
-    id: createdData?.order?.id || `ord_${Date.now()}`,
-    orderNumber: generatedNum,
-    userId: (payload as any).userId || null,
-    customerName: payload.customerName,
-    customerEmail: payload.customerEmail,
-    customerPhone: payload.customerPhone || null,
-    shippingAddress: payload.shippingAddress,
-    city: payload.city || "Colombo",
-    zipCode: payload.zipCode || "00100",
-    totalAmount: payload.totalAmount,
-    status: createdData?.order?.status || "PROCESSING",
-    createdAt: createdData?.order?.createdAt || new Date().toISOString(),
-    updatedAt: createdData?.order?.updatedAt || new Date().toISOString(),
-    items: payload.items.map((it, idx) => {
-      const matched = fallbackProducts.find((p) => p.id === it.productId);
-      return {
-        id: `item_${Date.now()}_${idx}`,
-        orderId: createdData?.order?.id || `ord_${Date.now()}`,
-        productId: it.productId,
-        quantity: it.quantity,
-        price: it.price,
-        product: (matched || {
-          id: it.productId,
-          name: "High-Performance Laptop Rig",
-          price: it.price,
-          img: "https://images.unsplash.com/photo-1603302576837-37561b2e2302?auto=format&fit=crop&w=1200&q=80",
-          category: "Gaming",
-          cpu: "Intel Core / AMD Ryzen",
-          gpu: "NVIDIA GeForce RTX",
-          ram: "16GB DDR5",
-          badge: "FLAGSHIP",
-          badgeColor: "cyan",
-          processor: "Intel i9",
-        }) as Product,
-      };
-    }),
-  };
-
-  // Cache order locally so it is immediately visible in Customer Hub / My Orders
-  try {
-    if (typeof window !== "undefined") {
-      const stored = localStorage.getItem("sellora_customer_orders");
-      const list = stored ? JSON.parse(stored) : [];
-      list.unshift(orderRecord);
-      localStorage.setItem("sellora_customer_orders", JSON.stringify(list));
-    }
-  } catch (e) {
-    console.warn("Failed to cache order locally:", e);
-  }
-
-  return createdData || {
-    success: true,
-    offline: true,
-    order: orderRecord,
-  };
+export interface AdminOrderRecord extends CustomerOrderRecord {
+  carrierName?: string | null;
+  trackingNumber?: string | null;
+  estimatedDelivery?: string | null;
+  user?: {
+    id: string;
+    email: string;
+    firstName?: string | null;
+    lastName?: string | null;
+    role?: string;
+  } | null;
 }
 
-export async function getOrders(): Promise<any[]> {
-  try {
-    const res = await fetch(`${API_BASE}/orders`);
-    if (res.ok) {
-      const data = await safeParseJson(res, []);
-      if (Array.isArray(data)) return data;
-    }
-  } catch (error) {
-    console.warn("Could not fetch orders from backend:", error);
-  }
-  return [];
+export async function getOrders(): Promise<AdminOrderRecord[]> {
+  const data = await requestOrderJson("/orders");
+  if (!Array.isArray(data)) throw new OrderRequestError("invalid-response");
+  return data;
 }
 
-export async function updateOrderStatus(id: string, status: string): Promise<any> {
-  const res = await fetch(`${API_BASE}/orders/${id}/status`, {
-    method: "PATCH",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ status }),
-  });
-  const data = await safeParseJson(res, {});
-  if (!res.ok) {
-    throw new Error(data.error || "Failed to update order status");
-  }
-  return data.order;
+export async function updateOrderStatus(
+  id: string,
+  status: OrderTrackingUpdate["status"] | OrderTrackingUpdate,
+) {
+  return (await updateOrderTracking(id, typeof status === "string" ? { status } : (status ?? {})))
+    .order;
 }
 
 export async function deleteOrder(id: string): Promise<void> {
   const res = await fetch(`${API_BASE}/orders/${id}`, {
     method: "DELETE",
   });
-  const data = await safeParseJson(res, {});
+  const data = await safeParseJson<{ error?: string }>(res, {});
   if (!res.ok) {
     throw new Error(data.error || "Failed to delete order");
   }
@@ -384,7 +305,7 @@ export async function registerUser(userData: {
     body: JSON.stringify(userData),
   });
 
-  const data = await safeParseJson(res, {});
+  const data = await safeParseJson<{ user?: UserSession; error?: string }>(res, {});
   if (!res.ok) {
     throw new Error(data.error || "Registration failed");
   }
@@ -398,7 +319,7 @@ export async function loginUser(credentials: { email: string; password: string }
     body: JSON.stringify(credentials),
   });
 
-  const data = await safeParseJson(res, {});
+  const data = await safeParseJson<{ user?: UserSession; error?: string }>(res, {});
   if (!res.ok) {
     throw new Error(data.error || "Login failed");
   }
@@ -717,7 +638,7 @@ export async function getPlatformSettings(): Promise<PlatformSettings> {
   try {
     const res = await fetch(`${API_BASE}/admin/settings`);
     if (res.ok) {
-      const data = await safeParseJson(res, null);
+      const data = await safeParseJson<PlatformSettings | null>(res, null);
       if (data) return data;
     }
   } catch (err) {
@@ -1117,45 +1038,11 @@ export interface CustomerReviewRecord {
   };
 }
 
-export async function getCustomerOrders(params: { userId?: string; email?: string }): Promise<CustomerOrderRecord[]> {
-  let orders: CustomerOrderRecord[] = [];
-  try {
-    const q = new URLSearchParams();
-    if (params.userId) q.append("userId", params.userId);
-    if (params.email) q.append("email", params.email);
-
-    const res = await fetch(`${API_BASE}/customer/orders?${q.toString()}`);
-    if (res.ok) {
-      const data = await safeParseJson<CustomerOrderRecord[]>(res, []);
-      if (Array.isArray(data)) {
-        orders = data;
-      }
-    }
-  } catch (err) {
-    console.error("Failed to fetch customer orders:", err);
-  }
-
-  // Gracefully merge with locally placed orders for seamless demo & offline tracking
-  try {
-    if (typeof window !== "undefined") {
-      const stored = localStorage.getItem("sellora_customer_orders");
-      if (stored) {
-        const localOrders: CustomerOrderRecord[] = JSON.parse(stored);
-        if (Array.isArray(localOrders)) {
-          const dbOrderNumbers = new Set(orders.map((o) => o.orderNumber));
-          const dbIds = new Set(orders.map((o) => o.id));
-          const unmergedLocals = localOrders.filter(
-            (lo) => !dbOrderNumbers.has(lo.orderNumber) && !dbIds.has(lo.id)
-          );
-          orders = [...unmergedLocals, ...orders];
-        }
-      }
-    }
-  } catch (e) {
-    console.warn("Could not read local customer orders:", e);
-  }
-
-  return orders;
+export async function getCustomerOrders(_params?: { userId?: string; email?: string }): Promise<CustomerOrderRecord[]> {
+  // Identity comes from the verified session cookie, never a userId/email query.
+  const data = await requestOrderJson("/customer/orders");
+  if (!Array.isArray(data)) throw new OrderRequestError("invalid-response");
+  return data;
 }
 
 export async function getCustomerReviews(params: { userId?: string; email?: string }): Promise<CustomerReviewRecord[]> {

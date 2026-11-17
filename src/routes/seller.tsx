@@ -182,9 +182,13 @@ export function SellerHubView() {
     }
   };
 
-  const handleLogout = () => {
-    logout();
-    navigate({ to: "/login" });
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate({ to: "/login" });
+    } catch {
+      window.alert("Sign out failed. Please try again.");
+    }
   };
 
   // Open modal for Create

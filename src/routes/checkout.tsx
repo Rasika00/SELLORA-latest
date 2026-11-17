@@ -249,9 +249,6 @@ function CartCheckoutPage() {
                   <h2 className="font-display font-bold text-lg text-foreground flex items-center gap-2">
                     <Truck className="h-5 w-5 text-primary" /> Live Package Tracking Pipeline
                   </h2>
-                  <p className="text-xs text-muted-foreground">
-                    Real-time multi-stage milestone tracking for your hardware delivery.
-                  </p>
                 </div>
                 <div className="flex items-center gap-2 text-xs font-mono bg-primary/10 text-primary border border-primary/20 px-3.5 py-1.5 rounded-xl self-start sm:self-auto font-bold shadow-sm">
                   <Clock className="h-4 w-4 animate-spin" />
@@ -273,9 +270,6 @@ function CartCheckoutPage() {
                   </div>
                   <div>
                     <h3 className="font-display font-bold text-xs text-foreground">1. Order Confirmed</h3>
-                    <p className="text-[11px] text-muted-foreground mt-1 leading-relaxed">
-                      Payment verified & system order logged into dispatch registry.
-                    </p>
                   </div>
                   <span className="text-[10px] font-mono text-emerald-500 mt-3 block font-semibold">✓ Just now</span>
                 </div>
@@ -293,9 +287,6 @@ function CartCheckoutPage() {
                   </div>
                   <div>
                     <h3 className="font-display font-bold text-xs text-foreground">2. Quality Check & Packing</h3>
-                    <p className="text-[11px] text-muted-foreground mt-1 leading-relaxed">
-                      Technician verifying BIOS, hardware specs & attaching tamper-evident seal.
-                    </p>
                   </div>
                   <span className="text-[10px] font-mono text-primary font-bold mt-3 block">In Progress</span>
                 </div>
@@ -312,9 +303,6 @@ function CartCheckoutPage() {
                   </div>
                   <div>
                     <h3 className="font-display font-bold text-xs text-foreground">3. Courier Dispatch</h3>
-                    <p className="text-[11px] text-muted-foreground mt-1 leading-relaxed">
-                      Handover to SELLORA Express logistics fleet for regional transit.
-                    </p>
                   </div>
                   <span className="text-[10px] font-mono text-muted-foreground mt-3 block">Scheduled</span>
                 </div>
@@ -331,9 +319,6 @@ function CartCheckoutPage() {
                   </div>
                   <div>
                     <h3 className="font-display font-bold text-xs text-foreground">4. Doorstep Delivery</h3>
-                    <p className="text-[11px] text-muted-foreground mt-1 leading-relaxed">
-                      Safe handoff with OTP verification and physical inspection.
-                    </p>
                   </div>
                   <span className="text-[10px] font-mono text-muted-foreground mt-3 block font-semibold">{estArrivalDate}</span>
                 </div>

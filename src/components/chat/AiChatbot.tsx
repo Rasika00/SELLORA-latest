@@ -608,7 +608,7 @@ export function AiChatbot() {
 
     try {
       if (geminiApiKey.trim()) {
-        const aiResponseText = await callGeminiApi(query, messages);
+        const aiResponseText = await callGeminiApi(query, [...messages, userMsg]);
         const mentionedProducts = products.filter(p => aiResponseText.toLowerCase().includes(p.name.toLowerCase())).slice(0, 2);
 
         const botMsg: Message = {

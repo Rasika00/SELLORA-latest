@@ -111,10 +111,13 @@ CREATE INDEX "idx_orderitem_product" ON "OrderItem"("productId");
 -- STEP 4: SEED DATA
 -- ==============================================================================
 
--- Seed Users (Pre-registered Admin & Customers)
+-- Seed Users (Pre-registered Admin, Sellers & Customers)
 INSERT INTO "User" ("id", "email", "password", "firstName", "lastName", "phone", "address", "role") VALUES
 ('usr-admin-1', 'admin@sellora.dev', '$2b$10$grDI8M/Z9has4eYokbhvLOAdAnTD2wPgxcEcUgU7uo8JbtuX9P3lO', 'Rasika', 'Admin', '+94 77 123 4567', 'Sellora Headquarters, Colombo 03', 'admin'),
 ('usr-admin-2', 'admin@sellora.com', '$2b$10$grDI8M/Z9has4eYokbhvLOAdAnTD2wPgxcEcUgU7uo8JbtuX9P3lO', 'System', 'Admin', '+94 77 987 6543', 'Sellora Tech Hub, Kandy', 'admin'),
+('usr-seller-1', 'titan.gaming@vendor.lk', '$2b$10$O/8WaPVIlDrdsSWEbhYfm.8wD3AI7/gsUZQl3SjQiYRoty71D0wTa', 'Titan', 'Gaming', NULL, NULL, 'seller'),
+('usr-seller-2', 'apex.tech@vendor.lk', '$2b$10$O/8WaPVIlDrdsSWEbhYfm.8wD3AI7/gsUZQl3SjQiYRoty71D0wTa', 'Apex', 'Tech', NULL, NULL, 'seller'),
+('usr-seller-3', 'zenith.creator@vendor.lk', '$2b$10$O/8WaPVIlDrdsSWEbhYfm.8wD3AI7/gsUZQl3SjQiYRoty71D0wTa', 'Zenith', 'Creator', NULL, NULL, 'seller'),
 ('usr-cust-1', 'alex.mercer@gmail.com', '$2b$10$O/8WaPVIlDrdsSWEbhYfm.8wD3AI7/gsUZQl3SjQiYRoty71D0wTa', 'Alex', 'Mercer', '+94 71 234 5678', 'No 45 Galle Road, Colombo', 'customer'),
 ('usr-cust-2', 'maya.lin@visuals.io', '$2b$10$O/8WaPVIlDrdsSWEbhYfm.8wD3AI7/gsUZQl3SjQiYRoty71D0wTa', 'Maya', 'Lin', '+94 72 345 6789', '28 Flower Road, Colombo 07', 'customer');
 

@@ -1,5 +1,6 @@
 import { products as fallbackProducts, type Product } from "@/data/products";
 import { initialFeedbacks, type FeedbackItem } from "@/data/feedbacks";
+import type { UserSession } from "@/lib/auth";
 
 const API_BASE = "/api";
 const LOCAL_FEEDBACK_KEY = "sellora_community_feedback";
@@ -377,7 +378,7 @@ export async function registerUser(userData: {
   role?: "customer" | "seller" | "admin" | string;
   storeName?: string;
   storeBio?: string;
-}) {
+}): Promise<{ success: boolean; user?: UserSession; error?: string; details?: string }> {
   const res = await fetch(`${API_BASE}/auth/register`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -386,12 +387,15 @@ export async function registerUser(userData: {
 
   const data = await safeParseJson(res, {});
   if (!res.ok) {
-    throw new Error(data.error || "Registration failed");
+    const details = data.details ? ` ${data.details}` : "";
+    throw new Error((data.error || "Registration failed") + details);
   }
   return data;
 }
 
-export async function loginUser(credentials: { email: string; password: string }) {
+export async function loginUser(
+  credentials: { email: string; password: string },
+): Promise<{ success: boolean; user?: UserSession; error?: string; details?: string }> {
   const res = await fetch(`${API_BASE}/auth/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -400,7 +404,8 @@ export async function loginUser(credentials: { email: string; password: string }
 
   const data = await safeParseJson(res, {});
   if (!res.ok) {
-    throw new Error(data.error || "Login failed");
+    const details = data.details ? ` ${data.details}` : "";
+    throw new Error((data.error || "Login failed") + details);
   }
   return data;
 }
@@ -473,14 +478,18 @@ export async function submitFeedback(payload: {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
     });
-    if (res.ok) {
-      const data = await safeParseJson<{ feedback?: FeedbackItem }>(res, {});
-      if (data && data.feedback) {
-        return data.feedback;
-      }
+    const data = await safeParseJson<{ feedback?: FeedbackItem; error?: string }>(res, {});
+    if (!res.ok) {
+      throw new Error(data.error || `Feedback submission failed (HTTP ${res.status}).`);
+    }
+    if (data.feedback) {
+      return data.feedback;
     }
   } catch (error) {
-    console.warn("Backend feedback submission failed, using local item:", error);
+    if (error instanceof Error && error.message.startsWith("Feedback submission failed")) {
+      throw error;
+    }
+    console.warn("Backend feedback submission failed; using local item:", error);
   }
 
   return newFeedback;
@@ -1438,10 +1447,5 @@ export async function deleteCustomerAddress(id: string): Promise<{ success: bool
   saveLocalAddresses(locals);
   return { success: true, message: "Address deleted" };
 }
-
-
-
-
-
 
 

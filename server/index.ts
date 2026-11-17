@@ -22,27 +22,33 @@ app.use(express.json());
 
 // Health Check & Database Connection Status
 app.get("/api/health", async (_req, res) => {
-  try {
-    if (process.env.DATABASE_URL) {
-      await Promise.race([
-        prisma.$queryRaw`SELECT 1`,
-        new Promise<never>((_, reject) => setTimeout(() => reject(new Error("DB timeout")), 1500)),
-      ]);
-      return res.json({
-        status: "connected",
-        database: "PostgreSQL",
-        timestamp: new Date().toISOString(),
-      });
-    }
-  } catch (error: any) {
-    // ignore
+  if (!process.env.DATABASE_URL) {
+    return res.status(503).json({
+      status: "disconnected",
+      database: "PostgreSQL",
+      error: "DATABASE_URL is not configured. Add it to .env and run npm run db:push.",
+      timestamp: new Date().toISOString(),
+    });
   }
 
-  res.json({
-    status: "connected",
-    database: "Embedded Catalog (PostgreSQL Optional)",
-    timestamp: new Date().toISOString(),
-  });
+  try {
+    await Promise.race([
+      prisma.$queryRaw`SELECT 1`,
+      new Promise<never>((_, reject) => setTimeout(() => reject(new Error("DB timeout")), 1500)),
+    ]);
+    return res.json({
+      status: "connected",
+      database: "PostgreSQL",
+      timestamp: new Date().toISOString(),
+    });
+  } catch (error: any) {
+    return res.status(503).json({
+      status: "disconnected",
+      database: "PostgreSQL",
+      error: error.message || "PostgreSQL is unavailable.",
+      timestamp: new Date().toISOString(),
+    });
+  }
 });
 
 // Admin Live KPI Statistics (A1.1)
@@ -812,14 +818,21 @@ app.delete("/api/orders/:id", async (req, res) => {
 // Auth: Register
 app.post("/api/auth/register", async (req, res) => {
   try {
+    if (!process.env.DATABASE_URL) {
+      return res.status(503).json({
+        error: "Registration is unavailable because PostgreSQL is not configured.",
+        details: "Add DATABASE_URL to .env, run npm run db:push, then restart the server.",
+      });
+    }
+
     const { email, password, firstName, lastName, phone, address, city, postalCode, role, storeName, storeBio } = req.body || {};
 
-    if (!email || !password) {
+    if (typeof email !== "string" || typeof password !== "string" || !email.trim() || !password) {
       return res.status(400).json({ error: "Email and password are required." });
     }
 
     const existing = await prisma.user.findUnique({
-      where: { email: email.toLowerCase() },
+      where: { email: email.trim().toLowerCase() },
     });
 
     if (existing) {
@@ -827,7 +840,7 @@ app.post("/api/auth/register", async (req, res) => {
     }
 
     const passwordHash = await bcrypt.hash(password, 10);
-    const assignedRole = email.toLowerCase().includes("admin")
+    const assignedRole = email.trim().toLowerCase().includes("admin")
       ? "admin"
       : role === "seller"
         ? "seller"
@@ -841,7 +854,7 @@ app.post("/api/auth/register", async (req, res) => {
 
     const user = await prisma.user.create({
       data: {
-        email: email.toLowerCase(),
+        email: email.trim().toLowerCase(),
         password: passwordHash,
         firstName,
         lastName,
@@ -899,14 +912,21 @@ app.post("/api/auth/register", async (req, res) => {
 // Auth: Login
 app.post("/api/auth/login", async (req, res) => {
   try {
+    if (!process.env.DATABASE_URL) {
+      return res.status(503).json({
+        error: "Login is unavailable because PostgreSQL is not configured.",
+        details: "Add DATABASE_URL to .env, run npm run db:push and npm run db:seed, then restart the server.",
+      });
+    }
+
     const { email, password } = req.body || {};
 
-    if (!email || !password) {
+    if (typeof email !== "string" || typeof password !== "string" || !email.trim() || !password) {
       return res.status(400).json({ error: "Email and password are required." });
     }
 
     const user = await prisma.user.findUnique({
-      where: { email: email.toLowerCase() },
+      where: { email: email.trim().toLowerCase() },
     });
 
     if (!user) {

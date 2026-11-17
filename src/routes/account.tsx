@@ -848,12 +848,6 @@ export function CustomerAccountHub() {
 
                   const stages = ["PENDING", "PROCESSING", "SHIPPED", "DELIVERED"];
                   const stageIdx = stages.indexOf(activeOrder.status);
-                  const estDate = new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toLocaleDateString("en-US", {
-                    weekday: "short",
-                    month: "short",
-                    day: "numeric",
-                  });
-
                   return (
                     <div className="rounded-2xl bg-card border-2 border-primary/40 shadow-card p-6 space-y-4 relative overflow-hidden">
                       <div className="absolute top-0 right-0 h-1.5 w-full bg-gradient-to-r from-primary via-accent to-emerald-500 animate-pulse" />
@@ -872,7 +866,7 @@ export function CustomerAccountHub() {
                               </span>
                             </div>
                             <p className="text-xs text-muted-foreground mt-0.5">
-                              Carrier: SELLORA Express Logistics &bull; Waybill: SLR-TRK-{activeOrder.orderNumber.replace(/[^0-9]/g, "") || "94821"}
+                              Waybill: SLR-TRK-{activeOrder.orderNumber.replace(/[^0-9]/g, "") || "94821"}
                             </p>
                           </div>
                         </div>
@@ -896,10 +890,10 @@ export function CustomerAccountHub() {
                       {/* Stepper Progress Bar */}
                       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                         {[
-                          { label: "1. Order Placed", desc: "Payment Confirmed", step: 0 },
-                          { label: "2. Quality Check", desc: "Thermal & Packing", step: 1 },
-                          { label: "3. Dispatched", desc: "Express Transit", step: 2 },
-                          { label: "4. Doorstep Delivery", desc: estDate, step: 3 },
+                          { label: "Order Placed", step: 0 },
+                          { label: "Processing", step: 1 },
+                          { label: "Shipped", step: 2 },
+                          { label: "Delivered", step: 3 },
                         ].map((s) => {
                           const isDone = stageIdx > s.step || (stageIdx === s.step && s.step === 3);
                           const isCurrent = stageIdx === s.step && s.step < 3;
@@ -919,7 +913,6 @@ export function CustomerAccountHub() {
                                 {isDone ? <span>✓ Done</span> : isCurrent ? <span className="text-primary animate-pulse">Active</span> : <span>Pending</span>}
                               </div>
                               <div className="text-xs font-bold truncate">{s.label}</div>
-                              <div className="text-[10px] text-muted-foreground truncate mt-0.5">{s.desc}</div>
                             </div>
                           );
                         })}
@@ -1339,10 +1332,10 @@ export function CustomerAccountHub() {
                                 {/* 4-Step Stepper Cards */}
                                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
                                   {[
-                                    { step: 0, title: "1. Order Placed", desc: "Payment Confirmed", status: "PENDING" },
-                                    { step: 1, title: "2. QC & Packing", desc: "Thermal QC Passed", status: "PROCESSING" },
-                                    { step: 2, title: "3. Dispatched", desc: "Express Courier", status: "SHIPPED" },
-                                    { step: 3, title: "4. Delivered", desc: estDeliveryDate, status: "DELIVERED" },
+                                    { step: 0, title: "Order Placed", status: "PENDING" },
+                                    { step: 1, title: "Processing", status: "PROCESSING" },
+                                    { step: 2, title: "Shipped", status: "SHIPPED" },
+                                    { step: 3, title: "Delivered", status: "DELIVERED" },
                                   ].map((st) => {
                                     const isDone = currentStageIdx > st.step || (currentStageIdx === st.step && st.step === 3);
                                     const isCurrent = currentStageIdx === st.step && st.step < 3;
@@ -1369,7 +1362,6 @@ export function CustomerAccountHub() {
                                           )}
                                         </div>
                                         <div className="text-xs font-bold truncate">{st.title}</div>
-                                        <div className="text-[10px] text-muted-foreground truncate mt-0.5">{st.desc}</div>
                                       </div>
                                     );
                                   })}
@@ -1860,10 +1852,6 @@ export function CustomerAccountHub() {
                     </span>
                   </h3>
                   <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground font-mono mt-0.5">
-                    <span>Placed: {new Date(trackingModalOrder.createdAt).toLocaleDateString()}</span>
-                    <span>&bull;</span>
-                    <span>Total: LKR {Number(trackingModalOrder.totalAmount ?? 0).toLocaleString()}</span>
-                    <span>&bull;</span>
                     <span className="text-primary font-bold">
                       Waybill: SLR-TRK-{trackingModalOrder.orderNumber.replace(/[^0-9]/g, "") || "94821"}
                     </span>
@@ -1935,10 +1923,10 @@ export function CustomerAccountHub() {
               }
 
               const steps = [
-                { key: "PENDING", label: "Order Placed", desc: "Logged & Verified" },
-                { key: "PROCESSING", label: "Packed & Verified", desc: "Thermal QC check" },
-                { key: "SHIPPED", label: "In Transit", desc: "Express Courier Hub" },
-                { key: "DELIVERED", label: "Delivered", desc: "Doorstep Handover" },
+                { key: "PENDING", label: "Order Placed" },
+                { key: "PROCESSING", label: "Processing" },
+                { key: "SHIPPED", label: "Shipped" },
+                { key: "DELIVERED", label: "Delivered" },
               ];
 
               return (
@@ -1971,9 +1959,6 @@ export function CustomerAccountHub() {
                           <div className={`text-xs font-bold leading-tight ${isComplete ? "text-foreground" : "text-muted-foreground"}`}>
                             {step.label}
                           </div>
-                          <div className="text-[10px] text-muted-foreground mt-0.5 hidden sm:block">
-                            {step.desc}
-                          </div>
                         </div>
                       );
                     })}
@@ -1985,25 +1970,15 @@ export function CustomerAccountHub() {
             {/* Carrier & Quality Assurance Info */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="p-4 rounded-xl bg-secondary/30 border border-border space-y-1.5 text-xs">
-                <span className="text-[10px] uppercase font-mono text-muted-foreground block font-bold">
-                  Carrier Logistics Partner
-                </span>
+                <span className="text-[10px] uppercase font-mono text-muted-foreground block font-bold">Carrier</span>
                 <p className="font-semibold text-foreground flex items-center gap-1.5">
                   <Truck className="h-3.5 w-3.5 text-primary" />
-                  <span>SELLORA Express Rapid Logistics</span>
-                </p>
-                <p className="text-muted-foreground font-mono text-[11px]">
-                  Service: Priority Surface/Air Insured Courier
-                </p>
-                <p className="text-emerald-500 font-mono text-[11px] font-semibold">
-                  ✓ Anti-Theft Tamper Seal Verified
+                  <span>SELLORA Express</span>
                 </p>
               </div>
 
               <div className="p-4 rounded-xl bg-secondary/30 border border-border space-y-1.5 text-xs">
-                <span className="text-[10px] uppercase font-mono text-muted-foreground block font-bold">
-                  Rig Quality Assurance Inspection
-                </span>
+                <span className="text-[10px] uppercase font-mono text-muted-foreground block font-bold">Quality Check</span>
                 <ul className="text-[11px] text-muted-foreground space-y-0.5 font-mono">
                   <li className="flex items-center gap-1 text-emerald-500">✓ 100% Thermal & BIOS Stress Test Passed</li>
                   <li className="flex items-center gap-1 text-emerald-500">✓ Sealed Antistatic Hardware Packaging</li>

@@ -34,7 +34,6 @@ export function LoginPage() {
 
     try {
       const result = await loginUser({ email: email.trim().toLowerCase(), password });
-      setIsLoading(false);
       if (result?.user) {
         setCurrentUser(result.user);
 
@@ -46,10 +45,13 @@ export function LoginPage() {
         } else {
           navigate({ to: "/" });
         }
+      } else {
+        throw new Error("Login failed to return user data.");
       }
     } catch (backendError: any) {
-      setIsLoading(false);
       setError(backendError?.message || "Invalid email or password. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
   };
 

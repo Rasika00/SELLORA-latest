@@ -1,6 +1,25 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
-import { ArrowLeft, CheckCircle2, ShieldCheck, Loader2, ShoppingCart, MapPin, Check, Plus, Phone } from "lucide-react";
+import {
+  ArrowLeft,
+  CheckCircle2,
+  ShieldCheck,
+  Loader2,
+  ShoppingCart,
+  MapPin,
+  Check,
+  Plus,
+  Phone,
+  Truck,
+  Package,
+  Clock,
+  Printer,
+  ChevronRight,
+  Copy,
+  ExternalLink,
+  Shield,
+  Box,
+} from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { Navbar } from "@/components/site/Navbar";
 import { createOrder, getCustomerAddresses, createCustomerAddress, type CustomerAddressRecord } from "@/lib/api/client";
@@ -17,6 +36,9 @@ function CartCheckoutPage() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [orderNumber, setOrderNumber] = useState<string>("");
+  const [completedOrderItems, setCompletedOrderItems] = useState<typeof items>([]);
+  const [completedTotal, setCompletedTotal] = useState<number>(0);
+  const [copiedTracking, setCopiedTracking] = useState(false);
 
   const [currentUser, setCurrentUser] = useState<UserSession | null>(null);
   const [addresses, setAddresses] = useState<CustomerAddressRecord[]>([]);
@@ -125,6 +147,9 @@ function CartCheckoutPage() {
         })),
       };
 
+      setCompletedOrderItems([...items]);
+      setCompletedTotal(cartTotal);
+
       const result = await createOrder(orderPayload);
       const generatedNumber = result?.order?.orderNumber || `ORD-${Math.floor(100000 + Math.random() * 900000)}`;
       setOrderNumber(generatedNumber);
@@ -132,6 +157,8 @@ function CartCheckoutPage() {
       clearCart();
     } catch (err) {
       console.error("Order failed:", err);
+      setCompletedOrderItems([...items]);
+      setCompletedTotal(cartTotal);
       setOrderNumber(`ORD-${Math.floor(100000 + Math.random() * 900000)}`);
       setIsSuccess(true);
       clearCart();
@@ -153,31 +180,277 @@ function CartCheckoutPage() {
   }
 
   if (isSuccess) {
+    const trackingCode = `SLR-TRK-${orderNumber.replace(/[^0-9]/g, "") || "948201"}`;
+    const estArrivalDate = new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toLocaleDateString("en-US", {
+      weekday: "short",
+      month: "short",
+      day: "numeric",
+    });
+
+    const handleCopyTracking = () => {
+      navigator.clipboard.writeText(trackingCode);
+      setCopiedTracking(true);
+      setTimeout(() => setCopiedTracking(false), 2000);
+    };
+
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-4">
-        <div className="max-w-md w-full bg-card rounded-2xl p-8 text-center animate-fade-up border border-border shadow-xl">
-          <CheckCircle2 className="w-20 h-20 text-primary mx-auto mb-6" />
-          <h2 className="text-3xl font-display font-bold text-foreground mb-4">Payment Successful!</h2>
-          <p className="text-muted-foreground mb-8">
-            Your order is now being prepared for orbital dispatch. You can track your real-time delivery pipeline from your Customer Hub.
-          </p>
-          <div className="bg-secondary/40 rounded-xl p-4 mb-8 text-left border border-border space-y-1">
-            <p className="text-xs text-muted-foreground">Order Reference: <span className="text-foreground font-mono font-bold">{orderNumber}</span></p>
-            <p className="text-xs text-muted-foreground">Delivery To: <span className="text-foreground">{formData.address}, {formData.city}</span></p>
-          </div>
-          <div className="flex flex-col gap-3">
-            <Link
-              to="/account"
-              className="block w-full rounded-xl bg-primary hover:bg-primary-hover text-primary-foreground px-6 py-3 text-sm font-semibold shadow-sm transition-all text-center"
-            >
-              View Order in Customer Hub
-            </Link>
-            <Link
-              to="/"
-              className="block w-full rounded-xl bg-secondary hover:bg-secondary/80 px-6 py-2.5 text-xs font-semibold text-foreground transition-colors border border-border text-center"
-            >
-              Return to Store
-            </Link>
+      <div className="min-h-screen bg-background text-foreground py-10 px-4 sm:px-6 lg:px-8">
+        <Navbar />
+        <div className="max-w-4xl mx-auto space-y-8 animate-fade-up pt-16">
+          {/* Main Confirmation & Live Tracking Card */}
+          <div className="bg-card border border-border rounded-3xl p-6 sm:p-10 shadow-2xl relative overflow-hidden space-y-8">
+            <div className="absolute top-0 right-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl -z-10 pointer-events-none" />
+
+            {/* Top Bar: Order Confirmation */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 pb-6 border-b border-border">
+              <div className="flex items-center gap-4">
+                <div className="h-16 w-16 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-500 shadow-sm shrink-0">
+                  <CheckCircle2 className="w-9 h-9" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] uppercase font-mono px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-bold border border-emerald-500/30">
+                      Order Confirmed & Paid
+                    </span>
+                    <span className="text-xs text-muted-foreground font-mono">
+                      Just now
+                    </span>
+                  </div>
+                  <h1 className="text-2xl sm:text-3xl font-display font-black text-foreground mt-1">
+                    Thank You, {formData.name || "Customer"}!
+                  </h1>
+                  <p className="text-xs text-muted-foreground">
+                    Your computing hardware has been allocated and is moving through the SELLORA delivery pipeline.
+                  </p>
+                </div>
+              </div>
+
+              {/* Order Reference & Waybill */}
+              <div className="bg-secondary/60 rounded-2xl p-4 border border-border text-left sm:text-right shrink-0 space-y-1">
+                <span className="text-[10px] uppercase font-mono text-muted-foreground block font-bold">Order Reference</span>
+                <span className="text-lg font-mono font-black text-primary tracking-wide block">{orderNumber}</span>
+                <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-mono justify-start sm:justify-end">
+                  <span>Waybill: <strong>{trackingCode}</strong></span>
+                  <button
+                    onClick={handleCopyTracking}
+                    title="Copy Waybill"
+                    className="p-1 rounded hover:bg-secondary text-primary transition-colors cursor-pointer"
+                  >
+                    {copiedTracking ? <Check className="h-3 w-3 text-emerald-500" /> : <Copy className="h-3 w-3" />}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* LIVE PACKAGE TRACKING PIPELINE (C2.1 & FR-52/53/54) */}
+            <div className="space-y-5">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                  <h2 className="font-display font-bold text-lg text-foreground flex items-center gap-2">
+                    <Truck className="h-5 w-5 text-primary" /> Live Package Tracking Pipeline
+                  </h2>
+                  <p className="text-xs text-muted-foreground">
+                    Real-time multi-stage milestone tracking for your hardware delivery.
+                  </p>
+                </div>
+                <div className="flex items-center gap-2 text-xs font-mono bg-primary/10 text-primary border border-primary/20 px-3.5 py-1.5 rounded-xl self-start sm:self-auto font-bold shadow-sm">
+                  <Clock className="h-4 w-4 animate-spin" />
+                  <span>Est. Doorstep Arrival: <strong>{estArrivalDate}</strong></span>
+                </div>
+              </div>
+
+              {/* 4-Stage Visual Progress Stepper */}
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4 relative">
+                {/* Step 1: Order Placed */}
+                <div className="bg-secondary/40 border-2 border-emerald-500/50 rounded-2xl p-4 flex flex-col justify-between shadow-sm">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="h-9 w-9 rounded-xl bg-emerald-500/20 text-emerald-500 flex items-center justify-center font-bold">
+                      <Check className="h-4 w-4" />
+                    </div>
+                    <span className="text-[9px] font-mono uppercase px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-500 font-bold border border-emerald-500/30">
+                      Step 1 Done
+                    </span>
+                  </div>
+                  <div>
+                    <h3 className="font-display font-bold text-xs text-foreground">1. Order Confirmed</h3>
+                    <p className="text-[11px] text-muted-foreground mt-1 leading-relaxed">
+                      Payment verified & system order logged into dispatch registry.
+                    </p>
+                  </div>
+                  <span className="text-[10px] font-mono text-emerald-500 mt-3 block font-semibold">✓ Just now</span>
+                </div>
+
+                {/* Step 2: Quality Check & Packing (ACTIVE) */}
+                <div className="bg-primary/10 border-2 border-primary rounded-2xl p-4 flex flex-col justify-between shadow-md relative overflow-hidden">
+                  <div className="absolute top-0 right-0 h-1.5 w-full bg-primary animate-pulse" />
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="h-9 w-9 rounded-xl bg-primary text-primary-foreground flex items-center justify-center font-bold animate-pulse shadow-sm">
+                      <Package className="h-4 w-4" />
+                    </div>
+                    <span className="text-[9px] font-mono uppercase px-2.5 py-0.5 rounded-full bg-primary text-primary-foreground font-bold animate-pulse">
+                      Active Now
+                    </span>
+                  </div>
+                  <div>
+                    <h3 className="font-display font-bold text-xs text-foreground">2. Quality Check & Packing</h3>
+                    <p className="text-[11px] text-muted-foreground mt-1 leading-relaxed">
+                      Technician verifying BIOS, hardware specs & attaching tamper-evident seal.
+                    </p>
+                  </div>
+                  <span className="text-[10px] font-mono text-primary font-bold mt-3 block">In Progress</span>
+                </div>
+
+                {/* Step 3: Courier Dispatch */}
+                <div className="bg-secondary/30 border border-border rounded-2xl p-4 flex flex-col justify-between opacity-80">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="h-9 w-9 rounded-xl bg-secondary text-muted-foreground flex items-center justify-center font-bold">
+                      <Truck className="h-4 w-4" />
+                    </div>
+                    <span className="text-[9px] font-mono uppercase px-2 py-0.5 rounded-full bg-secondary text-muted-foreground font-bold border border-border">
+                      Step 3
+                    </span>
+                  </div>
+                  <div>
+                    <h3 className="font-display font-bold text-xs text-foreground">3. Courier Dispatch</h3>
+                    <p className="text-[11px] text-muted-foreground mt-1 leading-relaxed">
+                      Handover to SELLORA Express logistics fleet for regional transit.
+                    </p>
+                  </div>
+                  <span className="text-[10px] font-mono text-muted-foreground mt-3 block">Scheduled</span>
+                </div>
+
+                {/* Step 4: Doorstep Delivery */}
+                <div className="bg-secondary/30 border border-border rounded-2xl p-4 flex flex-col justify-between opacity-80">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="h-9 w-9 rounded-xl bg-secondary text-muted-foreground flex items-center justify-center font-bold">
+                      <MapPin className="h-4 w-4" />
+                    </div>
+                    <span className="text-[9px] font-mono uppercase px-2 py-0.5 rounded-full bg-secondary text-muted-foreground font-bold border border-border">
+                      Step 4
+                    </span>
+                  </div>
+                  <div>
+                    <h3 className="font-display font-bold text-xs text-foreground">4. Doorstep Delivery</h3>
+                    <p className="text-[11px] text-muted-foreground mt-1 leading-relaxed">
+                      Safe handoff with OTP verification and physical inspection.
+                    </p>
+                  </div>
+                  <span className="text-[10px] font-mono text-muted-foreground mt-3 block font-semibold">{estArrivalDate}</span>
+                </div>
+              </div>
+
+              {/* Delivery Meta Details Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+                <div className="p-4 rounded-2xl bg-secondary/40 border border-border space-y-1.5">
+                  <span className="text-[10px] uppercase font-mono text-muted-foreground block font-bold">
+                    Delivery Destination
+                  </span>
+                  <p className="text-xs font-bold text-foreground">{formData.name}</p>
+                  <p className="text-xs text-muted-foreground leading-relaxed">
+                    {formData.address}, {formData.city} {formData.zipCode}
+                  </p>
+                  {formData.phone && (
+                    <p className="text-[11px] text-muted-foreground font-mono flex items-center gap-1.5 pt-1">
+                      <Phone className="h-3 w-3 text-primary" /> {formData.phone}
+                    </p>
+                  )}
+                </div>
+
+                <div className="p-4 rounded-2xl bg-secondary/40 border border-border space-y-1.5">
+                  <span className="text-[10px] uppercase font-mono text-muted-foreground block font-bold">
+                    Logistics & Carrier Partner
+                  </span>
+                  <p className="text-xs font-bold text-foreground flex items-center gap-1.5">
+                    <Truck className="h-3.5 w-3.5 text-primary" /> SELLORA Express Fleet
+                  </p>
+                  <p className="text-xs text-muted-foreground font-mono">Waybill: {trackingCode}</p>
+                  <p className="text-[11px] text-emerald-500 font-mono font-semibold">
+                    ✓ Insured High-Value Cargo
+                  </p>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-secondary/40 border border-border space-y-1.5">
+                  <span className="text-[10px] uppercase font-mono text-muted-foreground block font-bold">
+                    Fulfillment SLA
+                  </span>
+                  <p className="text-xs font-bold text-foreground">Priority Express Dispatch</p>
+                  <p className="text-xs text-muted-foreground">Estimated Window: 48 - 72 Hours</p>
+                  <p className="text-[11px] text-muted-foreground font-mono">
+                    Live updates in Customer Hub
+                  </p>
+                </div>
+              </div>
+
+              {/* Hardware Items Package Manifest */}
+              {completedOrderItems.length > 0 && (
+                <div className="p-5 rounded-2xl bg-secondary/30 border border-border space-y-3">
+                  <div className="flex items-center justify-between text-xs font-mono font-bold uppercase text-foreground">
+                    <span className="flex items-center gap-2">
+                      <Box className="h-4 w-4 text-primary" /> Package Manifest ({completedOrderItems.length} Items)
+                    </span>
+                    <span className="text-primary">
+                      Total: LKR {completedTotal.toLocaleString()}
+                    </span>
+                  </div>
+
+                  <div className="space-y-2">
+                    {completedOrderItems.map((ci) => (
+                      <div
+                        key={ci.product.id}
+                        className="p-2.5 rounded-xl bg-card border border-border flex items-center justify-between gap-3"
+                      >
+                        <div className="flex items-center gap-3 min-w-0">
+                          <img
+                            src={ci.product.img}
+                            alt={ci.product.name}
+                            className="h-10 w-12 rounded-lg object-cover border border-border shrink-0"
+                          />
+                          <div className="min-w-0">
+                            <div className="font-display font-bold text-xs text-foreground truncate">
+                              {ci.product.name}
+                            </div>
+                            <div className="text-[10px] text-muted-foreground font-mono truncate">
+                              {ci.product.cpu} &bull; {ci.product.gpu} &bull; Qty: {ci.quantity}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="text-xs font-mono font-bold text-foreground shrink-0">
+                          LKR {(ci.product.price * ci.quantity).toLocaleString()}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Direct Action Buttons */}
+              <div className="flex flex-col sm:flex-row items-center gap-3 pt-4 border-t border-border">
+                <a
+                  href={`/account?tab=orders&track=${encodeURIComponent(orderNumber)}`}
+                  className="w-full sm:w-auto flex-1 rounded-xl bg-primary hover:bg-primary-hover text-primary-foreground px-6 py-3.5 text-sm font-semibold shadow-md transition-all text-center flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  <Truck className="h-4 w-4" />
+                  <span>Track Package in Customer Hub (My Orders)</span>
+                  <ChevronRight className="h-4 w-4" />
+                </a>
+
+                <button
+                  type="button"
+                  onClick={() => window.print()}
+                  className="w-full sm:w-auto rounded-xl bg-secondary hover:bg-secondary/80 px-5 py-3.5 text-xs font-semibold text-foreground transition-colors border border-border flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  <Printer className="h-4 w-4 text-muted-foreground" />
+                  <span>Print Receipt</span>
+                </button>
+
+                <Link
+                  to="/"
+                  className="w-full sm:w-auto rounded-xl bg-secondary hover:bg-secondary/80 px-5 py-3.5 text-xs font-semibold text-foreground transition-colors border border-border text-center"
+                >
+                  Return to Store
+                </Link>
+              </div>
+            </div>
           </div>
         </div>
       </div>

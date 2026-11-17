@@ -40,6 +40,29 @@ export function createCheckoutMock({ cdp, fulfill }) {
     async handle(event) {
       const url = new URL(event.request.url),
         path = url.pathname;
+      if (path === "/api/orders/fixture-order/tracking")
+        return fulfill(event.requestId, 200, {
+          success: true,
+          order: {
+            id: "fixture-order",
+            orderNumber: "ORD-CHECKOUT-FIXTURE",
+            status: "PENDING",
+            carrierName: null,
+            trackingNumber: null,
+            estimatedDelivery: null,
+            createdAt: "2026-11-17T04:00:00.000Z",
+            updatedAt: "2026-11-17T04:00:00.000Z",
+            trackingEvents: [
+              {
+                id: "fixture-event",
+                status: "PENDING",
+                note: "Confirmed fixture history",
+                createdAt: "2026-11-17T04:00:00.000Z",
+                actorId: "internal-private-actor",
+              },
+            ],
+          },
+        });
       if (path === "/api/products") return fulfill(event.requestId, 200, [checkoutLaptop]);
       if (path.startsWith("/api/products/")) {
         if (mode === "product-missing")
@@ -156,6 +179,25 @@ export async function runCheckoutBrowserChecks({ cdp, until, delay, check, origi
   await mock.release();
   await success();
   check("Buy Now success is displayed only after a confirmed backend receipt");
+  await until(
+    () => evaluate("document.body.innerText.includes('Confirmed fixture history')"),
+    "confirmed live tracking",
+  );
+  const receiptText = await evaluate("document.body.innerText");
+  assert(!/SLR-TRK-|Paid|SELLORA Express|internal-private-actor/.test(receiptText));
+  assert.equal((receiptText.match(/Not provided/g) || []).length, 3);
+  assert(
+    await evaluate(
+      "Boolean(document.querySelector('a[href=\"/account?tab=orders&track=ORD-CHECKOUT-FIXTURE\"]'))",
+    ),
+  );
+  await evaluate(
+    "window.__printed=false;window.print=()=>{window.__printed=true};[...document.querySelectorAll('button')].find(b=>b.innerText==='Print Receipt').click()",
+  );
+  assert(await evaluate("window.__printed"));
+  check(
+    "team receipt print/deep link and pipeline use real history without fabricated payment or delivery data",
+  );
 
   for (const mode of ["error409", "error401", "error503", "invalid-receipt"]) {
     mock.mode(mode);
@@ -202,7 +244,9 @@ export async function runCheckoutBrowserChecks({ cdp, until, delay, check, origi
   await mock.release();
   await success();
   assert.equal(await evaluate("JSON.parse(localStorage.getItem('sellora-cart')).length"), 0);
+  assert((await evaluate("document.body.innerText")).includes(checkoutLaptop.name));
   check("cart is cleared only after a successful confirmed retry");
+  check("receipt retains the purchased item summary after the cart clears");
 
   await freshCart();
   await evaluate("document.querySelector('form input[type=checkbox]').click()");

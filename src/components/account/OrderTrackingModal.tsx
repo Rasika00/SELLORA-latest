@@ -233,24 +233,9 @@ type TrackingState = { orderId: string } & (
   | { status: "error"; error: OrderRequestError }
 );
 
-export function OrderTrackingModal({
-  orderId,
-  orderNumber,
-  onClose,
-  onLoaded,
-  children,
-}: {
-  orderId: string;
-  orderNumber: string;
-  onClose: () => void;
-  onLoaded?: (order: OrderTracking) => void;
-  children?: ReactNode;
-}) {
+function useOrderTracking(orderId: string, onLoaded?: (order: OrderTracking) => void) {
   const [state, setState] = useState<TrackingState>({ orderId, status: "loading" });
   const [refresh, setRefresh] = useState(0);
-  const trigger = useRef(
-    typeof document !== "undefined" ? (document.activeElement as HTMLElement | null) : null,
-  );
   useEffect(() => {
     const controller = new AbortController();
     let active = true;
@@ -272,6 +257,58 @@ export function OrderTrackingModal({
   }, [orderId, refresh, onLoaded]);
   const current: TrackingState = state.orderId === orderId ? state : { orderId, status: "loading" };
   const retry = () => setRefresh((value) => value + 1);
+  return { current, retry };
+}
+
+// The team's inline pipeline and checkout confirmation use the same authenticated
+// request, errors and real history as the existing tracking modal.
+export function OrderTrackingPanel({
+  orderId,
+  onLoaded,
+}: {
+  orderId: string;
+  onLoaded?: (order: OrderTracking) => void;
+}) {
+  const { current, retry } = useOrderTracking(orderId, onLoaded);
+  return (
+    <section
+      aria-label="Live package tracking"
+      aria-busy={current.status === "loading"}
+      className="min-w-0 space-y-4"
+    >
+      {current.status === "loading" && <p role="status">Loading order tracking...</p>}
+      {current.status === "error" && (
+        <OrderRequestErrorNotice error={current.error} onRetry={retry} />
+      )}
+      {current.status === "ready" && (
+        <>
+          <TrackingDetails order={current.order} />
+          <button type="button" onClick={retry} className={actionClass}>
+            <RefreshCw aria-hidden="true" className="h-3.5 w-3.5" /> Refresh tracking
+          </button>
+        </>
+      )}
+    </section>
+  );
+}
+
+export function OrderTrackingModal({
+  orderId,
+  orderNumber,
+  onClose,
+  onLoaded,
+  children,
+}: {
+  orderId: string;
+  orderNumber: string;
+  onClose: () => void;
+  onLoaded?: (order: OrderTracking) => void;
+  children?: ReactNode;
+}) {
+  const { current, retry } = useOrderTracking(orderId, onLoaded);
+  const trigger = useRef(
+    typeof document !== "undefined" ? (document.activeElement as HTMLElement | null) : null,
+  );
   return (
     <Dialog
       open

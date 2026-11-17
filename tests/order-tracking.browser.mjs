@@ -583,6 +583,52 @@ try {
     console.log(`Mobile screenshot: ${screenshot}`);
     await close();
     check("mobile tracking fits the viewport and wraps long courier IDs and notes");
+
+    mode = "ready";
+    await cdp.send("Page.navigate", { url: `${origin}/account?tab=orders&track=ORD-TEST-2` });
+    await until(
+      () =>
+        cdp.evaluate(
+          `(${dialogText}).includes('ORD-TEST-2') && (${dialogText}).includes('Test Courier')`,
+        ),
+      "team tracking deep link",
+    );
+    check("team order-reference deep links open the authorized real tracking modal");
+    await close();
+    await until(
+      () =>
+        cdp.evaluate(
+          "document.querySelector('[aria-label=\"Live package tracking\"]')?.innerText.includes('TEST-PKG-123')",
+        ),
+      "team inline pipeline",
+    );
+    assert(
+      !/SLR-TRK-|SELLORA Express|Thermal QC|24 - 48/.test(
+        await cdp.evaluate("document.body.innerText"),
+      ),
+    );
+    check(
+      "team expandable pipeline displays actual courier/history instead of simulated shipping data",
+    );
+    await cdp.evaluate(
+      "(()=>{const e=document.querySelector('input[placeholder^=\"Search orders\"]');Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set.call(e,'ORD-TEST-2');e.dispatchEvent(new Event('input',{bubbles:true}));})()",
+    );
+    await until(
+      () =>
+        cdp.evaluate(
+          "[...document.querySelectorAll('button')].filter(b=>b.innerText.trim()==='Track Order').length===1",
+        ),
+      "team order search",
+    );
+    await cdp.evaluate(
+      "[...document.querySelectorAll('button')].find(b=>b.innerText.startsWith('Cancelled (')).click()",
+    );
+    await until(
+      () => cdp.evaluate("document.body.innerText.includes('No Matching Orders Found')"),
+      "team status filter",
+    );
+    check("team reference search and status filters remain functional");
+
     listStatus = 401;
     await cdp.send("Page.reload");
     await until(
@@ -594,6 +640,27 @@ try {
       "an expired account-list session offers sign-in instead of pretending the customer has no orders",
     );
     assert(trackingRequests.every((url) => !url.includes("email=") && !url.includes("userId=")));
+    await cdp.send("Page.addScriptToEvaluateOnNewDocument", {
+      source:
+        "localStorage.removeItem('sellora_user');localStorage.setItem('sellora_customer_orders',JSON.stringify([{id:'private-fixture',orderNumber:'PRIVATE-CACHED-ORDER'}]));",
+    });
+    await cdp.send("Page.navigate", {
+      url: `${origin}/account?tab=orders&track=PRIVATE-CACHED-ORDER`,
+    });
+    await until(
+      () =>
+        cdp.evaluate(
+          "document.body.innerText.includes('Sign in to view and track orders belonging to your account.')",
+        ),
+      "signed-out deep link guard",
+    );
+    assert(!(await cdp.evaluate("document.body.innerText")).includes("PRIVATE-CACHED-ORDER"));
+    assert(
+      !(await cdp.evaluate("document.body.innerText")).includes("Track Order by Reference Number"),
+    );
+    check(
+      "signed-out deep links and stale browser order caches cannot bypass account authentication",
+    );
   }
   assert.deepEqual(errors, []);
   console.log(

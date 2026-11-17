@@ -10,7 +10,11 @@ import {
   Check,
   Plus,
   Phone,
+  Truck,
+  Printer,
+  Copy,
 } from "lucide-react";
+import { OrderTrackingPanel } from "@/components/account/OrderTrackingModal";
 import { Navbar } from "@/components/site/Navbar";
 import {
   getCustomerAddresses,
@@ -38,6 +42,8 @@ export function CheckoutPage({
   const [confirmedOrder, setConfirmedOrder] = useState<ConfirmedOrder | null>(null);
   const [checkoutError, setCheckoutError] = useState("");
   const [addressWarning, setAddressWarning] = useState("");
+  const [completedItems, setCompletedItems] = useState<CheckoutItem[]>([]);
+  const [copiedReference, setCopiedReference] = useState(false);
   const [submission] = useState(() => new CheckoutSubmission());
   const submitting = useRef(false);
   const isSuccess = confirmedOrder !== null;
@@ -137,6 +143,7 @@ export function CheckoutPage({
         })),
       });
       if (!order) return;
+      setCompletedItems([...items]);
       setConfirmedOrder(order);
       onConfirmed?.();
       // Optional address-book saving happens only after a confirmed order.
@@ -187,49 +194,110 @@ export function CheckoutPage({
 
   if (isSuccess) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-4">
-        <div className="max-w-md w-full bg-card rounded-2xl p-8 text-center animate-fade-up border border-border shadow-xl">
-          <CheckCircle2 className="w-20 h-20 text-primary mx-auto mb-6" />
-          <h2 className="text-3xl font-display font-bold text-foreground mb-4">Order Confirmed!</h2>
-          <p className="text-muted-foreground mb-8">
-            Your order is confirmed. You can view its current delivery status in your Customer Hub.
-          </p>
-          <div className="bg-secondary/40 rounded-xl p-4 mb-8 text-left border border-border space-y-1">
-            <p className="text-xs text-muted-foreground">
-              Order Reference:{" "}
-              <span className="text-foreground font-mono font-bold">{orderNumber}</span>
-            </p>
-            <p className="text-xs text-muted-foreground">
-              Order total:{" "}
-              <span className="text-foreground font-bold">
-                LKR {confirmedOrder?.totalAmount.toLocaleString()}
-              </span>
-            </p>
-            <p className="text-xs text-muted-foreground">
-              Delivery To:{" "}
-              <span className="text-foreground">
-                {formData.address}, {formData.city}
-              </span>
-            </p>
-          </div>
-          {addressWarning && (
-            <p role="status" className="mb-4 text-sm text-amber-500">
-              {addressWarning}
-            </p>
-          )}
-          <div className="flex flex-col gap-3">
-            <Link
-              to="/account"
-              className="block w-full rounded-xl bg-primary hover:bg-primary-hover text-primary-foreground px-6 py-3 text-sm font-semibold shadow-sm transition-all text-center"
-            >
-              View Order in Customer Hub
-            </Link>
-            <Link
-              to="/"
-              className="block w-full rounded-xl bg-secondary hover:bg-secondary/80 px-6 py-2.5 text-xs font-semibold text-foreground transition-colors border border-border text-center"
-            >
-              Return to Store
-            </Link>
+      <div className="min-h-screen bg-background text-foreground py-10 px-4 sm:px-6 lg:px-8">
+        <Navbar />
+        <div className="max-w-4xl mx-auto space-y-8 pt-16 animate-fade-up">
+          <div className="bg-card border border-border rounded-3xl p-6 sm:p-10 shadow-2xl space-y-8 min-w-0">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 pb-6 border-b border-border">
+              <div className="flex items-center gap-4 min-w-0">
+                <CheckCircle2 className="h-14 w-14 text-emerald-500 shrink-0" />
+                <div>
+                  <h2 className="text-2xl sm:text-3xl font-display font-black">Order Confirmed!</h2>
+                  <p className="text-sm text-muted-foreground">
+                    Thank you, {formData.name}. Your order was saved successfully.
+                  </p>
+                </div>
+              </div>
+              <div className="bg-secondary/60 rounded-2xl p-4 border border-border min-w-0">
+                <p className="text-[10px] uppercase font-mono text-muted-foreground">
+                  Order Reference
+                </p>
+                <p className="font-mono font-bold text-primary break-all">{orderNumber}</p>
+                <button
+                  type="button"
+                  className="mt-2 inline-flex items-center gap-2 text-xs text-primary"
+                  onClick={() => {
+                    navigator.clipboard
+                      ?.writeText(orderNumber)
+                      .then(() => setCopiedReference(true))
+                      .catch(() => setCopiedReference(false));
+                  }}
+                >
+                  <Copy className="h-3 w-3" />
+                  {copiedReference ? "Copied" : "Copy Order Reference"}
+                </button>
+              </div>
+            </div>
+
+            {/* Retain the team's live pipeline, using only confirmed API data. */}
+            <section className="space-y-4 min-w-0">
+              <h3 className="font-display font-bold flex items-center gap-2">
+                <Truck className="h-5 w-5 text-primary" /> Live Package Tracking Pipeline
+              </h3>
+              {currentUser && confirmedOrder ? (
+                <OrderTrackingPanel orderId={confirmedOrder.id} />
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  Keep your order reference. Private account tracking requires an order linked to
+                  your signed-in account.
+                </p>
+              )}
+            </section>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 rounded-2xl bg-secondary/30 border border-border p-5">
+              <div className="min-w-0 space-y-1">
+                <h3 className="text-xs font-bold uppercase">Shipping Destination</h3>
+                <p className="text-sm break-words">{formData.name}</p>
+                <p className="text-sm break-words">
+                  {formData.address}, {formData.city} {formData.zipCode}
+                </p>
+                <p className="text-xs text-muted-foreground break-words">{formData.phone}</p>
+              </div>
+              <div className="space-y-2 min-w-0">
+                <h3 className="text-xs font-bold uppercase">Order Summary</h3>
+                <p className="text-sm font-bold">
+                  Order total: LKR {confirmedOrder?.totalAmount.toLocaleString()}
+                </p>
+                {completedItems.map((item) => (
+                  <div key={item.product.id} className="flex items-center gap-3 text-xs">
+                    <img
+                      src={item.product.img}
+                      alt=""
+                      className="h-10 w-12 object-cover rounded-lg shrink-0"
+                    />
+                    <span className="min-w-0 break-words">
+                      {item.product.name} &times; {item.quantity}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            {addressWarning && (
+              <p role="status" className="text-sm text-amber-500">
+                {addressWarning}
+              </p>
+            )}
+            <div className="flex flex-col sm:flex-row gap-3 border-t border-border pt-4">
+              <a
+                href={"/account?tab=orders&track=" + encodeURIComponent(orderNumber)}
+                className="rounded-xl bg-primary hover:bg-primary-hover text-primary-foreground px-6 py-3 text-sm font-semibold text-center"
+              >
+                View Order in Customer Hub
+              </a>
+              <button
+                type="button"
+                onClick={() => window.print()}
+                className="rounded-xl bg-secondary border border-border px-5 py-3 text-xs font-semibold inline-flex items-center justify-center gap-2"
+              >
+                <Printer className="h-4 w-4" /> Print Receipt
+              </button>
+              <Link
+                to="/"
+                className="rounded-xl bg-secondary border border-border px-5 py-3 text-xs font-semibold text-center"
+              >
+                Return to Store
+              </Link>
+            </div>
           </div>
         </div>
       </div>

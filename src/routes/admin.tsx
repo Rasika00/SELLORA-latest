@@ -1,8 +1,15 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { products } from "@/data/products";
 import { getCurrentUser, logout, type UserSession } from "@/lib/auth";
 import { calculateBenchmark } from "@/lib/benchmarkEngine";
+import { AdminOrderTrackingModal } from "@/components/admin/AdminOrderTrackingModal";
+import { OrderRequestErrorNotice } from "@/components/account/OrderTrackingModal";
+import {
+  asOrderRequestError,
+  type OrderRequestError,
+  type OrderTrackingUpdateResult,
+} from "@/lib/api/order-tracking";
 import {
   getProducts,
   createProduct,
@@ -10,7 +17,7 @@ import {
   updateProductStatus,
   deleteProduct,
   getOrders,
-  updateOrderStatus,
+  type AdminOrderRecord,
   deleteOrder,
   getAdminStats,
   getUsers,
@@ -99,7 +106,8 @@ export function AdminDashboard() {
   );
   const [isLoadingProducts, setIsLoadingProducts] = useState(false);
 
-  const [orders, setOrders] = useState<any[]>([]);
+  const [orders, setOrders] = useState<AdminOrderRecord[]>([]);
+  const [ordersError, setOrdersError] = useState<OrderRequestError | null>(null);
   const [isLoadingOrders, setIsLoadingOrders] = useState(false);
 
   useEffect(() => {
@@ -123,11 +131,14 @@ export function AdminDashboard() {
 
   const refreshOrders = async () => {
     setIsLoadingOrders(true);
+    setOrdersError(null);
     try {
       const items = await getOrders();
       setOrders(items);
     } catch (e) {
       console.error("Failed to load orders for admin", e);
+      setOrders([]);
+      setOrdersError(asOrderRequestError(e));
     } finally {
       setIsLoadingOrders(false);
     }
@@ -206,10 +217,6 @@ export function AdminDashboard() {
                 >
                   Return to Storefront
                 </Link>
-              </div>
-
-              <div className="mt-8 pt-6 border-t border-white/5 text-[11px] text-muted-foreground font-mono">
-                Sample Admin: <span className="text-neon-cyan font-bold">admin@sellora.dev</span> &bull; Password: <span className="text-neon-cyan font-bold">admin</span>
               </div>
             </div>
           </div>
@@ -295,10 +302,13 @@ export function AdminDashboard() {
         </div>
       </header>
 
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex min-w-0 flex-1 flex-col overflow-hidden md:flex-row">
         {/* Static Sidebar */}
-        <aside className="w-56 border-r border-white/10 bg-[#0B0F19] flex flex-col shrink-0 py-4 z-40 relative shadow-[5px_0_15px_rgba(0,0,0,0.5)]">
-          <nav className="flex flex-col gap-1.5 px-3">
+        <aside className="relative z-40 flex w-full shrink-0 flex-col border-b border-white/10 bg-[#0B0F19] py-3 md:w-56 md:border-b-0 md:border-r md:py-4">
+          <nav
+            aria-label="Admin navigation"
+            className="flex gap-1.5 overflow-x-auto px-3 md:flex-col md:overflow-visible"
+          >
             {tabs.map((item) => {
               const Icon = item.icon;
               const isActive = activeTab === item.id;
@@ -306,7 +316,7 @@ export function AdminDashboard() {
                 <button
                   key={item.id}
                   onClick={() => setActiveTab(item.id)}
-                  className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors whitespace-nowrap ${
+                  className={`flex shrink-0 items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors whitespace-nowrap ${
                     isActive
                       ? "bg-neon-cyan/10 text-neon-cyan border border-neon-cyan/20 shadow-[inset_3px_0_0_rgba(0,242,254,1)]"
                       : "text-muted-foreground hover:bg-white/5 hover:text-white"
@@ -321,8 +331,11 @@ export function AdminDashboard() {
         </aside>
 
         {/* Main Dashboard Area */}
-        <main className="flex-1 overflow-y-auto p-6 lg:p-8 relative scroll-smooth">
+        <main className="relative min-w-0 flex-1 overflow-y-auto p-4 scroll-smooth sm:p-6 lg:p-8">
           <div className="max-w-[1400px] mx-auto space-y-8 animate-fade-up">
+            {ordersError && (
+              <OrderRequestErrorNotice error={ordersError} onRetry={() => void refreshOrders()} />
+            )}
             {activeTab === "dashboard" && (
               <TabDashboard
                 inventory={inventory}
@@ -338,7 +351,7 @@ export function AdminDashboard() {
                 isLoadingProducts={isLoadingProducts}
               />
             )}
-            {activeTab === "orders" && (
+            {activeTab === "orders" && !ordersError && (
               <TabOrders
                 orders={orders}
                 setOrders={setOrders}
@@ -1328,8 +1341,8 @@ function TabOrders({
   refreshOrders,
   isLoadingOrders,
 }: {
-  orders: any[];
-  setOrders: (orders: any[]) => void;
+  orders: AdminOrderRecord[];
+  setOrders: React.Dispatch<React.SetStateAction<AdminOrderRecord[]>>;
   refreshOrders: () => Promise<void>;
   isLoadingOrders: boolean;
 }) {
@@ -1338,26 +1351,20 @@ function TabOrders({
   const [selectedInvoiceOrder, setSelectedInvoiceOrder] = useState<any | null>(null);
   const [selectedDetailOrder, setSelectedDetailOrder] = useState<any | null>(null);
   const [showRawJson, setShowRawJson] = useState(false);
-  const [isUpdating, setIsUpdating] = useState<string | null>(null);
+  const [selectedTrackingOrder, setSelectedTrackingOrder] = useState<AdminOrderRecord | null>(null);
+  const handleTrackingUpdated = useCallback(
+    (tracking: OrderTrackingUpdateResult["order"]) => {
+      setOrders((previous) =>
+        previous.map((order) => (order.id === tracking.id ? { ...order, ...tracking } : order)),
+      );
+    },
+    [setOrders],
+  );
   const [message, setMessage] = useState<{ text: string; type: "success" | "error" } | null>(null);
 
   const showNotification = (text: string, type: "success" | "error" = "success") => {
     setMessage({ text, type });
     setTimeout(() => setMessage(null), 4000);
-  };
-
-  const handleStatusChange = async (orderId: string, newStatus: string) => {
-    setIsUpdating(orderId);
-    try {
-      const updated = await updateOrderStatus(orderId, newStatus);
-      setOrders(orders.map((o) => (o.id === orderId ? { ...o, ...updated } : o)));
-      showNotification(`Order status updated to ${newStatus}.`);
-    } catch (err: any) {
-      console.error(err);
-      showNotification(`Failed to update status: ${err.message}`, "error");
-    } finally {
-      setIsUpdating(null);
-    }
   };
 
   const handleDeleteOrder = async (orderId: string, orderNumber: string) => {
@@ -1396,6 +1403,11 @@ function TabOrders({
 
   return (
     <div className="space-y-6">
+      {isLoadingOrders && (
+        <p role="status" className="text-sm text-muted-foreground">
+          Loading orders...
+        </p>
+      )}
       {/* Top Notification */}
       {message && (
         <div
@@ -1518,7 +1530,7 @@ function TabOrders({
                 <th className="py-3.5 font-medium">Items Ordered</th>
                 <th className="py-3.5 font-medium">Total (Rs)</th>
                 <th className="py-3.5 font-medium">Pipeline Status</th>
-                <th className="py-3.5 font-medium text-right pr-6">Invoice & Action</th>
+                <th className="py-3.5 font-medium text-right pr-6">Tracking & Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5 text-xs">
@@ -1575,11 +1587,8 @@ function TabOrders({
 
                     {/* Pipeline Status Selector (A4.1) */}
                     <td className="py-4">
-                      <select
-                        value={order.status}
-                        disabled={isUpdating === order.id}
-                        onChange={(e) => handleStatusChange(order.id, e.target.value)}
-                        className={`text-xs font-mono font-bold px-2.5 py-1 rounded-lg border focus:outline-none transition-all cursor-pointer ${
+                      <span
+                        className={`text-xs font-mono font-bold px-2.5 py-1 rounded-lg border focus:outline-none transition-all ${
                           order.status === "DELIVERED"
                             ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/40"
                             : order.status === "SHIPPED"
@@ -1591,17 +1600,22 @@ function TabOrders({
                             : "bg-amber-500/20 text-amber-300 border-amber-500/40"
                         }`}
                       >
-                        <option value="PENDING" className="bg-[#0B0F19] text-amber-300">PENDING</option>
-                        <option value="PROCESSING" className="bg-[#0B0F19] text-blue-300">PROCESSING</option>
-                        <option value="SHIPPED" className="bg-[#0B0F19] text-purple-300">SHIPPED</option>
-                        <option value="DELIVERED" className="bg-[#0B0F19] text-emerald-300">DELIVERED</option>
-                        <option value="CANCELLED" className="bg-[#0B0F19] text-rose-300">CANCELLED</option>
-                      </select>
+                        {order.status}
+                      </span>
                     </td>
 
                     {/* Actions: Info, View Invoice & Delete */}
                     <td className="py-4 text-right pr-6">
                       <div className="flex items-center justify-end gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setSelectedTrackingOrder(order)}
+                          disabled={isLoadingOrders}
+                          className="inline-flex items-center gap-1.5 rounded-lg border border-neon-cyan/30 bg-neon-cyan/10 px-2.5 py-1.5 text-xs font-semibold text-neon-cyan hover:bg-neon-cyan/20 disabled:opacity-50"
+                        >
+                          <Truck aria-hidden="true" className="h-3.5 w-3.5" />
+                          Manage tracking
+                        </button>
                         <button
                           onClick={() => {
                             setSelectedDetailOrder(order);
@@ -1634,7 +1648,7 @@ function TabOrders({
                 );
               })}
 
-              {filteredOrders.length === 0 && (
+              {!isLoadingOrders && filteredOrders.length === 0 && (
                 <tr>
                   <td colSpan={7} className="py-12 text-center text-muted-foreground">
                     <ShoppingBag className="h-10 w-10 mx-auto mb-3 opacity-30 text-neon-cyan" />
@@ -1647,6 +1661,16 @@ function TabOrders({
           </table>
         </div>
       </div>
+
+      {selectedTrackingOrder && (
+        <AdminOrderTrackingModal
+          key={selectedTrackingOrder.id}
+          orderId={selectedTrackingOrder.id}
+          orderNumber={selectedTrackingOrder.orderNumber}
+          onClose={() => setSelectedTrackingOrder(null)}
+          onUpdated={handleTrackingUpdated}
+        />
+      )}
 
       {/* ============================================================================== */}
       {/* INVOICE & RECEIPT MODAL (A4.2)                                                */}

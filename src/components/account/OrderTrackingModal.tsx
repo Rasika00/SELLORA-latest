@@ -43,7 +43,13 @@ export function OrderRequestErrorNotice({
   );
 }
 
-export function TrackingDetails({ order }: { order: OrderTracking }) {
+export function TrackingDetails({
+  order,
+  showActorInfo = false,
+}: {
+  order: OrderTracking;
+  showActorInfo?: boolean;
+}) {
   const stages = ["PENDING", "PROCESSING", "SHIPPED", "DELIVERED"];
   const stageIndex = stages.indexOf(order.status);
   const cancelled = order.status === "CANCELLED";
@@ -200,6 +206,11 @@ export function TrackingDetails({ order }: { order: OrderTracking }) {
                 {event.note && (
                   <p className="whitespace-pre-wrap break-words pt-1 text-sm leading-relaxed text-muted-foreground [overflow-wrap:anywhere]">
                     {event.note}
+                  </p>
+                )}
+                {showActorInfo && event.actorId !== undefined && (
+                  <p className="break-words font-mono text-[10px] text-muted-foreground [overflow-wrap:anywhere]">
+                    {event.actorId ? `Changed by: ${event.actorId}` : "Automatic update"}
                   </p>
                 )}
               </li>

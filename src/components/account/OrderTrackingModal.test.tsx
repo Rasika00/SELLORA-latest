@@ -29,6 +29,23 @@ test("empty history shows its own message without inventing history records", ()
   assert.match(html, /Shipped/);
 });
 
+test("customer tracking never renders internal actor information even if supplied in the data", () => {
+  const html = renderToStaticMarkup(
+    <TrackingDetails
+      order={{
+        ...trackingOrder,
+        trackingEvents: [
+          { ...trackingOrder.trackingEvents[0], actorId: null },
+          { ...trackingOrder.trackingEvents[1], actorId: "internal-admin-private-id" },
+        ],
+      }}
+    />,
+  );
+  assert.doesNotMatch(html, /internal-admin-private-id|Changed by:|Automatic update/);
+  assert.match(html, /Preparing your order/);
+  assert.match(html, /dateTime="2026-11-17T03:00:00.000Z"/);
+});
+
 test("missing courier information displays honest empty values", () => {
   const html = renderToStaticMarkup(
     <TrackingDetails

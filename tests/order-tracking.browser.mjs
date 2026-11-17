@@ -9,6 +9,9 @@ import { createServer } from "node:net";
 import { basename, join, resolve, sep } from "node:path";
 import { tmpdir } from "node:os";
 import { customerOrder, trackingOrder } from "./fixtures/order-tracking.ts";
+import { adminTrackingOrder, adminOrder } from "./fixtures/admin-order-tracking.ts";
+import { runAdminBrowserChecks } from "./admin-order-tracking.browser.mjs";
+const adminFlow = process.argv.includes("--admin");
 
 const delay = (milliseconds) => new Promise((resolve) => setTimeout(resolve, milliseconds));
 async function freePort() {
@@ -117,6 +120,10 @@ const held = [];
 const trackingRequests = [];
 let mode = "ready";
 let listStatus = 200;
+let adminState = structuredClone(adminTrackingOrder);
+let adminReadFailure = 0;
+const adminWrites = [];
+const heldAdminWrites = [];
 const secondOrder = { ...customerOrder, id: "test-order-2", orderNumber: "ORD-TEST-2" };
 const check = (label) => {
   checks++;
@@ -154,7 +161,40 @@ try {
       ],
       body: Buffer.from(JSON.stringify(body)).toString("base64"),
     });
+  const completeAdminWrite = async (requestId, payload) => {
+    const changed = payload.status !== undefined && payload.status !== adminState.status;
+    for (const key of ["carrierName", "trackingNumber"])
+      if (Object.hasOwn(payload, key)) adminState[key] = payload[key];
+    if (Object.hasOwn(payload, "estimatedDelivery"))
+      adminState.estimatedDelivery = payload.estimatedDelivery
+        ? new Date(payload.estimatedDelivery).toISOString()
+        : null;
+    adminState.updatedAt = new Date(Date.UTC(2026, 10, 19, 6, 0, adminWrites.length)).toISOString();
+    if (changed) {
+      adminState.status = payload.status;
+      adminState.trackingEvents.push({
+        id: "admin-event-" + adminWrites.length,
+        status: payload.status,
+        note: payload.note ?? null,
+        actorId: "test-admin",
+        createdAt: adminState.updatedAt,
+      });
+    }
+    if (mode === "saved-read-fail") adminReadFailure = 503;
+    const { trackingEvents, ...order } = adminState;
+    return fulfill(requestId, 200, { success: true, historyCreated: changed, order });
+  };
   const trackingFor = (id) => {
+    if (adminFlow) {
+      const order = structuredClone(adminState);
+      if (mode === "empty") order.trackingEvents = [];
+      if (mode === "long") {
+        order.carrierName = "Courier".repeat(17);
+        order.trackingNumber = "TRACK".repeat(32);
+        order.trackingEvents.at(-1).note = "LongAdminTrackingNote".repeat(90);
+      }
+      return order;
+    }
     const order = structuredClone(trackingOrder);
     if (id === secondOrder.id) {
       order.id = secondOrder.id;
@@ -203,6 +243,43 @@ try {
       }
       if (!path.startsWith("/api/"))
         return cdp.send("Fetch.continueRequest", { requestId: event.requestId });
+      if (adminFlow && path === "/api/orders")
+        return fulfill(
+          event.requestId,
+          listStatus,
+          listStatus === 200
+            ? [{ ...adminOrder, ...adminState }]
+            : { error: "test authorization error" },
+        );
+      if (adminFlow && path.endsWith("/status") && event.request.method === "PATCH") {
+        const payload = JSON.parse(event.request.postData);
+        adminWrites.push(payload);
+        if (mode === "hold-write") {
+          heldAdminWrites.push({ requestId: event.requestId, payload });
+          return;
+        }
+        if (mode.startsWith("write-error"))
+          return fulfill(event.requestId, Number(mode.slice(11)), { error: "test write error" });
+        if (mode === "write-network")
+          return cdp.send("Fetch.failRequest", {
+            requestId: event.requestId,
+            errorReason: "InternetDisconnected",
+          });
+        if (mode === "conflict" || mode === "conflict-read-fail") {
+          adminState.status = payload.status ?? "PROCESSING";
+          adminState.updatedAt = "2026-11-19T05:00:00.000Z";
+          adminState.trackingEvents.push({
+            id: "external-" + adminWrites.length,
+            status: adminState.status,
+            note: "Changed by another test administrator",
+            actorId: "another-test-admin",
+            createdAt: adminState.updatedAt,
+          });
+          if (mode === "conflict-read-fail") adminReadFailure = 503;
+          return fulfill(event.requestId, 409, { error: "test conflict" });
+        }
+        return completeAdminWrite(event.requestId, payload);
+      }
       if (path === "/api/customer/orders")
         return fulfill(
           event.requestId,
@@ -211,6 +288,8 @@ try {
         );
       if (path.startsWith("/api/orders/") && path.endsWith("/tracking")) {
         const id = decodeURIComponent(path.split("/")[3]);
+        if (adminFlow && adminReadFailure)
+          return fulfill(event.requestId, adminReadFailure, { error: "test reload failure" });
         trackingRequests.push(event.request.url);
         if (mode === "hold") {
           held.push({ requestId: event.requestId, id });
@@ -241,232 +320,268 @@ try {
     mobile: false,
   });
   await cdp.send("Page.addScriptToEvaluateOnNewDocument", {
-    source: `localStorage.setItem('sellora_user', ${JSON.stringify(JSON.stringify({ id: "test-customer", email: "test@example.test", firstName: "Test", role: "customer" }))});`,
+    source: `localStorage.setItem('sellora_user', ${JSON.stringify(JSON.stringify({ id: adminFlow ? "test-admin" : "test-customer", email: "test@example.test", firstName: "Test", role: adminFlow ? "admin" : "customer" }))});`,
   });
-  await cdp.send("Page.navigate", { url: `${origin}/account` });
-  await until(
-    () => cdp.evaluate("document.body.innerText.toLowerCase().includes('customer command center')"),
-    "account page",
-  );
-  await until(
-    () =>
-      cdp.evaluate(
-        "document.querySelector('div.transition-opacity.duration-700')?.classList.contains('pointer-events-none') === false",
-      ),
-    "existing startup overlay completion",
-  );
-  await cdp.evaluate(
-    "[...document.querySelectorAll('nav button')].find(button => button.innerText.includes('My Orders')).click()",
-  );
-  await until(
-    () =>
-      cdp.evaluate(
-        "[...document.querySelectorAll('button')].some(button => button.innerText.trim() === 'Track Order')",
-      ),
-    "customer order list",
-  );
-  const click = async (label, index = 0) =>
-    cdp.evaluate(
-      `(() => { const button = [...document.querySelectorAll('button')].filter(button => button.innerText.trim() === ${JSON.stringify(label)})[${index}]; if (!button) throw new Error('Button missing'); button.focus(); button.click(); })()`,
-    );
-  const open = async (nextMode, index = 0) => {
-    mode = nextMode;
-    await click("Track Order", index);
+  if (adminFlow) {
+    await runAdminBrowserChecks({
+      cdp,
+      until,
+      delay,
+      check,
+      origin,
+      setMode: (value) => {
+        mode = value;
+        if (value === "ready") adminReadFailure = 0;
+      },
+      setListStatus: (value) => {
+        listStatus = value;
+      },
+      reset: () => {
+        adminState = structuredClone(adminTrackingOrder);
+        adminReadFailure = 0;
+        mode = "ready";
+      },
+      writes: () => adminWrites,
+      tracking: () => structuredClone(adminState),
+      releaseWrites: async () => {
+        mode = "ready";
+        for (const entry of heldAdminWrites.splice(0))
+          await completeAdminWrite(entry.requestId, entry.payload);
+      },
+    });
+  } else {
+    await cdp.send("Page.navigate", { url: `${origin}/account` });
     await until(
-      () => cdp.evaluate("Boolean(document.querySelector('[role=dialog]'))"),
-      "tracking modal",
+      () =>
+        cdp.evaluate("document.body.innerText.toLowerCase().includes('customer command center')"),
+      "account page",
     );
-  };
-  const close = async () => {
-    await click("Close tracking");
     await until(
-      () => cdp.evaluate("!document.querySelector('[role=dialog]')"),
-      "tracking modal close",
+      () =>
+        cdp.evaluate(
+          "document.querySelector('div.transition-opacity.duration-700')?.classList.contains('pointer-events-none') === false",
+        ),
+      "existing startup overlay completion",
     );
-  };
-
-  await open("hold");
-  await until(
-    () => cdp.evaluate(`(${dialogText}).includes('Loading order tracking')`),
-    "loading state",
-  );
-  check("loading is displayed while the tracking response is pending");
-  mode = "ready";
-  await until(async () => held.length > 0, "intercepted tracking request");
-  for (const first of held.splice(0)) {
-    try {
-      await fulfill(first.requestId, 200, { success: true, order: trackingFor(first.id) });
-    } catch (error) {
-      if (!/Invalid InterceptionId/.test(error.message)) throw error;
-    }
-  }
-  await until(
-    () => cdp.evaluate(`(${dialogText}).includes('Handed to the courier')`),
-    "tracking history",
-  );
-  const readyText = await cdp.evaluate(dialogText);
-  for (const value of ["ORD-TEST-1", "Test Courier", "TEST-PKG-123", "Test street", "Test Laptop"])
-    assert(readyText.includes(value), value);
-  assert(!/24 - 48|Thermal QC|refunded/i.test(readyText));
-  assert.equal(
     await cdp.evaluate(
-      "document.querySelectorAll('[aria-label=\"Recorded tracking history\"] li').length",
-    ),
-    3,
-  );
-  check(
-    "the existing modal displays tracking response fields, chronological history and original package/address details",
-  );
-  for (let count = 0; count < 12; count++) {
+      "[...document.querySelectorAll('nav button')].find(button => button.innerText.includes('My Orders')).click()",
+    );
+    await until(
+      () =>
+        cdp.evaluate(
+          "[...document.querySelectorAll('button')].some(button => button.innerText.trim() === 'Track Order')",
+        ),
+      "customer order list",
+    );
+    const click = async (label, index = 0) =>
+      cdp.evaluate(
+        `(() => { const button = [...document.querySelectorAll('button')].filter(button => button.innerText.trim() === ${JSON.stringify(label)})[${index}]; if (!button) throw new Error('Button missing'); button.focus(); button.click(); })()`,
+      );
+    const open = async (nextMode, index = 0) => {
+      mode = nextMode;
+      await click("Track Order", index);
+      await until(
+        () => cdp.evaluate("Boolean(document.querySelector('[role=dialog]'))"),
+        "tracking modal",
+      );
+    };
+    const close = async () => {
+      await click("Close tracking");
+      await until(
+        () => cdp.evaluate("!document.querySelector('[role=dialog]')"),
+        "tracking modal close",
+      );
+    };
+
+    await open("hold");
+    await until(
+      () => cdp.evaluate(`(${dialogText}).includes('Loading order tracking')`),
+      "loading state",
+    );
+    check("loading is displayed while the tracking response is pending");
+    mode = "ready";
+    await until(async () => held.length > 0, "intercepted tracking request");
+    for (const first of held.splice(0)) {
+      try {
+        await fulfill(first.requestId, 200, { success: true, order: trackingFor(first.id) });
+      } catch (error) {
+        if (!/Invalid InterceptionId/.test(error.message)) throw error;
+      }
+    }
+    await until(
+      () => cdp.evaluate(`(${dialogText}).includes('Handed to the courier')`),
+      "tracking history",
+    );
+    const readyText = await cdp.evaluate(dialogText);
+    for (const value of [
+      "ORD-TEST-1",
+      "Test Courier",
+      "TEST-PKG-123",
+      "Test street",
+      "Test Laptop",
+    ])
+      assert(readyText.includes(value), value);
+    assert(!/24 - 48|Thermal QC|refunded/i.test(readyText));
+    assert.equal(
+      await cdp.evaluate(
+        "document.querySelectorAll('[aria-label=\"Recorded tracking history\"] li').length",
+      ),
+      3,
+    );
+    check(
+      "the existing modal displays tracking response fields, chronological history and original package/address details",
+    );
+    for (let count = 0; count < 12; count++) {
+      await cdp.send("Input.dispatchKeyEvent", {
+        type: "keyDown",
+        key: "Tab",
+        code: "Tab",
+        windowsVirtualKeyCode: 9,
+      });
+      await cdp.send("Input.dispatchKeyEvent", {
+        type: "keyUp",
+        key: "Tab",
+        code: "Tab",
+        windowsVirtualKeyCode: 9,
+      });
+      assert(await cdp.evaluate("Boolean(document.activeElement.closest('[role=dialog]'))"));
+    }
+    check("keyboard focus stays inside the open modal");
+    mode = "delivered";
+    await click("Refresh tracking");
+    await until(
+      () => cdp.evaluate(`(${dialogText}).includes('Delivery recorded in test response')`),
+      "tracking refresh",
+    );
+    assert.equal(
+      await cdp.evaluate(
+        "document.querySelector('[aria-current=step] > span:last-child')?.innerText",
+      ),
+      "Delivered",
+    );
+    check("refresh replaces the current status and history with the next response");
     await cdp.send("Input.dispatchKeyEvent", {
       type: "keyDown",
-      key: "Tab",
-      code: "Tab",
-      windowsVirtualKeyCode: 9,
+      key: "Escape",
+      code: "Escape",
+      windowsVirtualKeyCode: 27,
     });
     await cdp.send("Input.dispatchKeyEvent", {
       type: "keyUp",
-      key: "Tab",
-      code: "Tab",
-      windowsVirtualKeyCode: 9,
+      key: "Escape",
+      code: "Escape",
+      windowsVirtualKeyCode: 27,
     });
-    assert(await cdp.evaluate("Boolean(document.activeElement.closest('[role=dialog]'))"));
-  }
-  check("keyboard focus stays inside the open modal");
-  mode = "delivered";
-  await click("Refresh tracking");
-  await until(
-    () => cdp.evaluate(`(${dialogText}).includes('Delivery recorded in test response')`),
-    "tracking refresh",
-  );
-  assert.equal(
-    await cdp.evaluate(
-      "document.querySelector('[aria-current=step] > span:last-child')?.innerText",
-    ),
-    "Delivered",
-  );
-  check("refresh replaces the current status and history with the next response");
-  await cdp.send("Input.dispatchKeyEvent", {
-    type: "keyDown",
-    key: "Escape",
-    code: "Escape",
-    windowsVirtualKeyCode: 27,
-  });
-  await cdp.send("Input.dispatchKeyEvent", {
-    type: "keyUp",
-    key: "Escape",
-    code: "Escape",
-    windowsVirtualKeyCode: 27,
-  });
-  await until(() => cdp.evaluate("!document.querySelector('[role=dialog]')"), "Escape close");
-  assert.equal(await cdp.evaluate("document.activeElement.innerText.trim()"), "Track Order");
-  check("Escape closes the dialog and restores focus to Track Order");
+    await until(() => cdp.evaluate("!document.querySelector('[role=dialog]')"), "Escape close");
+    assert.equal(await cdp.evaluate("document.activeElement.innerText.trim()"), "Track Order");
+    check("Escape closes the dialog and restores focus to Track Order");
 
-  for (const status of [401, 403, 404, 503]) {
-    await open(`error${status}`);
-    await until(
-      () => cdp.evaluate("Boolean(document.querySelector('[role=dialog] [role=alert]'))"),
-      `HTTP ${status} state`,
-    );
-    assert(!(await cdp.evaluate(dialogText)).includes("Test Courier"));
-    if (status === 401)
-      assert(
-        await cdp.evaluate("Boolean(document.querySelector('[role=dialog] a[href=\"/login\"]'))"),
+    for (const status of [401, 403, 404, 503]) {
+      await open(`error${status}`);
+      await until(
+        () => cdp.evaluate("Boolean(document.querySelector('[role=dialog] [role=alert]'))"),
+        `HTTP ${status} state`,
       );
+      assert(!(await cdp.evaluate(dialogText)).includes("Test Courier"));
+      if (status === 401)
+        assert(
+          await cdp.evaluate("Boolean(document.querySelector('[role=dialog] a[href=\"/login\"]'))"),
+        );
+      await close();
+      check(`HTTP ${status} shows an actionable error without stale tracking details`);
+    }
+    await open("network");
+    await until(
+      () => cdp.evaluate(`(${dialogText}).includes('Check your connection')`),
+      "network error",
+    );
+    mode = "ready";
+    await click("Try again");
+    await until(() => cdp.evaluate(`(${dialogText}).includes('Test Courier')`), "successful retry");
     await close();
-    check(`HTTP ${status} shows an actionable error without stale tracking details`);
-  }
-  await open("network");
-  await until(
-    () => cdp.evaluate(`(${dialogText}).includes('Check your connection')`),
-    "network error",
-  );
-  mode = "ready";
-  await click("Try again");
-  await until(() => cdp.evaluate(`(${dialogText}).includes('Test Courier')`), "successful retry");
-  await close();
-  check("network failures can be retried successfully");
-  await open("empty");
-  await until(
-    () => cdp.evaluate(`(${dialogText}).includes('No tracking updates have been recorded')`),
-    "empty history",
-  );
-  assert.equal((await cdp.evaluate(dialogText)).match(/Not provided/g)?.length, 3);
-  await close();
-  check("empty history and all missing delivery fields display honest empty states");
-  await open("cancelled");
-  await until(
-    () => cdp.evaluate(`(${dialogText}).includes('This order has been cancelled')`),
-    "cancelled order",
-  );
-  assert.equal(
-    await cdp.evaluate("document.querySelector('[aria-label=\"Order progress steps\"]')"),
-    null,
-  );
-  await close();
-  check("cancelled orders have no misleading delivered/refunded progress");
+    check("network failures can be retried successfully");
+    await open("empty");
+    await until(
+      () => cdp.evaluate(`(${dialogText}).includes('No tracking updates have been recorded')`),
+      "empty history",
+    );
+    assert.equal((await cdp.evaluate(dialogText)).match(/Not provided/g)?.length, 3);
+    await close();
+    check("empty history and all missing delivery fields display honest empty states");
+    await open("cancelled");
+    await until(
+      () => cdp.evaluate(`(${dialogText}).includes('This order has been cancelled')`),
+      "cancelled order",
+    );
+    assert.equal(
+      await cdp.evaluate("document.querySelector('[aria-label=\"Order progress steps\"]')"),
+      null,
+    );
+    await close();
+    check("cancelled orders have no misleading delivered/refunded progress");
 
-  await open("hold");
-  await until(async () => held.length > 0, "request to cancel");
-  const cancelled = held.shift();
-  await close();
-  await open("ready", 1);
-  await until(
-    () =>
-      cdp.evaluate(
-        `(${dialogText}).includes('ORD-TEST-2') && (${dialogText}).includes('Test Courier')`,
-      ),
-    "second order",
-  );
-  try {
-    await fulfill(cancelled.requestId, 200, { success: true, order: trackingFor(cancelled.id) });
-  } catch {
-    /* Browser already cancelled it. */
-  }
-  await delay(150);
-  assert(!(await cdp.evaluate(dialogText)).includes("ORD-TEST-1"));
-  await close();
-  check("closing a pending request and opening another order cannot display stale data");
+    await open("hold");
+    await until(async () => held.length > 0, "request to cancel");
+    const cancelled = held.shift();
+    await close();
+    await open("ready", 1);
+    await until(
+      () =>
+        cdp.evaluate(
+          `(${dialogText}).includes('ORD-TEST-2') && (${dialogText}).includes('Test Courier')`,
+        ),
+      "second order",
+    );
+    try {
+      await fulfill(cancelled.requestId, 200, { success: true, order: trackingFor(cancelled.id) });
+    } catch {
+      /* Browser already cancelled it. */
+    }
+    await delay(150);
+    assert(!(await cdp.evaluate(dialogText)).includes("ORD-TEST-1"));
+    await close();
+    check("closing a pending request and opening another order cannot display stale data");
 
-  await cdp.send("Emulation.setDeviceMetricsOverride", {
-    width: 390,
-    height: 844,
-    deviceScaleFactor: 1,
-    mobile: true,
-  });
-  await open("long");
-  await until(
-    () => cdp.evaluate(`(${dialogText}).includes('LongTrackingNote')`),
-    "mobile long content",
-  );
-  const size = await cdp.evaluate(
-    "(() => { const dialog=document.querySelector('[role=dialog]'); const rect=dialog.getBoundingClientRect(); return {left:rect.left,right:rect.right,top:rect.top,bottom:rect.bottom,width:innerWidth,height:innerHeight,scroll:dialog.scrollWidth,client:dialog.clientWidth}; })()",
-  );
-  assert(
-    size.left >= 0 &&
-      size.right <= size.width + 1 &&
-      size.top >= 0 &&
-      size.bottom <= size.height + 1,
-    JSON.stringify(size),
-  );
-  assert(size.scroll <= size.client + 1, JSON.stringify(size));
-  const image = await cdp.send("Page.captureScreenshot", { format: "png" });
-  const screenshot = join(temporaryRoot, "sellora-phase3-tracking-mobile.png");
-  await writeFile(screenshot, Buffer.from(image.data, "base64"));
-  console.log(`Mobile screenshot: ${screenshot}`);
-  await close();
-  check("mobile tracking fits the viewport and wraps long courier IDs and notes");
-  listStatus = 401;
-  await cdp.send("Page.reload");
-  await until(
-    () => cdp.evaluate("Boolean(document.querySelector('main a[href=\"/login\"]'))"),
-    "expired customer list session",
-  );
-  assert(!(await cdp.evaluate("document.body.innerText")).includes("No Orders Placed Yet"));
-  check(
-    "an expired account-list session offers sign-in instead of pretending the customer has no orders",
-  );
-  assert(trackingRequests.every((url) => !url.includes("email=") && !url.includes("userId=")));
+    await cdp.send("Emulation.setDeviceMetricsOverride", {
+      width: 390,
+      height: 844,
+      deviceScaleFactor: 1,
+      mobile: true,
+    });
+    await open("long");
+    await until(
+      () => cdp.evaluate(`(${dialogText}).includes('LongTrackingNote')`),
+      "mobile long content",
+    );
+    const size = await cdp.evaluate(
+      "(() => { const dialog=document.querySelector('[role=dialog]'); const rect=dialog.getBoundingClientRect(); return {left:rect.left,right:rect.right,top:rect.top,bottom:rect.bottom,width:innerWidth,height:innerHeight,scroll:dialog.scrollWidth,client:dialog.clientWidth}; })()",
+    );
+    assert(
+      size.left >= 0 &&
+        size.right <= size.width + 1 &&
+        size.top >= 0 &&
+        size.bottom <= size.height + 1,
+      JSON.stringify(size),
+    );
+    assert(size.scroll <= size.client + 1, JSON.stringify(size));
+    const image = await cdp.send("Page.captureScreenshot", { format: "png" });
+    const screenshot = join(temporaryRoot, "sellora-phase3-tracking-mobile.png");
+    await writeFile(screenshot, Buffer.from(image.data, "base64"));
+    console.log(`Mobile screenshot: ${screenshot}`);
+    await close();
+    check("mobile tracking fits the viewport and wraps long courier IDs and notes");
+    listStatus = 401;
+    await cdp.send("Page.reload");
+    await until(
+      () => cdp.evaluate("Boolean(document.querySelector('main a[href=\"/login\"]'))"),
+      "expired customer list session",
+    );
+    assert(!(await cdp.evaluate("document.body.innerText")).includes("No Orders Placed Yet"));
+    check(
+      "an expired account-list session offers sign-in instead of pretending the customer has no orders",
+    );
+    assert(trackingRequests.every((url) => !url.includes("email=") && !url.includes("userId=")));
+  }
   assert.deepEqual(errors, []);
   console.log(
     `Browser checks: ${checks} passed. API responses were intercepted fixtures; no real API/database integration was tested.`,

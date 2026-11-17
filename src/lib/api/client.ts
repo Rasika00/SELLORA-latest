@@ -1,6 +1,11 @@
 import { products as fallbackProducts, type Product } from "@/data/products";
 import { initialFeedbacks, type FeedbackItem } from "@/data/feedbacks";
-import { OrderRequestError, requestOrderJson } from "./order-tracking";
+import {
+  OrderRequestError,
+  requestOrderJson,
+  updateOrderTracking,
+  type OrderTrackingUpdate,
+} from "./order-tracking";
 export { getOrderTracking, type OrderTracking, type OrderTrackingEvent } from "./order-tracking";
 
 const API_BASE = "/api";
@@ -265,30 +270,31 @@ export async function createOrder(payload: CreateOrderPayload) {
   }
 }
 
-export async function getOrders(): Promise<any[]> {
-  try {
-    const res = await fetch(`${API_BASE}/orders`);
-    if (res.ok) {
-      const data = await res.json();
-      if (Array.isArray(data)) return data;
-    }
-  } catch (error) {
-    console.warn("Could not fetch orders from backend:", error);
-  }
-  return [];
+export interface AdminOrderRecord extends CustomerOrderRecord {
+  carrierName?: string | null;
+  trackingNumber?: string | null;
+  estimatedDelivery?: string | null;
+  user?: {
+    id: string;
+    email: string;
+    firstName?: string | null;
+    lastName?: string | null;
+    role?: string;
+  } | null;
 }
 
-export async function updateOrderStatus(id: string, status: string): Promise<any> {
-  const res = await fetch(`${API_BASE}/orders/${id}/status`, {
-    method: "PATCH",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ status }),
-  });
-  const data = await res.json();
-  if (!res.ok) {
-    throw new Error(data.error || "Failed to update order status");
-  }
-  return data.order;
+export async function getOrders(): Promise<AdminOrderRecord[]> {
+  const data = await requestOrderJson("/orders");
+  if (!Array.isArray(data)) throw new OrderRequestError("invalid-response");
+  return data;
+}
+
+export async function updateOrderStatus(
+  id: string,
+  status: OrderTrackingUpdate["status"] | OrderTrackingUpdate,
+) {
+  return (await updateOrderTracking(id, typeof status === "string" ? { status } : (status ?? {})))
+    .order;
 }
 
 export async function deleteOrder(id: string): Promise<void> {

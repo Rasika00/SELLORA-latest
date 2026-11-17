@@ -11,22 +11,8 @@ export { getOrderTracking, type OrderTracking, type OrderTrackingEvent } from ".
 const API_BASE = "/api";
 const LOCAL_FEEDBACK_KEY = "sellora_community_feedback";
 
-export interface OrderItemInput {
-  productId: string;
-  quantity: number;
-  price: number;
-}
-
-export interface CreateOrderPayload {
-  customerName: string;
-  customerEmail: string;
-  customerPhone?: string;
-  shippingAddress: string;
-  city?: string;
-  zipCode?: string;
-  totalAmount: number;
-  items: OrderItemInput[];
-}
+export { createOrder } from "./checkout";
+export type { CreateOrderPayload, OrderItemInput } from "./checkout";
 
 export async function checkDatabaseHealth(): Promise<{ status: string; database?: string; error?: string }> {
   try {
@@ -161,7 +147,11 @@ export async function getProducts(options?: {
   return filtered;
 }
 
-export async function createProduct(payload: Partial<Product>) {
+export type ProductWritePayload = Omit<Partial<Product>, "detailedSpecs"> & {
+  detailedSpecs?: Partial<NonNullable<Product["detailedSpecs"]>>;
+};
+
+export async function createProduct(payload: ProductWritePayload) {
   const res = await fetch(`${API_BASE}/products`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -174,7 +164,7 @@ export async function createProduct(payload: Partial<Product>) {
   return data.product;
 }
 
-export async function updateProduct(id: string, payload: Partial<Product>) {
+export async function updateProduct(id: string, payload: ProductWritePayload) {
   const res = await fetch(`${API_BASE}/products/${id}`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
@@ -239,35 +229,6 @@ export async function getProductById(id: string): Promise<Product | undefined> {
 
   // Graceful fallback
   return fallbackProducts.find((p) => p.id === id);
-}
-
-export async function createOrder(payload: CreateOrderPayload) {
-  try {
-    const res = await fetch(`${API_BASE}/orders`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
-
-    if (!res.ok) {
-      const errData = await res.json().catch(() => ({}));
-      throw new Error(errData.error || `HTTP error ${res.status}`);
-    }
-
-    return await res.json();
-  } catch (error) {
-    console.warn("Database order creation failed, generating local receipt:", error);
-    // Return fallback order ID so user experience is uninterrupted
-    return {
-      success: true,
-      offline: true,
-      order: {
-        orderNumber: `ORD-${Math.floor(100000 + Math.random() * 900000)}`,
-        customerName: payload.customerName,
-        totalAmount: payload.totalAmount,
-      },
-    };
-  }
 }
 
 export interface AdminOrderRecord extends CustomerOrderRecord {

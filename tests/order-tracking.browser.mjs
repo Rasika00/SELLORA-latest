@@ -11,7 +11,9 @@ import { tmpdir } from "node:os";
 import { customerOrder, trackingOrder } from "./fixtures/order-tracking.ts";
 import { adminTrackingOrder, adminOrder } from "./fixtures/admin-order-tracking.ts";
 import { runAdminBrowserChecks } from "./admin-order-tracking.browser.mjs";
+import { createCheckoutMock, runCheckoutBrowserChecks } from "./checkout.browser.mjs";
 const adminFlow = process.argv.includes("--admin");
+const checkoutFlow = process.argv.includes("--checkout");
 
 const delay = (milliseconds) => new Promise((resolve) => setTimeout(resolve, milliseconds));
 async function freePort() {
@@ -62,7 +64,10 @@ class Devtools {
       returnByValue: true,
       awaitPromise: true,
     });
-    if (result.exceptionDetails) throw new Error(result.exceptionDetails.text);
+    if (result.exceptionDetails)
+      throw new Error(
+        result.exceptionDetails.exception?.description || result.exceptionDetails.text,
+      );
     return result.result?.value;
   }
 }
@@ -225,6 +230,7 @@ try {
     }
     return order;
   };
+  const checkoutMock = createCheckoutMock({ cdp, fulfill });
   cdp.listeners.set("Fetch.requestPaused", (event) => {
     void (async () => {
       const path = new URL(event.request.url).pathname;
@@ -243,6 +249,7 @@ try {
       }
       if (!path.startsWith("/api/"))
         return cdp.send("Fetch.continueRequest", { requestId: event.requestId });
+      if (checkoutFlow) return checkoutMock.handle(event);
       if (adminFlow && path === "/api/orders")
         return fulfill(
           event.requestId,
@@ -322,7 +329,9 @@ try {
   await cdp.send("Page.addScriptToEvaluateOnNewDocument", {
     source: `localStorage.setItem('sellora_user', ${JSON.stringify(JSON.stringify({ id: adminFlow ? "test-admin" : "test-customer", email: "test@example.test", firstName: "Test", role: adminFlow ? "admin" : "customer" }))});`,
   });
-  if (adminFlow) {
+  if (checkoutFlow) {
+    await runCheckoutBrowserChecks({ cdp, until, delay, check, origin, mock: checkoutMock });
+  } else if (adminFlow) {
     await runAdminBrowserChecks({
       cdp,
       until,
@@ -473,6 +482,10 @@ try {
       windowsVirtualKeyCode: 27,
     });
     await until(() => cdp.evaluate("!document.querySelector('[role=dialog]')"), "Escape close");
+    await until(
+      () => cdp.evaluate("document.activeElement?.innerText.trim() === 'Track Order'"),
+      "tracking dialog restores focus after its close animation",
+    );
     assert.equal(await cdp.evaluate("document.activeElement.innerText.trim()"), "Track Order");
     check("Escape closes the dialog and restores focus to Track Order");
 

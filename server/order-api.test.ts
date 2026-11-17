@@ -97,6 +97,9 @@ async function request(
     method: options.method || "GET",
     headers: {
       "Content-Type": "application/json",
+      ...(path === "/api/orders" && options.method === "POST"
+        ? { "Idempotency-Key": randomBytes(24).toString("hex") }
+        : {}),
       ...(options.user !== undefined && { Cookie: cookie(options.user) }),
       ...options.headers,
     },
@@ -334,11 +337,21 @@ test("both existing status endpoints use a transaction and the verified actor", 
 
 test("checkout nests the initial PENDING event and never links a guest by a claimed ID/email", async () => {
   let data: any;
-  stub(prisma.order, "create", async (args: any) => {
-    data = args.data;
-    return { id: "created-order", ...data };
-  });
-  stub(prisma.product, "findUnique", async () => null); // Existing stock code makes no write for this mock.
+  stub(prisma, "$transaction", async (fn: (tx: unknown) => unknown) =>
+    fn({
+      product: {
+        findMany: async () => [{ id: "product-1", status: "APPROVED", price: 100, stock: 10 }],
+        updateMany: async () => ({ count: 1 }),
+      },
+      order: {
+        findUnique: async () => null,
+        create: async (args: { data: Record<string, unknown> }) => {
+          data = args.data;
+          return { id: "created-order", ...data };
+        },
+      },
+    }),
+  );
   const payload = {
     customerName: "Buyer",
     customerEmail: users[0].email,
@@ -359,6 +372,141 @@ test("checkout nests the initial PENDING event and never links a guest by a clai
   assert.equal(signedIn.status, 201);
   assert.equal(data.userId, users[0].id);
   assert.deepEqual(data.trackingEvents.create, { status: "PENDING", actorId: users[0].id });
+});
+
+test("checkout HTTP errors never return a successful receipt or write an initial event", async () => {
+  let writes = 0;
+  stub(prisma, "$transaction", async (fn: (tx: unknown) => unknown) =>
+    fn({
+      product: {
+        findMany: async () => [{ id: "product-1", price: 100, stock: 0, status: "APPROVED" }],
+        updateMany: async () => {
+          writes++;
+          return { count: 0 };
+        },
+      },
+      order: {
+        findUnique: async () => null,
+        create: async () => {
+          writes++;
+          throw new Error("must not write");
+        },
+      },
+    }),
+  );
+  const body = {
+    customerName: "Buyer",
+    customerEmail: "buyer@example.test",
+    shippingAddress: "Local",
+    totalAmount: 100,
+    items: [{ productId: "product-1", quantity: 1, price: 100 }],
+  };
+  const stock = await request("/api/orders", { method: "POST", body });
+  assert.equal(stock.status, 409);
+  assert.equal((await stock.json()).success, undefined);
+  assert.equal(writes, 0);
+  const missingKey = await request("/api/orders", {
+    method: "POST",
+    body,
+    headers: { "Idempotency-Key": "" },
+  });
+  assert.equal(missingKey.status, 400);
+  assert.equal(writes, 0);
+  const expired = await request("/api/orders", {
+    method: "POST",
+    body: { ...body, requireSession: true },
+  });
+  assert.equal(expired.status, 401);
+  assert.equal(writes, 0);
+});
+
+test("HTTP checkout replay returns the same order and decrements stock once", async () => {
+  let saved: Record<string, unknown> | null = null,
+    reservations = 0,
+    creates = 0;
+  stub(prisma, "$transaction", async (fn: (tx: unknown) => unknown) =>
+    fn({
+      product: {
+        findMany: async () => [{ id: "product-1", price: 100, stock: 5, status: "APPROVED" }],
+        updateMany: async () => {
+          reservations++;
+          return { count: 1 };
+        },
+      },
+      order: {
+        findUnique: async () => saved,
+        create: async ({ data }: { data: Record<string, unknown> }) => {
+          creates++;
+          saved = {
+            ...data,
+            items: [{ productId: "product-1", quantity: 1, price: 100, product: {} }],
+          };
+          return saved;
+        },
+      },
+    }),
+  );
+  const body = {
+    customerName: "Buyer",
+    customerEmail: "buyer@example.test",
+    shippingAddress: "Local",
+    totalAmount: 100,
+    items: [{ productId: "product-1", quantity: 1, price: 100 }],
+  };
+  const headers = { "Idempotency-Key": "http-checkout-retry-key-0001" };
+  const first = await request("/api/orders", { method: "POST", user: 0, body, headers });
+  const second = await request("/api/orders", { method: "POST", user: 0, body, headers });
+  assert.equal(first.status, 201);
+  assert.equal(second.status, 200);
+  const a = await first.json(),
+    b = await second.json();
+  assert.equal(a.order.id, b.order.id);
+  assert.equal(b.replayed, true);
+  assert.equal(reservations, 1);
+  assert.equal(creates, 1);
+});
+
+test("seller fulfillment and general status routes reject foreign and mixed-seller orders before writes", async () => {
+  for (const path of ["/api/orders/order-1/status", "/api/seller/orders/order-1/fulfillment"]) {
+    for (const sellerIds of [["other"], ["seller-1", "other"], [null], []]) {
+      let writes = 0;
+      stub(prisma, "$transaction", async (fn: (tx: unknown) => unknown) =>
+        fn({
+          order: {
+            findUnique: async () => ({
+              id: "order-1",
+              status: "PENDING",
+              updatedAt: new Date(),
+              items: sellerIds.map((sellerId) => ({ product: { sellerId } })),
+            }),
+            update: async () => {
+              writes++;
+              throw new Error("unauthorized write");
+            },
+          },
+        }),
+      );
+      const response = await request(path, {
+        method: "PATCH",
+        user: 1,
+        body: { status: "PROCESSING", sellerId: "seller-1", role: "admin" },
+      });
+      assert.equal(response.status, 403);
+      assert.equal(writes, 0);
+    }
+  }
+});
+
+test("pending and suspended sellers cannot bypass fulfillment approval using client roles", async () => {
+  for (const sellerStatus of ["PENDING", "SUSPENDED"]) {
+    stub(prisma.user, "findUnique", async () => ({ ...users[1], sellerStatus }));
+    const result = await request("/api/seller/orders/order-1/fulfillment", {
+      method: "PATCH",
+      user: 1,
+      body: { status: "PROCESSING", role: "admin" },
+    });
+    assert.equal(result.status, 403);
+  }
 });
 
 test("product ownership cannot be stolen to acquire order-write permission", async () => {

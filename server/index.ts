@@ -9,6 +9,7 @@ import { prisma } from "./db";
 import { products as fallbackProducts } from "../src/data/products";
 import { calculateBenchmark } from "../src/lib/benchmarkEngine";
 import {
+  ApiError,
   assertAuthConfigured,
   authenticatedUser,
   checkRequestOrigin,
@@ -23,7 +24,9 @@ import {
   sendApiError,
   setSessionCookie,
 } from "./auth";
-import { getOrderTracking, initialTrackingEvent, updateOrderTracking } from "./order-tracking";
+import { getOrderTracking, updateOrderTracking } from "./order-tracking";
+
+import { CheckoutRejection, createCheckoutOrder } from "./order-checkout";
 
 dotenv.config();
 
@@ -648,89 +651,20 @@ app.delete("/api/products/:id", requireAuth, requireProductWriter, async (req, r
 // Orders: Place new order
 app.post("/api/orders", optionalAuth, async (req, res) => {
   try {
-    const {
-      customerName,
-      customerEmail,
-      customerPhone,
-      shippingAddress,
-      city,
-      zipCode,
-      items,
-      totalAmount,
-    } = req.body;
-
-    if (!customerEmail || !customerName || !items || !Array.isArray(items) || items.length === 0) {
-      return res.status(400).json({ error: "Invalid order data. Name, email, and items are required." });
-    }
-
-    // Contact email is not identity. Guests remain unlinked, even if they supply a userId.
-    const actor = res.locals.auth;
-    const finalUserId = actor?.id;
-
-    const orderNumber = `ORD-${Math.floor(100000 + Math.random() * 900000)}`;
-
-    const order = await prisma.order.create({
-      data: {
-        orderNumber,
-        userId: finalUserId || null,
-        customerName: String(customerName).trim(),
-        customerEmail: String(customerEmail).trim().toLowerCase(),
-        customerPhone: customerPhone ? String(customerPhone).trim() : null,
-        shippingAddress: String(shippingAddress).trim(),
-        city: city ? String(city).trim() : null,
-        zipCode: zipCode ? String(zipCode).trim() : null,
-        totalAmount: Number(totalAmount),
-        status: "PENDING",
-        // Nested writes save Order, items and initial history atomically.
-        trackingEvents: initialTrackingEvent(actor?.id),
-        items: {
-          create: items.map((item: any) => ({
-            productId: item.productId,
-            quantity: item.quantity || 1,
-            price: Number(item.price),
-          })),
-        },
-      },
-      include: {
-        items: {
-          include: {
-            product: true,
-          },
-        },
-      },
-    });
-
-    // Automatically decrement product stock for purchased laptops
-    for (const item of items) {
-      if (item.productId) {
-        const qty = Number(item.quantity) || 1;
-        try {
-          const prod = await prisma.product.findUnique({
-            where: { id: item.productId },
-            select: { id: true, stock: true },
-          });
-          if (prod) {
-            const currentStock = typeof prod.stock === "number" ? prod.stock : 15;
-            const updatedStock = Math.max(0, currentStock - qty);
-            await prisma.product.update({
-              where: { id: item.productId },
-              data: { stock: updatedStock },
-            });
-          }
-        } catch (stockErr) {
-          console.warn(`Stock decrement skipped for ${item.productId}:`, stockErr);
-        }
-      }
-    }
-
-    res.status(201).json({
+    const requestKey = req.get("Idempotency-Key");
+    if (!requestKey) throw new ApiError(400, "A checkout request key is required.");
+    const result = await createCheckoutOrder(prisma, req.body, res.locals.auth, requestKey);
+    res.status(result.replayed ? 200 : 201).json({
       success: true,
-      message: "Order placed successfully in PostgreSQL",
-      order,
+      message: result.replayed
+        ? "Order already confirmed"
+        : "Order created successfully in PostgreSQL",
+      ...result,
     });
-  } catch (error: any) {
-    console.error("Failed to create order:", error);
-    res.status(500).json({ error: "Failed to create order in database", details: error.message });
+  } catch (error) {
+    if (error instanceof CheckoutRejection) {
+      res.status(error.statusCode).json({ error: error.message, code: error.code });
+    } else sendApiError(res, error);
   }
 });
 

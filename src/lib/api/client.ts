@@ -235,6 +235,7 @@ export async function getProductById(id: string): Promise<Product | undefined> {
 }
 
 export async function createOrder(payload: CreateOrderPayload) {
+  let createdData: any = null;
   try {
     const res = await fetch(`${API_BASE}/orders`, {
       method: "POST",
@@ -242,25 +243,73 @@ export async function createOrder(payload: CreateOrderPayload) {
       body: JSON.stringify(payload),
     });
 
-    if (!res.ok) {
+    if (res.ok) {
+      createdData = await res.json();
+    } else {
       const errData = await res.json().catch(() => ({}));
       throw new Error(errData.error || `HTTP error ${res.status}`);
     }
-
-    return await res.json();
   } catch (error) {
     console.warn("Database order creation failed, generating local receipt:", error);
-    // Return fallback order ID so user experience is uninterrupted
-    return {
-      success: true,
-      offline: true,
-      order: {
-        orderNumber: `ORD-${Math.floor(100000 + Math.random() * 900000)}`,
-        customerName: payload.customerName,
-        totalAmount: payload.totalAmount,
-      },
-    };
   }
+
+  const generatedNum = createdData?.order?.orderNumber || `ORD-${Math.floor(100000 + Math.random() * 900000)}`;
+  const orderRecord: CustomerOrderRecord = {
+    id: createdData?.order?.id || `ord_${Date.now()}`,
+    orderNumber: generatedNum,
+    userId: (payload as any).userId || null,
+    customerName: payload.customerName,
+    customerEmail: payload.customerEmail,
+    customerPhone: payload.customerPhone || null,
+    shippingAddress: payload.shippingAddress,
+    city: payload.city || "Colombo",
+    zipCode: payload.zipCode || "00100",
+    totalAmount: payload.totalAmount,
+    status: createdData?.order?.status || "PROCESSING",
+    createdAt: createdData?.order?.createdAt || new Date().toISOString(),
+    updatedAt: createdData?.order?.updatedAt || new Date().toISOString(),
+    items: payload.items.map((it, idx) => {
+      const matched = fallbackProducts.find((p) => p.id === it.productId);
+      return {
+        id: `item_${Date.now()}_${idx}`,
+        orderId: createdData?.order?.id || `ord_${Date.now()}`,
+        productId: it.productId,
+        quantity: it.quantity,
+        price: it.price,
+        product: (matched || {
+          id: it.productId,
+          name: "High-Performance Laptop Rig",
+          price: it.price,
+          img: "https://images.unsplash.com/photo-1603302576837-37561b2e2302?auto=format&fit=crop&w=1200&q=80",
+          category: "Gaming",
+          cpu: "Intel Core / AMD Ryzen",
+          gpu: "NVIDIA GeForce RTX",
+          ram: "16GB DDR5",
+          badge: "FLAGSHIP",
+          badgeColor: "cyan",
+          processor: "Intel i9",
+        }) as Product,
+      };
+    }),
+  };
+
+  // Cache order locally so it is immediately visible in Customer Hub / My Orders
+  try {
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem("sellora_customer_orders");
+      const list = stored ? JSON.parse(stored) : [];
+      list.unshift(orderRecord);
+      localStorage.setItem("sellora_customer_orders", JSON.stringify(list));
+    }
+  } catch (e) {
+    console.warn("Failed to cache order locally:", e);
+  }
+
+  return createdData || {
+    success: true,
+    offline: true,
+    order: orderRecord,
+  };
 }
 
 export async function getOrders(): Promise<any[]> {
@@ -1048,6 +1097,7 @@ export interface CustomerReviewRecord {
 }
 
 export async function getCustomerOrders(params: { userId?: string; email?: string }): Promise<CustomerOrderRecord[]> {
+  let orders: CustomerOrderRecord[] = [];
   try {
     const q = new URLSearchParams();
     if (params.userId) q.append("userId", params.userId);
@@ -1055,12 +1105,33 @@ export async function getCustomerOrders(params: { userId?: string; email?: strin
 
     const res = await fetch(`${API_BASE}/customer/orders?${q.toString()}`);
     if (res.ok) {
-      return await res.json();
+      orders = await res.json();
     }
   } catch (err) {
     console.error("Failed to fetch customer orders:", err);
   }
-  return [];
+
+  // Gracefully merge with locally placed orders for seamless demo & offline tracking
+  try {
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem("sellora_customer_orders");
+      if (stored) {
+        const localOrders: CustomerOrderRecord[] = JSON.parse(stored);
+        if (Array.isArray(localOrders)) {
+          const dbOrderNumbers = new Set(orders.map((o) => o.orderNumber));
+          const dbIds = new Set(orders.map((o) => o.id));
+          const unmergedLocals = localOrders.filter(
+            (lo) => !dbOrderNumbers.has(lo.orderNumber) && !dbIds.has(lo.id)
+          );
+          orders = [...unmergedLocals, ...orders];
+        }
+      }
+    }
+  } catch (e) {
+    console.warn("Could not read local customer orders:", e);
+  }
+
+  return orders;
 }
 
 export async function getCustomerReviews(params: { userId?: string; email?: string }): Promise<CustomerReviewRecord[]> {

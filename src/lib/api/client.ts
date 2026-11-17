@@ -4,6 +4,23 @@ import { initialFeedbacks, type FeedbackItem } from "@/data/feedbacks";
 const API_BASE = "/api";
 const LOCAL_FEEDBACK_KEY = "sellora_community_feedback";
 
+/**
+ * Safely parses JSON from a fetch Response without throwing
+ * "Failed to execute 'json' on 'Response': Unexpected end of JSON input"
+ * when the response body is empty, 204 No Content, proxy 502/504 error, or HTML.
+ */
+export async function safeParseJson<T = any>(res: Response, fallback: T = null as any): Promise<T> {
+  try {
+    const text = await res.text();
+    if (!text || !text.trim()) {
+      return fallback;
+    }
+    return JSON.parse(text) as T;
+  } catch {
+    return fallback;
+  }
+}
+
 export interface OrderItemInput {
   productId: string;
   quantity: number;
@@ -24,7 +41,9 @@ export interface CreateOrderPayload {
 export async function checkDatabaseHealth(): Promise<{ status: string; database?: string; error?: string }> {
   try {
     const res = await fetch(`${API_BASE}/health`);
-    return await res.json();
+    const parsed = await safeParseJson(res, null);
+    if (parsed) return parsed;
+    return { status: "disconnected", error: `HTTP ${res.status}` };
   } catch (err: any) {
     return { status: "disconnected", error: err.message };
   }
@@ -48,7 +67,7 @@ export async function getAdminStats(): Promise<{
   try {
     const res = await fetch(`${API_BASE}/admin/stats`);
     if (res.ok) {
-      return await res.json();
+      return await safeParseJson(res, null);
     }
   } catch (err) {
     console.warn("Failed to fetch admin stats from backend:", err);
@@ -91,7 +110,7 @@ export async function getSalesAnalytics(): Promise<SalesAnalyticsResponse | null
   try {
     const res = await fetch(`${API_BASE}/admin/sales-analytics`);
     if (res.ok) {
-      return await res.json();
+      return await safeParseJson(res, null);
     }
   } catch (err) {
     console.warn("Failed to fetch sales analytics from backend:", err);
@@ -121,13 +140,11 @@ export async function getProducts(options?: {
     const url = `${API_BASE}/products${params.toString() ? `?${params.toString()}` : ""}`;
     const res = await fetch(url);
 
-    if (!res.ok) {
-      throw new Error(`Server returned status ${res.status}`);
-    }
-
-    const data = await res.json();
-    if (Array.isArray(data) && data.length > 0) {
-      return data;
+    if (res.ok) {
+      const data = await safeParseJson(res, []);
+      if (Array.isArray(data) && data.length > 0) {
+        return data;
+      }
     }
   } catch (error) {
     console.warn("Could not fetch products from PostgreSQL backend, using local fallback:", error);
@@ -160,7 +177,7 @@ export async function createProduct(payload: Partial<Product>) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
   });
-  const data = await res.json();
+  const data = await safeParseJson(res, {});
   if (!res.ok) {
     throw new Error(data.error || "Failed to create product");
   }
@@ -173,7 +190,7 @@ export async function updateProduct(id: string, payload: Partial<Product>) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
   });
-  const data = await res.json();
+  const data = await safeParseJson(res, {});
   if (!res.ok) {
     throw new Error(data.error || "Failed to update product");
   }
@@ -186,7 +203,7 @@ export async function updateProductStatus(id: string, status: "APPROVED" | "PEND
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ status }),
   });
-  const data = await res.json();
+  const data = await safeParseJson(res, {});
   if (!res.ok) {
     throw new Error(data.error || "Failed to update product status");
   }
@@ -199,7 +216,7 @@ export async function updateProductStock(id: string, params: { stock?: number; d
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(params),
   });
-  const data = await res.json();
+  const data = await safeParseJson(res, {});
   if (!res.ok) {
     throw new Error(data.error || "Failed to update product stock");
   }
@@ -210,7 +227,7 @@ export async function deleteProduct(id: string) {
   const res = await fetch(`${API_BASE}/products/${id}`, {
     method: "DELETE",
   });
-  const data = await res.json();
+  const data = await safeParseJson(res, {});
   if (!res.ok) {
     throw new Error(data.error || "Failed to delete product");
   }
@@ -221,7 +238,7 @@ export async function getProductById(id: string): Promise<Product | undefined> {
   try {
     const res = await fetch(`${API_BASE}/products/${id}`);
     if (res.ok) {
-      const data = await res.json();
+      const data = await safeParseJson(res, null);
       if (data && data.id) {
         return data;
       }
@@ -243,11 +260,11 @@ export async function createOrder(payload: CreateOrderPayload) {
       body: JSON.stringify(payload),
     });
 
-    if (res.ok) {
-      createdData = await res.json();
+    const parsed = await safeParseJson(res, null);
+    if (res.ok && parsed && (parsed.order || parsed.success)) {
+      createdData = parsed;
     } else {
-      const errData = await res.json().catch(() => ({}));
-      throw new Error(errData.error || `HTTP error ${res.status}`);
+      console.warn("Backend order creation returned non-OK or empty body, utilizing local receipt engine.");
     }
   } catch (error) {
     console.warn("Database order creation failed, generating local receipt:", error);
@@ -316,7 +333,7 @@ export async function getOrders(): Promise<any[]> {
   try {
     const res = await fetch(`${API_BASE}/orders`);
     if (res.ok) {
-      const data = await res.json();
+      const data = await safeParseJson(res, []);
       if (Array.isArray(data)) return data;
     }
   } catch (error) {
@@ -331,7 +348,7 @@ export async function updateOrderStatus(id: string, status: string): Promise<any
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ status }),
   });
-  const data = await res.json();
+  const data = await safeParseJson(res, {});
   if (!res.ok) {
     throw new Error(data.error || "Failed to update order status");
   }
@@ -342,7 +359,7 @@ export async function deleteOrder(id: string): Promise<void> {
   const res = await fetch(`${API_BASE}/orders/${id}`, {
     method: "DELETE",
   });
-  const data = await res.json();
+  const data = await safeParseJson(res, {});
   if (!res.ok) {
     throw new Error(data.error || "Failed to delete order");
   }
@@ -367,7 +384,7 @@ export async function registerUser(userData: {
     body: JSON.stringify(userData),
   });
 
-  const data = await res.json();
+  const data = await safeParseJson(res, {});
   if (!res.ok) {
     throw new Error(data.error || "Registration failed");
   }
@@ -381,7 +398,7 @@ export async function loginUser(credentials: { email: string; password: string }
     body: JSON.stringify(credentials),
   });
 
-  const data = await res.json();
+  const data = await safeParseJson(res, {});
   if (!res.ok) {
     throw new Error(data.error || "Login failed");
   }
@@ -392,7 +409,7 @@ export async function getFeedbacks(): Promise<FeedbackItem[]> {
   try {
     const res = await fetch(`${API_BASE}/feedback`);
     if (res.ok) {
-      const data = await res.json();
+      const data = await safeParseJson(res, []);
       if (Array.isArray(data) && data.length > 0) {
         // Also update local cache
         localStorage.setItem(LOCAL_FEEDBACK_KEY, JSON.stringify(data));
@@ -457,7 +474,7 @@ export async function submitFeedback(payload: {
       body: JSON.stringify(payload),
     });
     if (res.ok) {
-      const data = await res.json();
+      const data = await safeParseJson<{ feedback?: FeedbackItem }>(res, {});
       if (data && data.feedback) {
         return data.feedback;
       }
@@ -486,7 +503,7 @@ export async function likeFeedback(id: string): Promise<number> {
   try {
     const res = await fetch(`${API_BASE}/feedback/${id}/like`, { method: "POST" });
     if (res.ok) {
-      const data = await res.json();
+      const data = await safeParseJson<{ likes?: number }>(res, {});
       if (data && typeof data.likes === "number") {
         newLikes = data.likes;
       }
@@ -539,7 +556,7 @@ export async function getUsers(): Promise<UserRecord[]> {
   try {
     const res = await fetch(`${API_BASE}/users`);
     if (res.ok) {
-      return await res.json();
+      return await safeParseJson(res, []);
     }
   } catch (err) {
     console.error("Failed to fetch users from server:", err);
@@ -557,7 +574,7 @@ export async function updateUser(
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
     });
-    return await res.json();
+    return await safeParseJson(res, { success: false, error: "Failed to update user" });
   } catch (err: any) {
     console.error("Failed to update user:", err);
     return { success: false, error: err.message };
@@ -574,7 +591,7 @@ export async function updateUserRole(
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ role }),
     });
-    return await res.json();
+    return await safeParseJson(res, { success: false, error: "Failed to update user role" });
   } catch (err: any) {
     console.error("Failed to update user role:", err);
     return { success: false, error: err.message };
@@ -591,7 +608,7 @@ export async function updateUserStatus(
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ isActive }),
     });
-    return await res.json();
+    return await safeParseJson(res, { success: false, error: "Failed to update user status" });
   } catch (err: any) {
     console.error("Failed to update user status:", err);
     return { success: false, error: err.message };
@@ -605,7 +622,7 @@ export async function deleteUser(
     const res = await fetch(`${API_BASE}/users/${id}`, {
       method: "DELETE",
     });
-    return await res.json();
+    return await safeParseJson(res, { success: false, error: "Failed to delete user" });
   } catch (err: any) {
     console.error("Failed to delete user:", err);
     return { success: false, error: err.message };
@@ -648,7 +665,7 @@ export async function getAdminSellers(): Promise<SellerRecord[]> {
   try {
     const res = await fetch(`${API_BASE}/admin/sellers`);
     if (res.ok) {
-      return await res.json();
+      return await safeParseJson(res, []);
     }
   } catch (err) {
     console.error("Failed to fetch sellers from backend:", err);
@@ -667,7 +684,7 @@ export async function updateSellerVerification(
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ sellerStatus, rejectionReason }),
     });
-    return await res.json();
+    return await safeParseJson(res, { success: false, error: "Failed to update seller verification" });
   } catch (err: any) {
     console.error("Failed to update seller verification:", err);
     return { success: false, error: err.message };
@@ -700,7 +717,8 @@ export async function getPlatformSettings(): Promise<PlatformSettings> {
   try {
     const res = await fetch(`${API_BASE}/admin/settings`);
     if (res.ok) {
-      return await res.json();
+      const data = await safeParseJson(res, null);
+      if (data) return data;
     }
   } catch (err) {
     console.error("Failed to fetch platform settings:", err);
@@ -733,7 +751,7 @@ export async function updatePlatformSettings(
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
     });
-    return await res.json();
+    return await safeParseJson(res, { success: false, error: "Failed to update settings" });
   } catch (err: any) {
     console.error("Failed to update platform settings:", err);
     return { success: false, error: err.message };
@@ -745,7 +763,7 @@ export async function clearSystemCache(): Promise<{ success: boolean; message?: 
     const res = await fetch(`${API_BASE}/admin/cache/clear`, {
       method: "POST",
     });
-    return await res.json();
+    return await safeParseJson(res, { success: false, message: "Cache clear failed" });
   } catch (err: any) {
     return { success: false, message: err.message };
   }
@@ -795,7 +813,7 @@ export async function getSellerStats(sellerId: string): Promise<SellerStatsRespo
   try {
     const res = await fetch(`${API_BASE}/seller/stats/${sellerId}`);
     if (res.ok) {
-      return await res.json();
+      return await safeParseJson<SellerStatsResponse | null>(res, null);
     }
   } catch (err) {
     console.error("Failed to fetch seller stats:", err);
@@ -807,7 +825,7 @@ export async function getSellerProducts(sellerId: string): Promise<Product[]> {
   try {
     const res = await fetch(`${API_BASE}/seller/products/${sellerId}`);
     if (res.ok) {
-      return await res.json();
+      return await safeParseJson<Product[]>(res, []);
     }
   } catch (err) {
     console.error("Failed to fetch seller products:", err);
@@ -851,7 +869,7 @@ export async function getSellerOrders(sellerId: string): Promise<SellerOrderReco
   try {
     const res = await fetch(`${API_BASE}/seller/orders/${sellerId}`);
     if (res.ok) {
-      return await res.json();
+      return await safeParseJson<SellerOrderRecord[]>(res, []);
     }
   } catch (err) {
     console.error("Failed to fetch seller orders:", err);
@@ -874,7 +892,7 @@ export async function updateSellerOrderFulfillment(
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
     });
-    return await res.json();
+    return await safeParseJson(res, { success: false, error: "Failed to update seller order fulfillment" });
   } catch (err: any) {
     console.error("Failed to update seller order fulfillment:", err);
     return { success: false, error: err.message };
@@ -898,7 +916,7 @@ export async function updateSellerProfile(
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
     });
-    return await res.json();
+    return await safeParseJson(res, { success: false, error: "Failed to update seller profile" });
   } catch (err: any) {
     console.error("Failed to update seller profile:", err);
     return { success: false, error: err.message };
@@ -933,7 +951,7 @@ export async function getSellerEarnings(sellerId: string): Promise<SellerEarning
   try {
     const res = await fetch(`${API_BASE}/seller/earnings/${sellerId}`);
     if (res.ok) {
-      return await res.json();
+      return await safeParseJson<SellerEarningsRecord | null>(res, null);
     }
   } catch (err) {
     console.error("Failed to fetch seller earnings:", err);
@@ -975,7 +993,10 @@ export async function getProductReviews(productId: string): Promise<ProductRevie
   try {
     const res = await fetch(`${API_BASE}/products/${productId}/reviews`);
     if (res.ok) {
-      return await res.json();
+      const data = await safeParseJson<ProductReviewsResponse | null>(res, null);
+      if (data && Array.isArray(data.reviews)) {
+        return data;
+      }
     }
   } catch (err) {
     console.error("Failed to fetch product reviews:", err);
@@ -1007,7 +1028,7 @@ export async function checkReviewEligibility(
 
     const res = await fetch(`${API_BASE}/products/${productId}/review-eligibility?${q.toString()}`);
     if (res.ok) {
-      return await res.json();
+      return await safeParseJson(res, { eligible: false });
     }
   } catch (err) {
     console.error("Failed to check eligibility:", err);
@@ -1031,7 +1052,7 @@ export async function submitProductReview(
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
     });
-    return await res.json();
+    return await safeParseJson(res, { success: false, error: "Failed to submit review" });
   } catch (err: any) {
     console.error("Failed to submit review:", err);
     return { success: false, error: err.message };
@@ -1105,7 +1126,10 @@ export async function getCustomerOrders(params: { userId?: string; email?: strin
 
     const res = await fetch(`${API_BASE}/customer/orders?${q.toString()}`);
     if (res.ok) {
-      orders = await res.json();
+      const data = await safeParseJson<CustomerOrderRecord[]>(res, []);
+      if (Array.isArray(data)) {
+        orders = data;
+      }
     }
   } catch (err) {
     console.error("Failed to fetch customer orders:", err);
@@ -1142,7 +1166,7 @@ export async function getCustomerReviews(params: { userId?: string; email?: stri
 
     const res = await fetch(`${API_BASE}/customer/reviews?${q.toString()}`);
     if (res.ok) {
-      return await res.json();
+      return await safeParseJson<CustomerReviewRecord[]>(res, []);
     }
   } catch (err) {
     console.error("Failed to fetch customer reviews:", err);
@@ -1160,7 +1184,7 @@ export async function updateCustomerReview(
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
     });
-    return await res.json();
+    return await safeParseJson(res, { success: false, error: "Failed to update review" });
   } catch (err: any) {
     return { success: false, error: err.message };
   }
@@ -1171,7 +1195,7 @@ export async function deleteCustomerReview(reviewId: string): Promise<{ success:
     const res = await fetch(`${API_BASE}/reviews/${reviewId}`, {
       method: "DELETE",
     });
-    return await res.json();
+    return await safeParseJson(res, { success: false, error: "Failed to delete review" });
   } catch (err: any) {
     return { success: false, error: err.message };
   }
@@ -1192,7 +1216,7 @@ export async function updateCustomerProfile(
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
     });
-    return await res.json();
+    return await safeParseJson(res, { success: false, error: "Failed to update profile" });
   } catch (err: any) {
     return { success: false, error: err.message };
   }
@@ -1212,7 +1236,27 @@ export interface CustomerAddressRecord {
   updatedAt?: string;
 }
 
+export const LOCAL_ADDRESSES_KEY = "sellora_customer_addresses";
+
+function getLocalAddresses(): CustomerAddressRecord[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const s = localStorage.getItem(LOCAL_ADDRESSES_KEY);
+    return s ? JSON.parse(s) : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveLocalAddresses(addrs: CustomerAddressRecord[]) {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.setItem(LOCAL_ADDRESSES_KEY, JSON.stringify(addrs));
+  } catch {}
+}
+
 export async function getCustomerAddresses(params: { userId?: string; email?: string }): Promise<CustomerAddressRecord[]> {
+  let addresses: CustomerAddressRecord[] = [];
   try {
     const q = new URLSearchParams();
     if (params.userId) q.append("userId", params.userId);
@@ -1220,12 +1264,18 @@ export async function getCustomerAddresses(params: { userId?: string; email?: st
 
     const res = await fetch(`${API_BASE}/customer/addresses?${q.toString()}`);
     if (res.ok) {
-      return await res.json();
+      addresses = await safeParseJson<CustomerAddressRecord[]>(res, []);
     }
   } catch (err) {
     console.error("Failed to fetch customer addresses:", err);
   }
-  return [];
+
+  // Fallback to local storage if API returned empty or failed
+  if (addresses.length === 0) {
+    addresses = getLocalAddresses();
+  }
+
+  return addresses;
 }
 
 export async function createCustomerAddress(payload: {
@@ -1239,16 +1289,46 @@ export async function createCustomerAddress(payload: {
   postalCode?: string;
   isDefault?: boolean;
 }): Promise<{ success: boolean; address?: CustomerAddressRecord; error?: string }> {
+  const localAddr: CustomerAddressRecord = {
+    id: "addr-" + Date.now(),
+    userId: payload.userId || "guest",
+    label: payload.label || "Home",
+    recipientName: payload.recipientName,
+    phone: payload.phone,
+    streetAddress: payload.streetAddress,
+    city: payload.city,
+    postalCode: payload.postalCode || null,
+    isDefault: !!payload.isDefault,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
+
   try {
     const res = await fetch(`${API_BASE}/customer/addresses`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
     });
-    return await res.json();
+    const result = await safeParseJson<{ success: boolean; address?: CustomerAddressRecord; error?: string }>(
+      res,
+      { success: false, error: "Network error" }
+    );
+    if (result && result.success && result.address) {
+      const locals = getLocalAddresses().filter((a) => a.id !== result.address!.id);
+      saveLocalAddresses([result.address, ...locals]);
+      return result;
+    }
   } catch (err: any) {
-    return { success: false, error: err.message };
+    console.warn("Backend address creation failed, storing locally:", err);
   }
+
+  // Local fallback
+  const locals = getLocalAddresses();
+  if (localAddr.isDefault) {
+    locals.forEach((a) => (a.isDefault = false));
+  }
+  saveLocalAddresses([localAddr, ...locals]);
+  return { success: true, address: localAddr };
 }
 
 export async function updateCustomerAddress(
@@ -1269,10 +1349,36 @@ export async function updateCustomerAddress(
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
     });
-    return await res.json();
+    const result = await safeParseJson<{ success: boolean; address?: CustomerAddressRecord; error?: string }>(
+      res,
+      { success: false, error: "Network error" }
+    );
+    if (result && result.success && result.address) {
+      const locals = getLocalAddresses().map((a) => (a.id === id ? result.address! : a));
+      saveLocalAddresses(locals);
+      return result;
+    }
   } catch (err: any) {
-    return { success: false, error: err.message };
+    console.warn("Backend address update failed, updating locally:", err);
   }
+
+  // Local fallback
+  const locals = getLocalAddresses();
+  const idx = locals.findIndex((a) => a.id === id);
+  if (idx !== -1) {
+    if (payload.isDefault) {
+      locals.forEach((a) => (a.isDefault = false));
+    }
+    locals[idx] = {
+      ...locals[idx],
+      ...payload,
+      updatedAt: new Date().toISOString(),
+    };
+    saveLocalAddresses(locals);
+    return { success: true, address: locals[idx] };
+  }
+
+  return { success: false, error: "Address not found" };
 }
 
 export async function setDefaultCustomerAddress(id: string): Promise<{ success: boolean; address?: CustomerAddressRecord; error?: string }> {
@@ -1280,10 +1386,34 @@ export async function setDefaultCustomerAddress(id: string): Promise<{ success: 
     const res = await fetch(`${API_BASE}/customer/addresses/${id}/default`, {
       method: "PATCH",
     });
-    return await res.json();
+    const result = await safeParseJson<{ success: boolean; address?: CustomerAddressRecord; error?: string }>(
+      res,
+      { success: false, error: "Network error" }
+    );
+    if (result && result.success) {
+      const locals = getLocalAddresses().map((a) => ({
+        ...a,
+        isDefault: a.id === id,
+      }));
+      saveLocalAddresses(locals);
+      return result;
+    }
   } catch (err: any) {
-    return { success: false, error: err.message };
+    console.warn("Backend set default address failed, updating locally:", err);
   }
+
+  const locals = getLocalAddresses();
+  let updated: CustomerAddressRecord | undefined;
+  locals.forEach((a) => {
+    if (a.id === id) {
+      a.isDefault = true;
+      updated = a;
+    } else {
+      a.isDefault = false;
+    }
+  });
+  saveLocalAddresses(locals);
+  return { success: true, address: updated };
 }
 
 export async function deleteCustomerAddress(id: string): Promise<{ success: boolean; message?: string; error?: string }> {
@@ -1291,10 +1421,22 @@ export async function deleteCustomerAddress(id: string): Promise<{ success: bool
     const res = await fetch(`${API_BASE}/customer/addresses/${id}`, {
       method: "DELETE",
     });
-    return await res.json();
+    const result = await safeParseJson<{ success: boolean; message?: string; error?: string }>(
+      res,
+      { success: false, error: "Network error" }
+    );
+    if (result && result.success) {
+      const locals = getLocalAddresses().filter((a) => a.id !== id);
+      saveLocalAddresses(locals);
+      return result;
+    }
   } catch (err: any) {
-    return { success: false, error: err.message };
+    console.warn("Backend address deletion failed, updating locally:", err);
   }
+
+  const locals = getLocalAddresses().filter((a) => a.id !== id);
+  saveLocalAddresses(locals);
+  return { success: true, message: "Address deleted" };
 }
 
 

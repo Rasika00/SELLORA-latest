@@ -1,9 +1,15 @@
-const gaming = "https://images.unsplash.com/photo-1603302576837-37561b2e2302?auto=format&fit=crop&w=1200&q=80";
-const creator = "https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?auto=format&fit=crop&w=1200&q=80";
-const workstation = "https://images.unsplash.com/photo-1541807084-5c52b6b3adef?auto=format&fit=crop&w=1200&q=80";
-const business = "https://images.unsplash.com/photo-1525547719571-a2d4ac8945e2?auto=format&fit=crop&w=1200&q=80";
-const gaming2 = "https://images.unsplash.com/photo-1593642634315-48f5414c3ad9?auto=format&fit=crop&w=1200&q=80";
-const creator2 = "https://images.unsplash.com/photo-1593642632823-8f785ba67e45?auto=format&fit=crop&w=1200&q=80";
+const gaming =
+  "https://images.unsplash.com/photo-1603302576837-37561b2e2302?auto=format&fit=crop&w=1200&q=80";
+const creator =
+  "https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?auto=format&fit=crop&w=1200&q=80";
+const workstation =
+  "https://images.unsplash.com/photo-1541807084-5c52b6b3adef?auto=format&fit=crop&w=1200&q=80";
+const business =
+  "https://images.unsplash.com/photo-1525547719571-a2d4ac8945e2?auto=format&fit=crop&w=1200&q=80";
+const gaming2 =
+  "https://images.unsplash.com/photo-1593642634315-48f5414c3ad9?auto=format&fit=crop&w=1200&q=80";
+const creator2 =
+  "https://images.unsplash.com/photo-1593642632823-8f785ba67e45?auto=format&fit=crop&w=1200&q=80";
 
 export type Product = {
   id: string;
@@ -11,7 +17,14 @@ export type Product = {
   badge: string;
   badgeColor: "cyan" | "purple" | "blue";
   category: "Gaming" | "Ultrabook" | "Workstation";
-  processor: "Intel i9" | "Intel i7" | "Intel i5" | "AMD Ryzen 9" | "AMD Ryzen 7" | "AMD Ryzen 5" | "Apple M Max";
+  processor:
+    | "Intel i9"
+    | "Intel i7"
+    | "Intel i5"
+    | "AMD Ryzen 9"
+    | "AMD Ryzen 7"
+    | "AMD Ryzen 5"
+    | "Apple M Max";
   price: number;
   priceUsd?: string;
   cpu: string;
@@ -70,7 +83,7 @@ export const products: Product[] = [
     display: '18" QHD+ Mini LED 300Hz',
     batteryWeight: "91.7Wh · 3.10 kg",
     specialHighlight: "Vapor Chamber Cooling with 3 Fan System",
-    img: 'https://res.cloudinary.com/dpdsdpmgg/image/upload/v1786031922/Laptop_1_mi69bv.jpg',
+    img: "https://res.cloudinary.com/dpdsdpmgg/image/upload/v1786031922/Laptop_1_mi69bv.jpg",
     detailedSpecs: {
       displayTech: "18 inch Mini LED QHD+ HDR",
       refreshRate: "300Hz / 3ms",
@@ -95,7 +108,7 @@ export const products: Product[] = [
     display: '16.2" Liquid Retina XDR',
     batteryWeight: "100Wh · 2.16 kg",
     specialHighlight: "Incredible battery life with ProRes hardware acceleration",
-    img: 'https://res.cloudinary.com/dpdsdpmgg/image/upload/v1786031922/Laptop_3_sdawxh.jpg',
+    img: "https://res.cloudinary.com/dpdsdpmgg/image/upload/v1786031922/Laptop_3_sdawxh.jpg",
     detailedSpecs: {
       displayTech: "Liquid Retina XDR, 1600 nits peak",
       refreshRate: "ProMotion 120Hz",
@@ -120,7 +133,7 @@ export const products: Product[] = [
     display: '16.0" WQUXGA OLED Touch',
     batteryWeight: "94Wh · 2.95 kg",
     specialHighlight: "ISV certified for professional 3D and CAD software",
-    img: 'https://res.cloudinary.com/dpdsdpmgg/image/upload/v1786031922/Laptop_2_rzy6al.jpg',
+    img: "https://res.cloudinary.com/dpdsdpmgg/image/upload/v1786031922/Laptop_2_rzy6al.jpg",
     detailedSpecs: {
       displayTech: "16 inch 4K OLED Pantone Validated",
       refreshRate: "60Hz Standard",
@@ -145,7 +158,7 @@ export const products: Product[] = [
     display: '14.5" 3.2K OLED 120Hz',
     batteryWeight: "69.5Wh · 1.68 kg",
     specialHighlight: "Seamless glass touchpad and CNC machined chassis",
-    img: 'https://res.cloudinary.com/dpdsdpmgg/image/upload/v1786031923/Laptop_16_b3haqq.jpg',
+    img: "https://res.cloudinary.com/dpdsdpmgg/image/upload/v1786031923/Laptop_16_b3haqq.jpg",
     detailedSpecs: {
       displayTech: "3.2K OLED Touch 100% DCI P3",
       refreshRate: "120Hz Variable",
@@ -170,7 +183,7 @@ export const products: Product[] = [
     display: '14.0" 3K OLED 120Hz',
     batteryWeight: "73Wh · 1.50 kg",
     specialHighlight: "Slash Lighting array on a premium CNC aluminum lid",
-    img: 'https://res.cloudinary.com/dpdsdpmgg/image/upload/v1786031923/Laptop_17_iom266.jpg',
+    img: "https://res.cloudinary.com/dpdsdpmgg/image/upload/v1786031923/Laptop_17_iom266.jpg",
     detailedSpecs: {
       displayTech: "ROG Nebula Display OLED",
       refreshRate: "120Hz / 0.2ms",
@@ -195,7 +208,7 @@ export const products: Product[] = [
     display: '16.0" WUXGA DreamColor',
     batteryWeight: "95Wh · 2.40 kg",
     specialHighlight: "Tool less chassis access for easy RAM and storage upgrades",
-    img: 'https://res.cloudinary.com/dpdsdpmgg/image/upload/v1786031923/Laptop_4_lj1sn1.jpg',
+    img: "https://res.cloudinary.com/dpdsdpmgg/image/upload/v1786031923/Laptop_4_lj1sn1.jpg",
     detailedSpecs: {
       displayTech: "HP DreamColor 100% DCI P3",
       refreshRate: "120Hz",
@@ -220,7 +233,7 @@ export const products: Product[] = [
     display: '18" QHD+ 165Hz',
     batteryWeight: "97Wh · 4.23 kg",
     specialHighlight: "Cryo tech cooling technology with quad fans",
-    img: 'https://res.cloudinary.com/dpdsdpmgg/image/upload/v1786031924/Laptop_18_aed4k6.jpg',
+    img: "https://res.cloudinary.com/dpdsdpmgg/image/upload/v1786031924/Laptop_18_aed4k6.jpg",
     detailedSpecs: {
       displayTech: "QHD+ ComfortView Plus",
       refreshRate: "165Hz",
@@ -245,7 +258,7 @@ export const products: Product[] = [
     display: '18" UHD+ Mini LED 120Hz',
     batteryWeight: "99.9Wh · 3.60 kg",
     specialHighlight: "Cherry MX Ultra Low Profile mechanical keyboard",
-    img: 'https://res.cloudinary.com/dpdsdpmgg/image/upload/v1786031924/Laptop_7_ipsysm.jpg',
+    img: "https://res.cloudinary.com/dpdsdpmgg/image/upload/v1786031924/Laptop_7_ipsysm.jpg",
     detailedSpecs: {
       displayTech: "18 inch 4K Mini LED HDR 1000",
       refreshRate: "120Hz",
@@ -270,7 +283,7 @@ export const products: Product[] = [
     display: '16" ROG Nebula HDR',
     batteryWeight: "90Wh · 2.65 kg",
     specialHighlight: "Tri Fan technology with full surround vents",
-    img: 'https://res.cloudinary.com/dpdsdpmgg/image/upload/v1786031924/Laptop_5_qsvxkl.jpg',
+    img: "https://res.cloudinary.com/dpdsdpmgg/image/upload/v1786031924/Laptop_5_qsvxkl.jpg",
     detailedSpecs: {
       displayTech: "Mini LED QHD+",
       refreshRate: "240Hz / 3ms",
@@ -295,7 +308,7 @@ export const products: Product[] = [
     display: '15.3" Liquid Retina',
     batteryWeight: "66.5Wh · 1.51 kg",
     specialHighlight: "Fanless design for completely silent operation",
-    img: 'https://res.cloudinary.com/dpdsdpmgg/image/upload/v1786031924/Laptop_5_qsvxkl.jpg',
+    img: "https://res.cloudinary.com/dpdsdpmgg/image/upload/v1786031924/Laptop_5_qsvxkl.jpg",
     detailedSpecs: {
       displayTech: "Liquid Retina IPS 500 nits",
       refreshRate: "60Hz",
@@ -320,7 +333,7 @@ export const products: Product[] = [
     display: '14.4" PixelSense Flow',
     batteryWeight: "58Wh · 1.98 kg",
     specialHighlight: "Dynamic woven hinge for seamless transitions",
-    img: 'https://res.cloudinary.com/dpdsdpmgg/image/upload/v1786031924/Laptop_8_wkgwx7.jpg',
+    img: "https://res.cloudinary.com/dpdsdpmgg/image/upload/v1786031924/Laptop_8_wkgwx7.jpg",
     detailedSpecs: {
       displayTech: "PixelSense Touch with HDR",
       refreshRate: "120Hz",
@@ -345,7 +358,7 @@ export const products: Product[] = [
     display: '14" 2.8K OLED Touch',
     batteryWeight: "68Wh · 1.44 kg",
     specialHighlight: "9MP camera with hardware privacy controls",
-    img: 'https://res.cloudinary.com/dpdsdpmgg/image/upload/v1786031924/Laptop_19_a41l7n.jpg',
+    img: "https://res.cloudinary.com/dpdsdpmgg/image/upload/v1786031924/Laptop_19_a41l7n.jpg",
     detailedSpecs: {
       displayTech: "OLED Touch with IMAX Enhanced",
       refreshRate: "120Hz Variable",
@@ -370,7 +383,7 @@ export const products: Product[] = [
     display: '14" 3K OLED',
     batteryWeight: "75Wh · 1.20 kg",
     specialHighlight: "Incredibly light at just 1.2kg with a 75Wh battery",
-    img: 'https://res.cloudinary.com/dpdsdpmgg/image/upload/v1786031925/Laptop_10_h0hpgt.jpg',
+    img: "https://res.cloudinary.com/dpdsdpmgg/image/upload/v1786031925/Laptop_10_h0hpgt.jpg",
     detailedSpecs: {
       displayTech: "ASUS Lumina OLED",
       refreshRate: "120Hz",
@@ -395,7 +408,7 @@ export const products: Product[] = [
     display: '16" 4K OLED Touch',
     batteryWeight: "93Wh · 2.67 kg",
     specialHighlight: "Revolutionary CAMM memory module for increased speed",
-    img: 'https://res.cloudinary.com/dpdsdpmgg/image/upload/v1786031925/Laptop_9_poxul9.jpg',
+    img: "https://res.cloudinary.com/dpdsdpmgg/image/upload/v1786031925/Laptop_9_poxul9.jpg",
     detailedSpecs: {
       displayTech: "16 inch UHD+ OLED 100% DCI P3",
       refreshRate: "60Hz",
@@ -420,7 +433,7 @@ export const products: Product[] = [
     display: '16" 3.2K OLED Touch',
     batteryWeight: "90Wh · 2.40 kg",
     specialHighlight: "Built in Asus Dial for precise creative control",
-    img: 'https://res.cloudinary.com/dpdsdpmgg/image/upload/v1786031925/Laptop_6_xgjpda.jpg',
+    img: "https://res.cloudinary.com/dpdsdpmgg/image/upload/v1786031925/Laptop_6_xgjpda.jpg",
     detailedSpecs: {
       displayTech: "120Hz 3.2K OLED Calman Verified",
       refreshRate: "120Hz",
@@ -445,7 +458,7 @@ export const products: Product[] = [
     display: '16" WQXGA IPS 240Hz',
     batteryWeight: "99.9Wh · 2.80 kg",
     specialHighlight: "Legion Coldfront 5.0 with AI tuned performance",
-    img: 'https://res.cloudinary.com/dpdsdpmgg/image/upload/v1786031925/Laptop_20_a4pz4q.jpg',
+    img: "https://res.cloudinary.com/dpdsdpmgg/image/upload/v1786031925/Laptop_20_a4pz4q.jpg",
     detailedSpecs: {
       displayTech: "PureSight Gaming IPS",
       refreshRate: "240Hz",
@@ -470,7 +483,7 @@ export const products: Product[] = [
     display: '18" WQXGA Mini LED',
     batteryWeight: "90Wh · 3.25 kg",
     specialHighlight: "MagKey 3.0 swappable mechanical switches",
-    img: 'https://res.cloudinary.com/dpdsdpmgg/image/upload/v1786031926/Laptop_11_wojfiq.jpg',
+    img: "https://res.cloudinary.com/dpdsdpmgg/image/upload/v1786031926/Laptop_11_wojfiq.jpg",
     detailedSpecs: {
       displayTech: "Mini LED 1000 nits Peak",
       refreshRate: "250Hz",
@@ -495,7 +508,7 @@ export const products: Product[] = [
     display: '17" WQXGA IPS',
     batteryWeight: "77Wh · 1.35 kg",
     specialHighlight: "Unbelievably light for a 17 inch display at just 1.35kg",
-    img: 'https://res.cloudinary.com/dpdsdpmgg/image/upload/v1786031926/Laptop_12_efhyvu.jpg',
+    img: "https://res.cloudinary.com/dpdsdpmgg/image/upload/v1786031926/Laptop_12_efhyvu.jpg",
     detailedSpecs: {
       displayTech: "Anti glare IPS display",
       refreshRate: "144Hz Variable",
@@ -520,7 +533,7 @@ export const products: Product[] = [
     display: '14" FHD IPS',
     batteryWeight: "48Wh · 1.2 kg",
     specialHighlight: "Excellent portability and battery life at an entry level price",
-    img: 'https://res.cloudinary.com/dpdsdpmgg/image/upload/v1786031926/Laptop_21_lf8noi.jpg',
+    img: "https://res.cloudinary.com/dpdsdpmgg/image/upload/v1786031926/Laptop_21_lf8noi.jpg",
     detailedSpecs: {
       displayTech: "100% sRGB IPS",
       refreshRate: "60Hz",
@@ -545,7 +558,7 @@ export const products: Product[] = [
     display: '15.6" FHD 120Hz',
     batteryWeight: "60Wh · 2.3 kg",
     specialHighlight: "Great entry level gaming laptop with dedicated RTX graphics",
-    img: 'https://res.cloudinary.com/dpdsdpmgg/image/upload/v1786031926/Laptop_22_jz0khc.jpg',
+    img: "https://res.cloudinary.com/dpdsdpmgg/image/upload/v1786031926/Laptop_22_jz0khc.jpg",
     detailedSpecs: {
       displayTech: "FHD IPS Anti glare",
       refreshRate: "120Hz",
@@ -570,7 +583,7 @@ export const products: Product[] = [
     display: '14" 2.8K OLED 90Hz',
     batteryWeight: "51Wh · 1.4 kg",
     specialHighlight: "Stunning 2.8K OLED display in a thin aluminum chassis",
-    img: 'https://res.cloudinary.com/dpdsdpmgg/image/upload/v1786031926/Laptop_14_shebrb.jpg',
+    img: "https://res.cloudinary.com/dpdsdpmgg/image/upload/v1786031926/Laptop_14_shebrb.jpg",
     detailedSpecs: {
       displayTech: "OLED HDR 500 nits",
       refreshRate: "90Hz",
@@ -595,7 +608,7 @@ export const products: Product[] = [
     display: '15.6" FHD 144Hz',
     batteryWeight: "90Wh · 2.2 kg",
     specialHighlight: "MIL STD 810H durability with a massive 90Wh battery",
-    img: 'https://res.cloudinary.com/dpdsdpmgg/image/upload/v1786031927/Laptop_13_w2upfg.jpg',
+    img: "https://res.cloudinary.com/dpdsdpmgg/image/upload/v1786031927/Laptop_13_w2upfg.jpg",
     detailedSpecs: {
       displayTech: "FHD IPS Level",
       refreshRate: "144Hz",
@@ -620,7 +633,7 @@ export const products: Product[] = [
     display: '14" QHD+ 100% DCI P3',
     batteryWeight: "72Wh · 1.6 kg",
     specialHighlight: "Perfect balance of creator performance and portability",
-    img: 'https://res.cloudinary.com/dpdsdpmgg/image/upload/v1786031927/Laptop_23_eox4hh.jpg',
+    img: "https://res.cloudinary.com/dpdsdpmgg/image/upload/v1786031927/Laptop_23_eox4hh.jpg",
     detailedSpecs: {
       displayTech: "QHD+ True Pixel Display",
       refreshRate: "60Hz",
@@ -744,7 +757,8 @@ export const products: Product[] = [
     gpu: "AMD Radeon Vega Integrated",
     display: '15.6" FHD NanoEdge',
     batteryWeight: "42Wh · 1.70 kg",
-    specialHighlight: "8-core processing power with 180-degree lay-flat hinge and Antimicrobial Guard",
+    specialHighlight:
+      "8-core processing power with 180-degree lay-flat hinge and Antimicrobial Guard",
     img: "https://res.cloudinary.com/fqizrdtg/image/upload/v1789059787/ASUS_Vivobook_15_product_render_20260910220550.jpg",
     detailedSpecs: {
       displayTech: "15.6 inch FHD TÜV Rheinland-certified",
@@ -844,7 +858,8 @@ export const products: Product[] = [
     gpu: "RTX 3050 6GB",
     display: '15.6" FHD 120Hz',
     batteryWeight: "56Wh · 2.65 kg",
-    specialHighlight: "Alienware-inspired thermal engineering with dedicated Game Shift boost button",
+    specialHighlight:
+      "Alienware-inspired thermal engineering with dedicated Game Shift boost button",
     img: "https://res.cloudinary.com/fqizrdtg/image/upload/v1789059787/Dell_G15_gaming_laptop_render_20260910220311.jpg",
     detailedSpecs: {
       displayTech: "FHD 120Hz 250 nits Anti-Glare",
@@ -869,7 +884,8 @@ export const products: Product[] = [
     gpu: "Apple 8-Core GPU",
     display: '13.6" Liquid Retina 500 nits',
     batteryWeight: "52.6Wh · 1.24 kg",
-    specialHighlight: "Completely silent fanless architecture with up to 18 hours of real battery life",
+    specialHighlight:
+      "Completely silent fanless architecture with up to 18 hours of real battery life",
     img: "https://res.cloudinary.com/fqizrdtg/image/upload/v1789059788/Laptop_product_render_20260910220303.jpg",
     detailedSpecs: {
       displayTech: "13.6 inch Liquid Retina with True Tone",
@@ -894,7 +910,8 @@ export const products: Product[] = [
     gpu: "Intel Arc Graphics Integrated",
     display: '14" 3K 120Hz OLED Lumina',
     batteryWeight: "75Wh · 1.20 kg",
-    specialHighlight: "Intel AI Boost NPU processor paired with a massive 75Wh battery in a 1.2kg frame",
+    specialHighlight:
+      "Intel AI Boost NPU processor paired with a massive 75Wh battery in a 1.2kg frame",
     img: "https://res.cloudinary.com/fqizrdtg/image/upload/v1789059787/ASUS_Zenbook_14_OLED_render_20260910220635.jpg",
     detailedSpecs: {
       displayTech: "3K 120Hz OLED 16:10 600 nits HDR",
@@ -919,7 +936,8 @@ export const products: Product[] = [
     gpu: "AMD Radeon 780M Integrated",
     display: '14" 2.8K OLED Touch 120Hz',
     batteryWeight: "71Wh · 1.49 kg",
-    specialHighlight: "Versatile 360-degree convertibility with stylus pen support and Dolby Atmos sound",
+    specialHighlight:
+      "Versatile 360-degree convertibility with stylus pen support and Dolby Atmos sound",
     img: "https://res.cloudinary.com/fqizrdtg/image/upload/v1789059788/Lenovo_Yoga_7_laptop_render_20260910220314.jpg",
     detailedSpecs: {
       displayTech: "14 inch 2.8K OLED PureSight Touch 400 nits",
